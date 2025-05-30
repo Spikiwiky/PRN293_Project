@@ -20,9 +20,4 @@
     <ProjectReference Include="..\EcommerceBackend.DataAccess\EcommerceBackend.DataAccess.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Middlewares\" />
-    <Folder Include="Controllers\" />
-  </ItemGroup>
-
 </Project>
