@@ -1,10 +1,12 @@
 ﻿using EcommerceBackend.DataAccess.Models;
 using Microsoft.EntityFrameworkCore;
-using EcommerceBackend.BusinessObject.Abstract;
-using EcommerceBackend.BusinessObject.Services;
-using EcommerceBackend.DataAccess.Abstract;
-using EcommerceBackend.DataAccess.Repository;
-using EcommerceBackend.BusinessObject.Services.ProductService;
+
+using EcommerceBackend.DataAccess.Abstract.AuthAbstract;
+using EcommerceBackend.DataAccess.Repository.AuthRepository;
+using EcommerceBackend.BusinessObject.Abstract.AuthAbstract;
+using EcommerceBackend.BusinessObject.Services.AuthService;
+
+
 
 namespace EcommerceBackend.API.Configurations
 {
@@ -21,6 +23,7 @@ namespace EcommerceBackend.API.Configurations
                 }
                 ));
 
+
             // Register Repositories
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.AddScoped<IProductRepository, ProductRepository>();
@@ -33,6 +36,7 @@ namespace EcommerceBackend.API.Configurations
             //services.AddScoped<IUserService, UserService>();
             //services.AddScoped<IEmailService, EmailService>();
             //services.AddScoped<IOtpService, OtpService>();
+
         }
     }
 }

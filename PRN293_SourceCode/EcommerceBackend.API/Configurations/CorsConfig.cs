@@ -4,15 +4,15 @@
     {
         public static void AddCorsPolicy(this IServiceCollection services, IConfiguration configuration)
         {
-            var reactAppUrl = configuration["Cors:ReactAppUrl"];
-            Console.WriteLine($"ReactAppUrl loaded: {reactAppUrl}"); 
+            var frontendAppUrl = configuration["Cors:FrontendAppUrl"];
+            Console.WriteLine($"FrontendAppUrl loaded: {frontendAppUrl}");
 
             services.AddCors(options =>
             {
-                options.AddPolicy("AllowReactApp",
+                options.AddPolicy("AllowFrontendApp",
                     policy =>
                     {
-                        policy.WithOrigins(reactAppUrl ?? "http://localhost:3000")
+                        policy.WithOrigins(frontendAppUrl ?? "https://localhost:7107")
                               .AllowAnyHeader()
                               .AllowAnyMethod()
                               .AllowCredentials();
