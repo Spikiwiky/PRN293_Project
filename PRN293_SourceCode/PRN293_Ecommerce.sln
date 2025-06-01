@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EcommerceBackend.BusinessOb
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EcommerceBackend.DataAccess", "EcommerceBackend.DataAccess\EcommerceBackend.DataAccess.csproj", "{9146B6A7-32BD-42E3-A573-7DE5A023D2E2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EcommerceFrontend.Web", "EcommerceFrontend.Web\EcommerceFrontend.Web.csproj", "{E439DC33-8B5A-4F41-8BC1-8F92AD630578}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EcommerceFrontend.Web", "EcommerceFrontend.Web\EcommerceFrontend.Web.csproj", "{E439DC33-8B5A-4F41-8BC1-8F92AD630578}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
