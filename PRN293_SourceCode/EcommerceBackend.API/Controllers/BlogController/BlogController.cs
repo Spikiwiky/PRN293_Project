@@ -1,12 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 
 namespace EcommerceBackend.API.Controllers.BlogController
 {
-    public class BlogController : Controller
+    [Route("api/[controller]")]
+    [ApiController]
+    public class BlogController : ControllerBase
     {
-        public IActionResult Index()
-        {
-            return View();
-        }
     }
 }

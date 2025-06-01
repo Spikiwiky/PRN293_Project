@@ -1,5 +1,15 @@
 ﻿using EcommerceBackend.DataAccess.Models;
 using Microsoft.EntityFrameworkCore;
+using EcommerceBackend.DataAccess.Abstract.AuthAbstract;
+using EcommerceBackend.DataAccess.Repository.AuthRepository;
+using EcommerceBackend.BusinessObject.Abstract.AuthAbstract;
+using EcommerceBackend.BusinessObject.Services.AuthService;
+
+using EcommerceBackend.DataAccess.Repository;
+using EcommerceBackend.BusinessObject.Services;
+using EcommerceBackend.BusinessObject.Services.ProductService;
+using EcommerceBackend.DataAccess.Abstract;
+
 
 
 namespace EcommerceBackend.API.Configurations
@@ -16,12 +26,20 @@ namespace EcommerceBackend.API.Configurations
                     sqlOptions.EnableRetryOnFailure();
                 }
                 ));
-            // Register any Services and Repositories
+
+
+            // Register Dependency injection
+            services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+            services.AddScoped<IProductRepository, ProductRepository>();
+            services.AddScoped<IProductService, ProductService>();
+            //Register for auth
+            services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IAuthRepository, AuthRepository>();
+
+            // Register other services as needed
             //services.AddScoped<IUserService, UserService>();
-            //services.AddScoped<IAuthService, AuthService>();
             //services.AddScoped<IEmailService, EmailService>();
             //services.AddScoped<IOtpService, OtpService>();
-            //services.AddScoped<IUserRepository, UserRepository>();
 
         }
     }
