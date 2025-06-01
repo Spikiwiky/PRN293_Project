@@ -8,6 +8,9 @@ using Microsoft.AspNetCore.Authorization;
 using PdfSharp.Fonts;
 using EcommerceBackend.API.Configurations;
 using EcommerceBackend.API.Hubs;
+using EcommerceBackend.BusinessObject.Services;
+using EcommerceBackend.DataAccess.Abstract.BlogAbstract;
+using EcommerceBackend.DataAccess.Repository.BlogRepository;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,7 +19,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
+builder.Services.AddScoped<IBlogRepository, BlogRepository>();
+builder.Services.AddScoped<BlogService>();
 
 // Config Authentication Jwt
 JwtConfig.ConfigureJwtAuthentication(builder.Services, builder.Configuration);

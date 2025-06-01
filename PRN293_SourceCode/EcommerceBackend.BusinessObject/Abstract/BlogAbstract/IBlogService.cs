@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EcommerceBackend.DataAccess.Repository.BlogRepository
+namespace EcommerceBackend.BusinessObject.Abstract.BlogAbstract
 {
-    internal class Class1
+    internal interface IBlogService
     {
     }
 }
