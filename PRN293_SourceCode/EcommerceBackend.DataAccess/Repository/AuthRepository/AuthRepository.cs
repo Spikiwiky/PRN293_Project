@@ -18,13 +18,13 @@ namespace EcommerceBackend.DataAccess.Repository.AuthRepository
             _context = context;
         }
 
-        public async Task<User?> GetUserByEmail(string email)
+        public User? GetUserByEmail(string email)
         {
             try
             {
-                return await _context.Users
+                return _context.Users
                     .Include(u => u.Role)
-                    .FirstOrDefaultAsync(u => u.Email == email);
+                    .FirstOrDefault(u => u.Email == email);
             }
             catch(Exception)
             {
