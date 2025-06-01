@@ -40,7 +40,7 @@ namespace EcommerceBackend.DataAccess.Models
                     .AddJsonFile("appsettings.json")
                     .Build();
 
-                var connectionString = configuration.GetConnectionString("DefaultConnection");
+                var connectionString = configuration.GetConnectionString("MyCnn");
 
                 optionsBuilder.UseSqlServer(connectionString);
             }
