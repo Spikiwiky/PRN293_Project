@@ -10,5 +10,7 @@ namespace EcommerceBackend.BusinessObject.Abstract.AuthAbstract
     public interface IAuthService
     {
         public string GenerateJwtToken(UserDto user);
+        bool IsValidEmail(string email);
+        UserDto? ValidateUser(LoginRequestDto loginRequest);
     }
 }

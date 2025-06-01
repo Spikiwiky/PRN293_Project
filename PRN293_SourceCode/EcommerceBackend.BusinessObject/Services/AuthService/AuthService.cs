@@ -59,6 +59,27 @@ namespace EcommerceBackend.BusinessObject.Services.AuthService
             }
         }
 
+        public UserDto? ValidateUser(LoginRequestDto loginRequest)
+        {
 
+            var user = _authRepository.GetUserByEmail(loginRequest.Email);
+            if (user == null || user.Password != loginRequest.Password || user.Status != 1 || user.IsDelete == true)
+            {
+                return null;
+            }
+            if (user.Status != 1 || user.IsDelete == true)
+            {
+                throw new UnauthorizedAccessException();
+
+            }
+
+            return new UserDto
+            {
+                UserId = user.UserId,
+                Email = user.Email,
+                RoleName = user.Role.RoleName ?? "",
+                UserName = user.UserName ?? "",
+            };
+        }
     }
 }

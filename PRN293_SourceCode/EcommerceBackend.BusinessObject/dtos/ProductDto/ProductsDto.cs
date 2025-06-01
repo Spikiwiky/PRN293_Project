@@ -16,6 +16,8 @@ namespace EcommerceBackend.BusinessObject.dtos.ProductDto
         public string Size { get; set; }
         public string Color { get; set; }
         public string Category { get; set; }
+        public string variant_id { get; set; } 
+        public decimal? Price { get; set; }   
         public int Status { get; set; }
         public bool IsDelete { get; set; }
         public List<string> ImageUrls { get; set; }

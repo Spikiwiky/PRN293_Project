@@ -9,7 +9,7 @@ namespace EcommerceBackend.DataAccess.Abstract.AuthAbstract
 {
     public interface IAuthRepository
     {
-        Task<User?> GetUserByEmail(string email);
+        User? GetUserByEmail(string email);
         Task<User?> GetUserByIdAsync(int userId);
     }
 }
