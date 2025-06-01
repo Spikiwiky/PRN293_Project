@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Pages\LoginPage\" />
     <Folder Include="Services\" />
     <Folder Include="wwwroot\CustomerSite\" />
   </ItemGroup>
