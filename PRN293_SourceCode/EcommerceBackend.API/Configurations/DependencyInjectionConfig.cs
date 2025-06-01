@@ -5,7 +5,10 @@ using EcommerceBackend.DataAccess.Abstract.AuthAbstract;
 using EcommerceBackend.DataAccess.Repository.AuthRepository;
 using EcommerceBackend.BusinessObject.Abstract.AuthAbstract;
 using EcommerceBackend.BusinessObject.Services.AuthService;
-
+using EcommerceBackend.DataAccess.Repository;
+using EcommerceBackend.BusinessObject.Services;
+using EcommerceBackend.BusinessObject.Services.ProductService;
+using EcommerceBackend.DataAccess.Abstract;
 
 
 namespace EcommerceBackend.API.Configurations

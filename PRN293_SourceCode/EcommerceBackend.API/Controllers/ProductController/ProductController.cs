@@ -1,8 +1,8 @@
-﻿
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using EcommerceBackend.BusinessObject.Services;
 using EcommerceBackend.BusinessObject.Services.ProductService;
+
 namespace EcommerceBackend.API.Controllers.ProductController
 {
     [Route("api/[controller]")]
@@ -22,17 +22,19 @@ namespace EcommerceBackend.API.Controllers.ProductController
             var products = await _productService.LoadProductsAsync(page, pageSize);
             return Ok(products);
         }
-       
+
         [HttpGet("search")]
         public async Task<IActionResult> SearchProducts(
             [FromQuery] string name = null,
             [FromQuery] string category = null,
             [FromQuery] string size = null,
             [FromQuery] string color = null,
+            [FromQuery] string variantId = null,
+            [FromQuery] decimal? price = null,
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 10)
         {
-            var products = await _productService.SearchProductsAsync(name, category, size, color, page, pageSize);
+            var products = await _productService.SearchProductsAsync(name, category, size, color, variantId, price, page, pageSize);
             return Ok(products);
         }
     }

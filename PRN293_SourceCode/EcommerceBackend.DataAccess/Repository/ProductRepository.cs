@@ -27,7 +27,7 @@
 //                .FirstOrDefaultAsync(p => p.ProductId == id && p.IsDelete != true);
 //        }
 
-//        public async Task<IEnumerable<Product>> GetProductsByCategoryAsync(int categoryId)
+//        public async Task<IEnumerable<Product>> GetProductsByCategoryAsync(int categoryId);jjklkjkl
 //        {
 //            return await _context.Products
 //                .Include(p => p.ProductCategory)
