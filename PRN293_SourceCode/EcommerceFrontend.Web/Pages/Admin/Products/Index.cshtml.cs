@@ -54,11 +54,11 @@ namespace EcommerceFrontend.Web.Pages.Admin.Products
                     SearchFilters.MinPrice, SearchFilters.MaxPrice, SearchFilters.StartDate, SearchFilters.EndDate, 
                     CurrentPage, PageSize);
 
-                // Get total count for pagination
+                
                 var totalCount = await _adminProductService.GetTotalProductCountAsync();
                 TotalPages = (int)Math.Ceiling(totalCount / (double)PageSize);
 
-                // Get products with filters
+              
                 Products = await _adminProductService.SearchProductsAsync(
                     name: SearchFilters.Name,
                     category: SearchFilters.Category,

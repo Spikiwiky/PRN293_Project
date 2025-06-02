@@ -124,8 +124,8 @@
                                     <div class="btn-group" role="group">
                                         <a asp-page="./Edit" asp-route-id="@product.ProductId" 
                                            class="btn btn-sm btn-primary">Edit</a>
-                                        <button type="button" class="btn btn-sm btn-danger" 
-                                                onclick="deleteProduct(@product.ProductId)">Delete</button>
+                                        <a asp-page="./Delete" asp-route-id="@product.ProductId" 
+                                           class="btn btn-sm btn-danger">Delete</a>
                                     </div>
                                 </td>
                             </tr>
@@ -170,27 +170,16 @@
 </div>
 
 @section Scripts {
-    <script>
-        function deleteProduct(id) {
-            if (confirm('Are you sure you want to delete this product?')) {
-                fetch(`/api/admin/products/${id}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                })
-                .then(response => {
-                    if (response.ok) {
-                        window.location.reload();
-                    } else {
-                        alert('Error deleting product');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Error deleting product');
-                });
-            }
-        }
-    </script>
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <script>
+            alert('@TempData["SuccessMessage"]');
+        </script>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <script>
+            alert('@TempData["ErrorMessage"]');
+        </script>
+    }
 } 

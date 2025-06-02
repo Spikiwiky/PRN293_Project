@@ -1,0 +1,96 @@
+@page
+@model EcommerceFrontend.Web.Pages.Admin.Products.DeleteModel
+@{
+    ViewData["Title"] = "Delete Product";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Delete Product</h1>
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-exclamation-triangle me-1"></i>
+            Confirm Deletion
+        </div>
+        <div class="card-body">
+            <div class="alert alert-danger">
+                <h4>Are you sure you want to delete this product?</h4>
+                <p>This action cannot be undone.</p>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <h5>Product Details</h5>
+                    <dl class="row">
+                        <dt class="col-sm-4">Product Name</dt>
+                        <dd class="col-sm-8">@Model.Product.ProductName</dd>
+
+                        <dt class="col-sm-4">Category</dt>
+                        <dd class="col-sm-8">@Model.Product.ProductCategoryTitle</dd>
+
+                        <dt class="col-sm-4">Size</dt>
+                        <dd class="col-sm-8">@Model.Product.Size</dd>
+
+                        <dt class="col-sm-4">Color</dt>
+                        <dd class="col-sm-8">@Model.Product.Color</dd>
+
+                        <dt class="col-sm-4">Price</dt>
+                        <dd class="col-sm-8">@Model.Product.Price?.ToString("C")</dd>
+
+                        <dt class="col-sm-4">Stock Quantity</dt>
+                        <dd class="col-sm-8">@Model.Product.StockQuantity</dd>
+
+                        <dt class="col-sm-4">Featured</dt>
+                        <dd class="col-sm-8">@(Model.Product.IsFeatured ? "Yes" : "No")</dd>
+
+                        <dt class="col-sm-4">Status</dt>
+                        <dd class="col-sm-8">
+                            @switch (Model.Product.Status)
+                            {
+                                case 1:
+                                    <span class="badge bg-success">Active</span>
+                                    break;
+                                case 0:
+                                    <span class="badge bg-warning">Inactive</span>
+                                    break;
+                                default:
+                                    <span class="badge bg-secondary">Unknown</span>
+                                    break;
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4">Created At</dt>
+                        <dd class="col-sm-8">@Model.Product.CreatedAt?.ToString("dd/MM/yyyy HH:mm")</dd>
+                    </dl>
+                </div>
+                <div class="col-md-6">
+                    <h5>Product Images</h5>
+                    <div class="row">
+                        @if (Model.Product.ImageUrls?.Any() == true)
+                        {
+                            foreach (var imageUrl in Model.Product.ImageUrls)
+                            {
+                                <div class="col-md-4 mb-2">
+                                    <img src="@imageUrl" class="img-thumbnail" alt="Product image" />
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="col">
+                                <p class="text-muted">No images available</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <form method="post">
+                <input type="hidden" asp-for="Product.ProductId" />
+                <div class="d-flex justify-content-end gap-2">
+                    <a asp-page="./Index" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-danger">Delete Product</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div> 

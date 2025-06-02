@@ -196,11 +196,11 @@ namespace EcommerceBackend.API.Controllers.AdminController
             [FromQuery] DateTime? endDate = null,
             [FromQuery] bool? isFeatured = null,
             [FromQuery] int page = 1,
-            [FromQuery] int pageSize = 10)
+            [FromQuery] int pageSize = 10                                                                                                                                         )
         {
             try
             {
-                // Validate variant search parameters
+               
                 var validationResult = ValidateProductVariant(size, color);
                 if (validationResult is BadRequestObjectResult)
                 {
