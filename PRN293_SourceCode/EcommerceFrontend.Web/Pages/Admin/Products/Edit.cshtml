@@ -1,0 +1,127 @@
+@page "{id:int}"
+@model EcommerceFrontend.Web.Pages.Admin.Products.EditModel
+@{
+    ViewData["Title"] = "Edit Product";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Edit Product</h1>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-edit me-1"></i>
+            Product Details
+        </div>
+        <div class="card-body">
+            <form method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="Product.ProductId" />
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="Product.ProductName" class="control-label">Product Name</label>
+                            <input asp-for="Product.ProductName" class="form-control" required />
+                            <span asp-validation-for="Product.ProductName" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="Product.ProductCategoryId" class="control-label">Product Category</label>
+                            <select asp-for="Product.ProductCategoryId" asp-items="Model.Categories" class="form-control">
+                                <option value="">-- Select Category --</option>
+                            </select>
+                            <span asp-validation-for="Product.ProductCategoryId" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label asp-for="Product.Description" class="control-label">Description</label>
+                            <textarea asp-for="Product.Description" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="Product.Description" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="Product.Size" class="control-label">Size</label>
+                            <input asp-for="Product.Size" class="form-control" />
+                            <span asp-validation-for="Product.Size" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="Product.Color" class="control-label">Color</label>
+                            <input asp-for="Product.Color" class="form-control" />
+                            <span asp-validation-for="Product.Color" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="Product.Category" class="control-label">Category Tag</label>
+                            <input asp-for="Product.Category" class="form-control" />
+                            <span asp-validation-for="Product.Category" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="Product.Price" class="control-label">Price</label>
+                            <input asp-for="Product.Price" class="form-control" type="number" step="0.01" />
+                            <span asp-validation-for="Product.Price" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="Product.StockQuantity" class="control-label">Stock Quantity</label>
+                            <input asp-for="Product.StockQuantity" class="form-control" type="number" min="0" />
+                            <span asp-validation-for="Product.StockQuantity" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="Product.Status" class="control-label">Status</label>
+                            <select asp-for="Product.Status" class="form-control">
+                                <option value="1">Active</option>
+                                <option value="0">Inactive</option>
+                            </select>
+                            <span asp-validation-for="Product.Status" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="ImageUrlsInput" class="control-label">Image URLs</label>
+                            <input asp-for="ImageUrlsInput" class="form-control" />
+                            <small class="form-text text-muted">Enter image URLs separated by commas</small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-check mt-4">
+                            <input asp-for="Product.IsFeatured" class="form-check-input" type="checkbox" />
+                            <label asp-for="Product.IsFeatured" class="form-check-label">Featured Product</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                    <a asp-page="./Index" class="btn btn-secondary">Back to List</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+} 

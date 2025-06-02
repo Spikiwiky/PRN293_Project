@@ -1,0 +1,111 @@
+@page
+@model EcommerceFrontend.Web.Pages.Products.IndexModel
+@{
+    ViewData["Title"] = "Products";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Products</h1>
+        <div class="d-flex gap-2">
+            <form method="get" class="d-flex gap-2">
+                <input type="text" name="SearchTerm" value="@Model.SearchTerm" class="form-control" placeholder="Search products...">
+                <select name="Category" class="form-select">
+                    <option value="">All Categories</option>
+                    <option value="Men Clothing" selected="@(Model.Category == "Men Clothing")">Men Clothing</option>
+                    <option value="Women Clothing" selected="@(Model.Category == "Women Clothing")">Women Clothing</option>
+                    <option value="Kids Clothing" selected="@(Model.Category == "Kids Clothing")">Kids Clothing</option>
+                    <option value="Sportswear" selected="@(Model.Category == "Sportswear")">Sportswear</option>
+                    <option value="Accessories" selected="@(Model.Category == "Accessories")">Accessories</option>
+                </select>
+                <button type="submit" class="btn btn-primary">Search</button>
+            </form>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger" role="alert">
+            @Model.ErrorMessage
+        </div>
+    }
+
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        @foreach (var product in Model.Products)
+        {
+            <div class="col">
+                <div class="card h-100">
+                    @if (!string.IsNullOrEmpty(product.Image))
+                    {
+                        <img src="@product.Image" class="card-img-top" alt="@product.ProductName" style="height: 200px; object-fit: cover;">
+                    }
+                    else
+                    {
+                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                            <span class="text-muted">No image available</span>
+                        </div>
+                    }
+                    <div class="card-body">
+                        <h5 class="card-title">@product.ProductName</h5>
+                        <p class="card-text">@product.Description</p>
+                        @if (product.Price.HasValue)
+                        {
+                            <p class="card-text">
+                                <strong class="text-primary">$@product.Price.Value.ToString("N2")</strong>
+                            </p>
+                        }
+                        <div class="mb-2">
+                            <span class="badge bg-info">Size: @product.Variants.Size</span>
+                            <span class="badge bg-secondary">Color: @product.Variants.Color</span>
+                        </div>
+                        @if (!string.IsNullOrEmpty(product.CategoryName))
+                        {
+                            <p class="card-text">
+                                <small class="text-muted">Category: @product.CategoryName</small>
+                            </p>
+                        }
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a href="/Products/Details/@product.ProductId" class="btn btn-primary">View Details</a>
+                            @if (product.IsActive)
+                            {
+                                <button class="btn btn-success">Add to Cart</button>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">Out of Stock</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    @if (Model.Products.Any())
+    {
+        <div class="d-flex justify-content-center mt-4">
+            <nav aria-label="Page navigation">
+                <ul class="pagination">
+                    @if (Model.PageNumber > 1)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="?PageNumber=@(Model.PageNumber - 1)&SearchTerm=@Model.SearchTerm&Category=@Model.Category">Previous</a>
+                        </li>
+                    }
+                    <li class="page-item">
+                        <span class="page-link">Page @Model.PageNumber</span>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?PageNumber=@(Model.PageNumber + 1)&SearchTerm=@Model.SearchTerm&Category=@Model.Category">Next</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        // Add any JavaScript functionality here
+    </script>
+}
