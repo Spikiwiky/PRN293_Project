@@ -107,8 +107,33 @@ namespace EcommerceFrontend.Web.Services.Admin
 
         public async Task<bool> DeleteProductAsync(int id)
         {
-            var response = await _httpClient.DeleteAsync($"api/admin/products/{id}");
-            return response.IsSuccessStatusCode;
+            try
+            {
+                _logger.LogInformation("Attempting to delete product with ID: {Id}", id);
+                var response = await _httpClient.DeleteAsync($"api/admin/products/{id}");
+                
+                if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    _logger.LogWarning("Product with ID {Id} not found", id);
+                    return false;
+                }
+                
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("Failed to delete product {Id}. Status: {Status}, Error: {Error}", 
+                        id, response.StatusCode, errorContent);
+                    throw new HttpRequestException($"Failed to delete product: {errorContent}", null, response.StatusCode);
+                }
+
+                _logger.LogInformation("Successfully deleted product with ID: {Id}", id);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting product with ID {Id}", id);
+                throw;
+            }
         }
 
         public async Task<bool> UpdateProductFeaturedStatusAsync(int id, bool isFeatured)

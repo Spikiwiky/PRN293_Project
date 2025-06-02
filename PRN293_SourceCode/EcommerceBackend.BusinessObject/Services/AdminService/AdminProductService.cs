@@ -144,7 +144,7 @@ namespace EcommerceBackend.BusinessObject.Services.AdminService
             {
                 _logger.LogInformation("Creating new product with name: {ProductName}", createDto.ProductName);
 
-                // Validate size if provided
+              
                 if (!string.IsNullOrEmpty(createDto.Size) && !ValidSizes.Contains(createDto.Size))
                 {
                     var error = $"Invalid size: {createDto.Size}. Valid sizes are: {string.Join(", ", ValidSizes)}";
@@ -253,7 +253,7 @@ namespace EcommerceBackend.BusinessObject.Services.AdminService
                     throw new KeyNotFoundException(error);
                 }
 
-                // Check for duplicate variant in the same product
+               
                 if (!string.IsNullOrEmpty(updateDto.Size) && !string.IsNullOrEmpty(updateDto.Color))
                 {
                     if (IsVariantDuplicateInProduct(product.Variants, updateDto.Size, updateDto.Color))
@@ -264,7 +264,7 @@ namespace EcommerceBackend.BusinessObject.Services.AdminService
                     }
                 }
 
-                // Update basic properties
+
                 if (!string.IsNullOrEmpty(updateDto.ProductName))
                     product.ProductName = updateDto.ProductName;
                 
@@ -277,7 +277,7 @@ namespace EcommerceBackend.BusinessObject.Services.AdminService
                 if (updateDto.Status.HasValue)
                     product.Status = updateDto.Status;
 
-                // Update variants
+              
                 var now = DateTime.UtcNow;
                 Dictionary<string, JsonElement> variantDict;
 
@@ -287,7 +287,7 @@ namespace EcommerceBackend.BusinessObject.Services.AdminService
                     variantDict = variants.EnumerateObject()
                         .ToDictionary(p => p.Name, p => p.Value);
 
-                    // Keep original createdAt and createdBy
+                
                     if (!variantDict.ContainsKey("createdAt"))
                         variantDict["createdAt"] = JsonDocument.Parse($"\"{now:o}\"").RootElement;
                     if (!variantDict.ContainsKey("createdBy"))
@@ -300,7 +300,7 @@ namespace EcommerceBackend.BusinessObject.Services.AdminService
                     variantDict["createdBy"] = JsonDocument.Parse("\"system\"").RootElement;
                 }
 
-                // Update variant properties
+             
                 if (!string.IsNullOrEmpty(updateDto.Size))
                     variantDict["size"] = JsonDocument.Parse($"\"{updateDto.Size}\"").RootElement;
                 
@@ -310,7 +310,7 @@ namespace EcommerceBackend.BusinessObject.Services.AdminService
                 if (!string.IsNullOrEmpty(updateDto.Category))
                     variantDict["categories"] = JsonDocument.Parse($"\"{updateDto.Category}\"").RootElement;
                 
-                // Generate new variant ID if size or color is updated
+               
                 if (!string.IsNullOrEmpty(updateDto.Size) && !string.IsNullOrEmpty(updateDto.Color))
                 {
                     variantDict["variant_id"] = JsonDocument.Parse($"\"{updateDto.Size}-{updateDto.Color}\"").RootElement;
@@ -329,7 +329,7 @@ namespace EcommerceBackend.BusinessObject.Services.AdminService
                 if (updateDto.IsFeatured.HasValue)
                     variantDict["isFeatured"] = JsonDocument.Parse(updateDto.IsFeatured.ToString()!.ToLower()).RootElement;
 
-                // Update timestamps
+            
                 variantDict["updatedAt"] = JsonDocument.Parse($"\"{now:o}\"").RootElement;
                 variantDict["updatedBy"] = JsonDocument.Parse($"\"{updateDto.UpdatedBy ?? "system"}\"").RootElement;
 
@@ -377,11 +377,12 @@ namespace EcommerceBackend.BusinessObject.Services.AdminService
             {
                 _logger.LogInformation("Starting deletion process for product ID {Id}", id);
 
-             
-                var product = await _context.Products.FindAsync(id);
+                var product = await _context.Products
+                    .FirstOrDefaultAsync(p => p.ProductId == id && (p.IsDelete == false || p.IsDelete == null));
+                
                 if (product == null)
                 {
-                    _logger.LogWarning("Product with ID {Id} not found for deletion", id);
+                    _logger.LogWarning("Product with ID {Id} not found or already deleted", id);
                     return false;
                 }
 
@@ -390,9 +391,6 @@ namespace EcommerceBackend.BusinessObject.Services.AdminService
                 // Set IsDelete flag
                 product.IsDelete = true;
                 
-                // Mark entity as modified
-                _context.Entry(product).State = EntityState.Modified;
-                
                 // Save changes
                 var changes = await _context.SaveChangesAsync();
                 _logger.LogInformation("SaveChanges returned: {changes} records affected", changes);
@@ -400,13 +398,7 @@ namespace EcommerceBackend.BusinessObject.Services.AdminService
                 if (changes > 0)
                 {
                     _logger.LogInformation("Successfully marked product {ProductName} (ID: {Id}) as deleted", product.ProductName, id);
-                    
-                    // Verify the change
-                    await _context.Entry(product).ReloadAsync();
-                    var isDeleted = product.IsDelete == true;
-                    _logger.LogInformation("Verification - Product IsDelete status: {IsDelete}", isDeleted);
-                    
-                    return isDeleted;
+                    return true;
                 }
                 else
                 {
