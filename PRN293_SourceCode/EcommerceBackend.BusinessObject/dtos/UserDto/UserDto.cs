@@ -33,7 +33,6 @@ namespace EcommerceBackend.BusinessObject.dtos.UserDto
 
         public bool IsDelete { get; set; }
 
-        // ❌ Loại bỏ các navigation properties nếu không cần post/put
         // public object Role { get; set; }
         // public List<object> Carts { get; set; }
         // public List<object> Orders { get; set; }
