@@ -1,5 +1,5 @@
 using EcommerceFrontend.Web.Services;
-
+using EcommerceBackend.BusinessObject.Services.ProductService;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.

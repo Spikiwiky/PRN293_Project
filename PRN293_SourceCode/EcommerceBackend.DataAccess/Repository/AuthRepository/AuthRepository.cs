@@ -18,7 +18,7 @@ namespace EcommerceBackend.DataAccess.Repository.AuthRepository
             _context = context;
         }
 
-        public User? GetUserByEmail(string email)
+        public EcommerceBackend.DataAccess.Models.User? GetUserByEmail(string email)
         {
             try
             {
@@ -32,7 +32,7 @@ namespace EcommerceBackend.DataAccess.Repository.AuthRepository
             }
         }
 
-        public async Task<User?> GetUserByIdAsync(int userId)
+        public async Task<EcommerceBackend.DataAccess.Models.User?> GetUserByIdAsync(int userId)
         {
             try
             {

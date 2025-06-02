@@ -12,4 +12,9 @@
     <Folder Include="wwwroot\CustomerSite\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\EcommerceBackend.BusinessObject\EcommerceBackend.BusinessObject.csproj" />
+    <ProjectReference Include="..\EcommerceBackend.DataAccess\EcommerceBackend.DataAccess.csproj" />
+  </ItemGroup>
+
 </Project>
