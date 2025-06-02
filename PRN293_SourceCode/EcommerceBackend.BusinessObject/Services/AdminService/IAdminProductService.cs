@@ -14,8 +14,10 @@ namespace EcommerceBackend.BusinessObject.Services.AdminService
             string? category = null,
             string? size = null,
             string? color = null,
-            string? variantId = null,
-            decimal? price = null,
+            decimal? minPrice = null,
+            decimal? maxPrice = null,
+            DateTime? startDate = null,
+            DateTime? endDate = null,
             bool? isFeatured = null,
             int page = 1,
             int pageSize = 10);

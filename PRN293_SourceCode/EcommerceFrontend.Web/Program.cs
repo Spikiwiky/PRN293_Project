@@ -1,5 +1,6 @@
-using EcommerceFrontend.Web.Services;
+﻿using EcommerceFrontend.Web.Services;
 using EcommerceFrontend.Web.Services.Admin;
+using EcommerceFrontend.Web.Services.User;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,10 +8,15 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 
 // Register HTTP client services
-builder.Services.AddHttpClient();
+var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"];
+
+builder.Services.AddHttpClient("MyAPI", client =>
+{
+    client.BaseAddress = new Uri(apiBaseUrl!); 
+});
 builder.Services.AddScoped<IHttpClientService, HttpClientService>();
 builder.Services.AddScoped<IProductService, ProductService>();
-
+builder.Services.AddScoped<IUserService, UserService>();
 // Register admin services
 builder.Services.AddScoped<IAdminProductService, AdminProductService>();
 

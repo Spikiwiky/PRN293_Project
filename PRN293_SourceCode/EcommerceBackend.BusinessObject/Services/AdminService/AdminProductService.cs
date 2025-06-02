@@ -13,6 +13,16 @@ namespace EcommerceBackend.BusinessObject.Services.AdminService
         private readonly EcommerceDBContext _context;
         private readonly ILogger<AdminProductService> _logger;
 
+        private static readonly HashSet<string> ValidSizes = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "S", "M", "L", "XL", "2XL"
+        };
+
+        private static readonly HashSet<string> ValidColors = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "Red", "Blue", "Green", "Yellow", "Purple", "Black", "White", "Orange", "Pink", "Brown"
+        };
+
         public AdminProductService(
             IProductRepository productRepository,
             EcommerceDBContext context,
@@ -64,7 +74,7 @@ namespace EcommerceBackend.BusinessObject.Services.AdminService
                     if (variants.TryGetProperty("isFeatured", out var isFeaturedElement))
                         dto.IsFeatured = isFeaturedElement.GetBoolean();
 
-                    // Parse timestamps
+                  
                     if (variants.TryGetProperty("createdAt", out var createdAtElement) && 
                         DateTime.TryParse(createdAtElement.GetString(), out var createdAt))
                         dto.CreatedAt = createdAt;
@@ -134,7 +144,22 @@ namespace EcommerceBackend.BusinessObject.Services.AdminService
             {
                 _logger.LogInformation("Creating new product with name: {ProductName}", createDto.ProductName);
 
-                // Check for existing product with same name that is not deleted
+              
+                if (!string.IsNullOrEmpty(createDto.Size) && !ValidSizes.Contains(createDto.Size))
+                {
+                    var error = $"Invalid size: {createDto.Size}. Valid sizes are: {string.Join(", ", ValidSizes)}";
+                    _logger.LogWarning(error);
+                    throw new InvalidOperationException(error);
+                }
+
+                // Validate color if provided
+                if (!string.IsNullOrEmpty(createDto.Color) && !ValidColors.Contains(createDto.Color))
+                {
+                    var error = $"Invalid color: {createDto.Color}. Valid colors are: {string.Join(", ", ValidColors)}";
+                    _logger.LogWarning(error);
+                    throw new InvalidOperationException(error);
+                }
+
                 var existingProduct = await _context.Products
                     .FirstOrDefaultAsync(p => p.ProductName == createDto.ProductName && (!p.IsDelete.HasValue || !p.IsDelete.Value));
 
@@ -149,16 +174,21 @@ namespace EcommerceBackend.BusinessObject.Services.AdminService
                 }
 
                 var now = DateTime.UtcNow;
+               
+                string variantId = !string.IsNullOrEmpty(createDto.Size) && !string.IsNullOrEmpty(createDto.Color)
+                    ? $"{createDto.Size}-{createDto.Color}"
+                    : Guid.NewGuid().ToString();
+
                 var variants = new
                 {
                     size = createDto.Size,
                     color = createDto.Color,
                     categories = createDto.Category,
-                    variant_id = createDto.VariantId ?? Guid.NewGuid().ToString(),
+                    variant_id = variantId,
                     price = createDto.Price,
                     stockQuantity = createDto.StockQuantity,
                     isFeatured = createDto.IsFeatured,
-                    createdAt = now.ToString("o"), // ISO 8601 format
+                    createdAt = now.ToString("o"),
                     updatedAt = now.ToString("o"),
                     createdBy = createDto.CreatedBy ?? "system",
                     updatedBy = createDto.CreatedBy ?? "system"
@@ -223,7 +253,7 @@ namespace EcommerceBackend.BusinessObject.Services.AdminService
                     throw new KeyNotFoundException(error);
                 }
 
-                // Check for duplicate variant in the same product
+               
                 if (!string.IsNullOrEmpty(updateDto.Size) && !string.IsNullOrEmpty(updateDto.Color))
                 {
                     if (IsVariantDuplicateInProduct(product.Variants, updateDto.Size, updateDto.Color))
@@ -234,7 +264,7 @@ namespace EcommerceBackend.BusinessObject.Services.AdminService
                     }
                 }
 
-                // Update basic properties
+
                 if (!string.IsNullOrEmpty(updateDto.ProductName))
                     product.ProductName = updateDto.ProductName;
                 
@@ -247,7 +277,7 @@ namespace EcommerceBackend.BusinessObject.Services.AdminService
                 if (updateDto.Status.HasValue)
                     product.Status = updateDto.Status;
 
-                // Update variants
+              
                 var now = DateTime.UtcNow;
                 Dictionary<string, JsonElement> variantDict;
 
@@ -257,7 +287,7 @@ namespace EcommerceBackend.BusinessObject.Services.AdminService
                     variantDict = variants.EnumerateObject()
                         .ToDictionary(p => p.Name, p => p.Value);
 
-                    // Keep original createdAt and createdBy
+                
                     if (!variantDict.ContainsKey("createdAt"))
                         variantDict["createdAt"] = JsonDocument.Parse($"\"{now:o}\"").RootElement;
                     if (!variantDict.ContainsKey("createdBy"))
@@ -270,7 +300,7 @@ namespace EcommerceBackend.BusinessObject.Services.AdminService
                     variantDict["createdBy"] = JsonDocument.Parse("\"system\"").RootElement;
                 }
 
-                // Update variant properties
+             
                 if (!string.IsNullOrEmpty(updateDto.Size))
                     variantDict["size"] = JsonDocument.Parse($"\"{updateDto.Size}\"").RootElement;
                 
@@ -280,8 +310,15 @@ namespace EcommerceBackend.BusinessObject.Services.AdminService
                 if (!string.IsNullOrEmpty(updateDto.Category))
                     variantDict["categories"] = JsonDocument.Parse($"\"{updateDto.Category}\"").RootElement;
                 
-                if (!string.IsNullOrEmpty(updateDto.VariantId))
+               
+                if (!string.IsNullOrEmpty(updateDto.Size) && !string.IsNullOrEmpty(updateDto.Color))
+                {
+                    variantDict["variant_id"] = JsonDocument.Parse($"\"{updateDto.Size}-{updateDto.Color}\"").RootElement;
+                }
+                else if (!string.IsNullOrEmpty(updateDto.VariantId))
+                {
                     variantDict["variant_id"] = JsonDocument.Parse($"\"{updateDto.VariantId}\"").RootElement;
+                }
                 
                 if (updateDto.Price.HasValue)
                     variantDict["price"] = JsonDocument.Parse(updateDto.Price.ToString()!).RootElement;
@@ -292,7 +329,7 @@ namespace EcommerceBackend.BusinessObject.Services.AdminService
                 if (updateDto.IsFeatured.HasValue)
                     variantDict["isFeatured"] = JsonDocument.Parse(updateDto.IsFeatured.ToString()!.ToLower()).RootElement;
 
-                // Update timestamps
+            
                 variantDict["updatedAt"] = JsonDocument.Parse($"\"{now:o}\"").RootElement;
                 variantDict["updatedBy"] = JsonDocument.Parse($"\"{updateDto.UpdatedBy ?? "system"}\"").RootElement;
 
@@ -340,11 +377,12 @@ namespace EcommerceBackend.BusinessObject.Services.AdminService
             {
                 _logger.LogInformation("Starting deletion process for product ID {Id}", id);
 
-             
-                var product = await _context.Products.FindAsync(id);
+                var product = await _context.Products
+                    .FirstOrDefaultAsync(p => p.ProductId == id && (p.IsDelete == false || p.IsDelete == null));
+                
                 if (product == null)
                 {
-                    _logger.LogWarning("Product with ID {Id} not found for deletion", id);
+                    _logger.LogWarning("Product with ID {Id} not found or already deleted", id);
                     return false;
                 }
 
@@ -353,9 +391,6 @@ namespace EcommerceBackend.BusinessObject.Services.AdminService
                 // Set IsDelete flag
                 product.IsDelete = true;
                 
-                // Mark entity as modified
-                _context.Entry(product).State = EntityState.Modified;
-                
                 // Save changes
                 var changes = await _context.SaveChangesAsync();
                 _logger.LogInformation("SaveChanges returned: {changes} records affected", changes);
@@ -363,13 +398,7 @@ namespace EcommerceBackend.BusinessObject.Services.AdminService
                 if (changes > 0)
                 {
                     _logger.LogInformation("Successfully marked product {ProductName} (ID: {Id}) as deleted", product.ProductName, id);
-                    
-                    // Verify the change
-                    await _context.Entry(product).ReloadAsync();
-                    var isDeleted = product.IsDelete == true;
-                    _logger.LogInformation("Verification - Product IsDelete status: {IsDelete}", isDeleted);
-                    
-                    return isDeleted;
+                    return true;
                 }
                 else
                 {
@@ -389,8 +418,10 @@ namespace EcommerceBackend.BusinessObject.Services.AdminService
             string? category = null,
             string? size = null,
             string? color = null,
-            string? variantId = null,
-            decimal? price = null,
+            decimal? minPrice = null,
+            decimal? maxPrice = null,
+            DateTime? startDate = null,
+            DateTime? endDate = null,
             bool? isFeatured = null,
             int page = 1,
             int pageSize = 10)
@@ -398,8 +429,8 @@ namespace EcommerceBackend.BusinessObject.Services.AdminService
             try
             {
                 _logger.LogInformation(
-                    "Searching products with parameters: name={Name}, category={Category}, size={Size}, color={Color}, variantId={VariantId}, price={Price}, isFeatured={IsFeatured}, page={Page}, pageSize={PageSize}",
-                    name, category, size, color, variantId, price, isFeatured, page, pageSize);
+                    "Searching products with parameters: name={Name}, category={Category}, size={Size}, color={Color}, minPrice={MinPrice}, maxPrice={MaxPrice}, startDate={StartDate}, endDate={EndDate}, isFeatured={IsFeatured}, page={Page}, pageSize={PageSize}",
+                    name, category, size, color, minPrice, maxPrice, startDate, endDate, isFeatured, page, pageSize);
 
                 var query = _context.Products
                     .Include(p => p.ProductCategory)
@@ -417,7 +448,7 @@ namespace EcommerceBackend.BusinessObject.Services.AdminService
                 }
 
                 // Handle variants-based filtering
-                if (!string.IsNullOrWhiteSpace(size) || !string.IsNullOrWhiteSpace(color) || !string.IsNullOrWhiteSpace(variantId) || price.HasValue || isFeatured.HasValue)
+                if (!string.IsNullOrWhiteSpace(size) || !string.IsNullOrWhiteSpace(color) || minPrice.HasValue || maxPrice.HasValue || startDate.HasValue || endDate.HasValue || isFeatured.HasValue)
                 {
                     _logger.LogInformation("Performing variant-based filtering");
                     
@@ -439,19 +470,31 @@ namespace EcommerceBackend.BusinessObject.Services.AdminService
                                 (variants.TryGetProperty("color", out var colorElement) && 
                                  colorElement.GetString()?.Contains(color, StringComparison.OrdinalIgnoreCase) == true);
 
-                            var matchesVariantId = string.IsNullOrWhiteSpace(variantId) || 
-                                (variants.TryGetProperty("variant_id", out var variantIdElement) && 
-                                 variantIdElement.GetString() == variantId);
+                            var matchesPrice = true;
+                            if (variants.TryGetProperty("price", out var priceElement))
+                            {
+                                var price = priceElement.GetDecimal();
+                                if (minPrice.HasValue)
+                                    matchesPrice = matchesPrice && price >= minPrice.Value;
+                                if (maxPrice.HasValue)
+                                    matchesPrice = matchesPrice && price <= maxPrice.Value;
+                            }
 
-                            var matchesPrice = !price.HasValue || 
-                                (variants.TryGetProperty("price", out var priceElement) && 
-                                 priceElement.GetDecimal() == price.Value);
+                            var matchesDate = true;
+                            if (variants.TryGetProperty("createdAt", out var createdAtElement) &&
+                                DateTime.TryParse(createdAtElement.GetString(), out var createdAt))
+                            {
+                                if (startDate.HasValue)
+                                    matchesDate = matchesDate && createdAt >= startDate.Value;
+                                if (endDate.HasValue)
+                                    matchesDate = matchesDate && createdAt <= endDate.Value;
+                            }
 
                             var matchesFeatured = !isFeatured.HasValue || 
                                 (variants.TryGetProperty("isFeatured", out var featuredElement) && 
                                  featuredElement.GetBoolean() == isFeatured.Value);
 
-                            return matchesSize && matchesColor && matchesVariantId && matchesPrice && matchesFeatured;
+                            return matchesSize && matchesColor && matchesPrice && matchesDate && matchesFeatured;
                         }
                         catch (Exception ex)
                         {
@@ -495,7 +538,7 @@ namespace EcommerceBackend.BusinessObject.Services.AdminService
                 _logger.LogInformation("Found {Count} total matching products before pagination", totalCount);
 
                 var dbProducts = await query
-                    .OrderByDescending(p => p.ProductId) // Sort by ProductId as a fallback
+                    .OrderByDescending(p => p.ProductId)
                     .Skip((page - 1) * pageSize)
                     .Take(pageSize)
                     .ToListAsync();

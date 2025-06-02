@@ -1,0 +1,11 @@
+﻿@page "{id:int}"
+@model EcommerceFrontend.Web.Pages.User.DeleteModel
+@{
+}
+<h2>Xác nhận xoá người dùng</h2>
+<form method="post">
+    <input type="hidden" asp-for="User.UserId" />
+    <p>Bạn có chắc chắn muốn xoá người dùng <strong>@Model.User.UserName</strong> không?</p>
+    <button type="submit" class="btn btn-danger">Xoá</button>
+    <a asp-page="Index" class="btn btn-secondary">Huỷ</a>
+</form>
