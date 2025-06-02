@@ -46,6 +46,14 @@ namespace EcommerceBackend.DataAccess.Repository.AuthRepository
             }
         }
 
+        public User? CreateUser(User user)
+        {
+            _context.Users.Add(user);
+            _context.SaveChanges();
+            return _context.Users
+                .Include(u => u.Role) 
+                .FirstOrDefault(u => u.UserId == user.UserId);
+        }
 
     }
 }

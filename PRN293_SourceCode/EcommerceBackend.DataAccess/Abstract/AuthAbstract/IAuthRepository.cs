@@ -11,5 +11,6 @@ namespace EcommerceBackend.DataAccess.Abstract.AuthAbstract
     {
         User? GetUserByEmail(string email);
         Task<User?> GetUserByIdAsync(int userId);
+        User? CreateUser(User user);
     }
 }
