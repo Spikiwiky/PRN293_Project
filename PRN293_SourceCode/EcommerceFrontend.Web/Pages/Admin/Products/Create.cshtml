@@ -49,14 +49,33 @@
                     <div class="col-md-4">
                         <div class="form-group">
                             <label asp-for="Product.Size" class="control-label">Size</label>
-                            <input asp-for="Product.Size" class="form-control" />
+                            <select asp-for="Product.Size" class="form-control">
+                                <option value="">-- Select Size --</option>
+                                <option value="S">S</option>
+                                <option value="M">M</option>
+                                <option value="L">L</option>
+                                <option value="XL">XL</option>
+                                <option value="2XL">2XL</option>
+                            </select>
                             <span asp-validation-for="Product.Size" class="text-danger"></span>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="form-group">
                             <label asp-for="Product.Color" class="control-label">Color</label>
-                            <input asp-for="Product.Color" class="form-control" />
+                            <select asp-for="Product.Color" class="form-control">
+                                <option value="">-- Select Color --</option>
+                                <option value="Red">Red</option>
+                                <option value="Blue">Blue</option>
+                                <option value="Green">Green</option>
+                                <option value="Yellow">Yellow</option>
+                                <option value="Purple">Purple</option>
+                                <option value="Black">Black</option>
+                                <option value="White">White</option>
+                                <option value="Orange">Orange</option>
+                                <option value="Pink">Pink</option>
+                                <option value="Brown">Brown</option>
+                            </select>
                             <span asp-validation-for="Product.Color" class="text-danger"></span>
                         </div>
                     </div>

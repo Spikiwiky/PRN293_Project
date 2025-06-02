@@ -13,6 +13,16 @@ namespace EcommerceBackend.BusinessObject.Services.AdminService
         private readonly EcommerceDBContext _context;
         private readonly ILogger<AdminProductService> _logger;
 
+        private static readonly HashSet<string> ValidSizes = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "S", "M", "L", "XL", "2XL"
+        };
+
+        private static readonly HashSet<string> ValidColors = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "Red", "Blue", "Green", "Yellow", "Purple", "Black", "White", "Orange", "Pink", "Brown"
+        };
+
         public AdminProductService(
             IProductRepository productRepository,
             EcommerceDBContext context,
@@ -133,6 +143,22 @@ namespace EcommerceBackend.BusinessObject.Services.AdminService
             try
             {
                 _logger.LogInformation("Creating new product with name: {ProductName}", createDto.ProductName);
+
+                // Validate size if provided
+                if (!string.IsNullOrEmpty(createDto.Size) && !ValidSizes.Contains(createDto.Size))
+                {
+                    var error = $"Invalid size: {createDto.Size}. Valid sizes are: {string.Join(", ", ValidSizes)}";
+                    _logger.LogWarning(error);
+                    throw new InvalidOperationException(error);
+                }
+
+                // Validate color if provided
+                if (!string.IsNullOrEmpty(createDto.Color) && !ValidColors.Contains(createDto.Color))
+                {
+                    var error = $"Invalid color: {createDto.Color}. Valid colors are: {string.Join(", ", ValidColors)}";
+                    _logger.LogWarning(error);
+                    throw new InvalidOperationException(error);
+                }
 
                 var existingProduct = await _context.Products
                     .FirstOrDefaultAsync(p => p.ProductName == createDto.ProductName && (!p.IsDelete.HasValue || !p.IsDelete.Value));
