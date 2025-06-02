@@ -1,0 +1,67 @@
+﻿```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Ecommerce Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Ecommerce Admin</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" asp-page="/Admin/Products/Dashboard">Dashboard</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <!-- Sidebar (Dashboard) -->
+            <div class="col-md-3 col-lg-2 bg-light p-3 vh-100" style="overflow-y: auto; position: sticky; top: 0;">
+                <h5 class="text-center mb-3">Quản lý sản phẩm</h5>
+                <div class="list-group">
+                    <a asp-page="/Admin/Products/Create" class="list-group-item list-group-item-action">
+                        <i class="bi bi-plus-circle me-2"></i> Thêm mới sản phẩm
+                    </a>
+                    <a asp-page="/Admin/Products/Edit" asp-route-id="1" class="list-group-item list-group-item-action">
+                        <i class="bi bi-pencil-square me-2"></i> Chỉnh sửa sản phẩm
+                    </a>
+                    <a asp-page="/Admin/Products/Index" class="list-group-item list-group-item-action">
+                        <i class="bi bi-list-ul me-2"></i> Danh sách sản phẩm
+                    </a>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10 p-4">
+                <main role="main">
+                    @RenderBody()
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white text-center py-3 mt-4">
+        <p>© 2025 Ecommerce Admin. All rights reserved.</p>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
+```
