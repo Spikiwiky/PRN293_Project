@@ -6,7 +6,6 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddHttpClient<IHttpClientService, HttpClientService>();
-builder.Services.AddScoped<IProductService, ProductService>();
 
 // Register admin services
 builder.Services.AddScoped<IAdminProductService, AdminProductService>();
