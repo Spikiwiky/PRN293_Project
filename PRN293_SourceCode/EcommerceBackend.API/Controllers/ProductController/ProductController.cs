@@ -25,16 +25,18 @@ namespace EcommerceBackend.API.Controllers.ProductController
 
         [HttpGet("search")]
         public async Task<IActionResult> SearchProducts(
-            [FromQuery] string name = null,
-            [FromQuery] string category = null,
-            [FromQuery] string size = null,
-            [FromQuery] string color = null,
-            [FromQuery] string variantId = null,
-            [FromQuery] decimal? price = null,
+            [FromQuery] string? name = null,
+            [FromQuery] string? category = null,
+            [FromQuery] string? size = null,
+            [FromQuery] string? color = null,
+            [FromQuery] decimal? minPrice = null,
+            [FromQuery] decimal? maxPrice = null,
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 10)
         {
-            var products = await _productService.SearchProductsAsync(name, category, size, color, variantId, price, page, pageSize);
+            var products = await _productService.SearchProductsAsync(
+                name, category, size, color, 
+                minPrice, maxPrice, page, pageSize);
             return Ok(products);
         }
     }

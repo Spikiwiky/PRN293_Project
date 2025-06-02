@@ -40,7 +40,10 @@ namespace EcommerceFrontend.Web.Services.Admin
             string? category = null,
             string? size = null,
             string? color = null,
-            decimal? price = null,
+            decimal? minPrice = null,
+            decimal? maxPrice = null,
+            DateTime? startDate = null,
+            DateTime? endDate = null,
             bool? isFeatured = null,
             int page = 1,
             int pageSize = 10)
@@ -57,7 +60,10 @@ namespace EcommerceFrontend.Web.Services.Admin
                 if (!string.IsNullOrEmpty(category)) queryParams.Add($"category={Uri.EscapeDataString(category)}");
                 if (!string.IsNullOrEmpty(size)) queryParams.Add($"size={Uri.EscapeDataString(size)}");
                 if (!string.IsNullOrEmpty(color)) queryParams.Add($"color={Uri.EscapeDataString(color)}");
-                if (price.HasValue) queryParams.Add($"price={price}");
+                if (minPrice.HasValue) queryParams.Add($"minPrice={minPrice}");
+                if (maxPrice.HasValue) queryParams.Add($"maxPrice={maxPrice}");
+                if (startDate.HasValue) queryParams.Add($"startDate={startDate.Value:yyyy-MM-dd}");
+                if (endDate.HasValue) queryParams.Add($"endDate={endDate.Value:yyyy-MM-dd}");
                 if (isFeatured.HasValue) queryParams.Add($"isFeatured={isFeatured}");
 
                 _logger.LogInformation("Sending search request to API with parameters: {Params}", string.Join("&", queryParams));
@@ -77,8 +83,8 @@ namespace EcommerceFrontend.Web.Services.Admin
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error searching products with parameters: name={Name}, category={Category}, size={Size}, color={Color}, price={Price}, isFeatured={IsFeatured}, page={Page}, pageSize={PageSize}",
-                    name, category, size, color, price, isFeatured, page, pageSize);
+                _logger.LogError(ex, "Error searching products with parameters: name={Name}, category={Category}, size={Size}, color={Color}, minPrice={MinPrice}, maxPrice={MaxPrice}, startDate={StartDate}, endDate={EndDate}, isFeatured={IsFeatured}, page={Page}, pageSize={PageSize}",
+                    name, category, size, color, minPrice, maxPrice, startDate, endDate, isFeatured, page, pageSize);
                 throw;
             }
         }

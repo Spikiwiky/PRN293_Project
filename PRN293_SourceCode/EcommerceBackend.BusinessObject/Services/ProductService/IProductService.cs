@@ -10,6 +10,14 @@ namespace EcommerceBackend.BusinessObject.Services.ProductService
     public interface IProductService
     {
         Task<List<ProductsDto>> LoadProductsAsync(int page, int pageSize);
-        Task<List<ProductsDto>> SearchProductsAsync(string name = null, string category = null, string size = null, string color = null, string variantId = null, decimal? price = null, int page = 1, int pageSize = 10);
+        Task<List<ProductsDto>> SearchProductsAsync(
+            string? name = null,
+            string? category = null,
+            string? size = null,
+            string? color = null,
+            decimal? minPrice = null,
+            decimal? maxPrice = null,
+            int page = 1,
+            int pageSize = 10);
     }
 }
