@@ -1,11 +1,12 @@
-﻿using EcommerceBackend.BusinessObject.dtos.BlogDto;
+﻿using EcommerceBackend.BusinessObject.Abstract.BlogAbstract;
+using EcommerceBackend.BusinessObject.dtos.BlogDto;
 using EcommerceBackend.DataAccess.Abstract;
 using EcommerceBackend.DataAccess.Abstract.BlogAbstract;
 using EcommerceBackend.DataAccess.Models;
 
 namespace EcommerceBackend.BusinessObject.Services
 {
-    public class BlogService
+    public class BlogService : IBlogService
     {
         private readonly IBlogRepository _repository;
 
@@ -26,18 +27,6 @@ namespace EcommerceBackend.BusinessObject.Services
             });
         }
 
-        public async Task<BlogDto?> GetByIdAsync(int id)
-        {
-            var b = await _repository.GetByIdAsync(id);
-            return b == null ? null : new BlogDto
-            {
-                BlogId = b.BlogId,
-                BlogCategoryId = b.BlogCategoryId,
-                BlogTittle = b.BlogTittle,
-                BlogContent = b.BlogContent
-            };
-        }
-
         public async Task AddAsync(BlogDto dto)
         {
             var blog = new Blog
@@ -46,7 +35,20 @@ namespace EcommerceBackend.BusinessObject.Services
                 BlogTittle = dto.BlogTittle,
                 BlogContent = dto.BlogContent
             };
+
             await _repository.AddAsync(blog);
+        }
+
+        public async Task<BlogDto> GetByIdAsync(int id)
+        {
+            var b = await _repository.GetByIdAsync(id);
+            return new BlogDto
+            {
+                BlogId = b.BlogId,
+                BlogCategoryId = b.BlogCategoryId,
+                BlogTittle = b.BlogTittle,
+                BlogContent = b.BlogContent
+            };
         }
 
         public async Task UpdateAsync(BlogDto dto)
@@ -58,6 +60,7 @@ namespace EcommerceBackend.BusinessObject.Services
                 BlogTittle = dto.BlogTittle,
                 BlogContent = dto.BlogContent
             };
+
             await _repository.UpdateAsync(blog);
         }
 
