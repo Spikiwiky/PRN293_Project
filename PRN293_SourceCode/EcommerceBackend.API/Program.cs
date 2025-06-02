@@ -46,9 +46,9 @@ builder.Services.AddAuthorization();
 //builder.Services.AddCorsPolicy(builder.Configuration);
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowFrontendApp", policy =>
+    options.AddPolicy("AllowReactApp", policy =>
     {
-        policy.WithOrigins("https://localhost:7107")
+        policy.WithOrigins("http://localhost:3000")
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
@@ -57,6 +57,7 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddSignalR();
 
+//builder.WebHost.UseUrls("http://0.0.0.0:80");
 var app = builder.Build();
 
 app.MapHub<SignalrHub>("/SignalrHub"); // Đăng ký đường dẫn của Hub
@@ -68,7 +69,7 @@ app.UseSession();
 
 app.UseHttpsRedirection();
 app.UseRouting();
-app.UseCors("AllowFrontendApp");
+app.UseCors("AllowReactApp");
 app.UseAuthentication();
 app.UseAuthorization();
 
