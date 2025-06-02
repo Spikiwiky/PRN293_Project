@@ -36,18 +36,33 @@ public class IndexModel : PageModel
     {
         try
         {
-            if (!string.IsNullOrEmpty(SearchTerm) || !string.IsNullOrEmpty(Category))
+            _logger.LogInformation("Received request - SearchTerm: {SearchTerm}, Category: {Category}", SearchTerm, Category);
+
+            // Only use search if we have a search term. For category-only filtering, use the load endpoint
+            if (!string.IsNullOrEmpty(SearchTerm))
             {
-                Products = await _productService.SearchProductsAsync(
-                    name: SearchTerm,
-                    category: Category,
-                    page: PageNumber,
-                    pageSize: PageSize
-                );
+                _logger.LogInformation("Using search with term: {SearchTerm}", SearchTerm);
+                Products = await _productService.GetAllProductsAsync(PageNumber, PageSize);
+                
+                // Filter the results in memory if we have a category
+                if (!string.IsNullOrEmpty(Category))
+                {
+                    Products = Products.Where(p => p.ProductCategoryTitle == Category).ToList();
+                    _logger.LogInformation("Filtered to {Count} products in category {Category}", Products.Count, Category);
+                }
+            }
+            else if (!string.IsNullOrEmpty(Category))
+            {
+                _logger.LogInformation("Getting products for category: {Category}", Category);
+                Products = await _productService.GetAllProductsAsync(PageNumber, PageSize);
+                Products = Products.Where(p => p.ProductCategoryTitle == Category).ToList();
+                _logger.LogInformation("Found {Count} products in category {Category}", Products.Count, Category);
             }
             else
             {
+                _logger.LogInformation("Getting all products without filters");
                 Products = await _productService.GetAllProductsAsync(PageNumber, PageSize);
+                _logger.LogInformation("Retrieved {Count} products total", Products.Count);
             }
         }
         catch (Exception ex)

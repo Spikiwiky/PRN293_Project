@@ -1,0 +1,183 @@
+@page
+@model EcommerceFrontend.Web.Pages.Admin.Products.IndexModel
+@{
+    ViewData["Title"] = "Product Management";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Product Management</h1>
+    
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div>
+                <i class="fas fa-table me-1"></i>
+                Products List
+            </div>
+            <a asp-page="./Create" class="btn btn-primary">Create New Product</a>
+        </div>
+        <div class="card-body">
+            <!-- Search Filters -->
+            <form method="get" class="mb-4">
+                <div class="row g-3">
+                    <div class="col-md-2">
+                        <input type="text" class="form-control" placeholder="Product Name" 
+                               asp-for="SearchFilters.Name">
+                    </div>
+                    <div class="col-md-2">
+                        <input type="text" class="form-control" placeholder="Category" 
+                               asp-for="SearchFilters.Category">
+                    </div>
+                    <div class="col-md-2">
+                        <input type="text" class="form-control" placeholder="Size" 
+                               asp-for="SearchFilters.Size">
+                    </div>
+                    <div class="col-md-2">
+                        <input type="text" class="form-control" placeholder="Color" 
+                               asp-for="SearchFilters.Color">
+                    </div>
+                    <div class="col-md-2">
+                        <input type="number" class="form-control" placeholder="Price" 
+                               asp-for="SearchFilters.Price">
+                    </div>
+                    <div class="col-md-2">
+                        <select class="form-select" asp-for="SearchFilters.IsFeatured">
+                            <option value="">Featured Status</option>
+                            <option value="true">Featured</option>
+                            <option value="false">Not Featured</option>
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary">Search</button>
+                        <a asp-page="./Index" class="btn btn-secondary">Reset</a>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Products Table -->
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Category</th>
+                            <th>Size</th>
+                            <th>Color</th>
+                            <th>Price</th>
+                            <th>Stock</th>
+                            <th>Featured</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var product in Model.Products)
+                        {
+                            <tr>
+                                <td>@product.ProductId</td>
+                                <td>@product.ProductName</td>
+                                <td>@product.ProductCategoryTitle</td>
+                                <td>@product.Size</td>
+                                <td>@product.Color</td>
+                                <td>@product.Price?.ToString("C")</td>
+                                <td>@product.StockQuantity</td>
+                                <td>
+                                    @if (product.IsFeatured)
+                                    {
+                                        <span class="badge bg-success">Yes</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">No</span>
+                                    }
+                                </td>
+                                <td>
+                                    @switch (product.Status)
+                                    {
+                                        case 1:
+                                            <span class="badge bg-success">Active</span>
+                                            break;
+                                        case 0:
+                                            <span class="badge bg-warning">Inactive</span>
+                                            break;
+                                        default:
+                                            <span class="badge bg-secondary">Unknown</span>
+                                            break;
+                                    }
+                                </td>
+                                <td>@product.CreatedAt?.ToString("dd/MM/yyyy")</td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a asp-page="./Edit" asp-route-id="@product.ProductId" 
+                                           class="btn btn-sm btn-primary">Edit</a>
+                                        <button type="button" class="btn btn-sm btn-danger" 
+                                                onclick="deleteProduct(@product.ProductId)">Delete</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            @if (Model.TotalPages > 1)
+            {
+                <nav>
+                    <ul class="pagination justify-content-center">
+                        @if (Model.CurrentPage > 1)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" asp-page="./Index" 
+                                   asp-all-route-data="Model.GetPageRouteData(Model.CurrentPage - 1)">Previous</a>
+                            </li>
+                        }
+
+                        @for (int i = 1; i <= Model.TotalPages; i++)
+                        {
+                            <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                                <a class="page-link" asp-page="./Index" 
+                                   asp-all-route-data="Model.GetPageRouteData(i)">@i</a>
+                            </li>
+                        }
+
+                        @if (Model.CurrentPage < Model.TotalPages)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" asp-page="./Index" 
+                                   asp-all-route-data="Model.GetPageRouteData(Model.CurrentPage + 1)">Next</a>
+                            </li>
+                        }
+                    </ul>
+                </nav>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function deleteProduct(id) {
+            if (confirm('Are you sure you want to delete this product?')) {
+                fetch(`/api/admin/products/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        window.location.reload();
+                    } else {
+                        alert('Error deleting product');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error deleting product');
+                });
+            }
+        }
+    </script>
+} 

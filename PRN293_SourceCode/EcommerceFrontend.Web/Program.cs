@@ -1,4 +1,5 @@
 using EcommerceFrontend.Web.Services;
+using EcommerceFrontend.Web.Services.Admin;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -6,6 +7,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddHttpClient<IHttpClientService, HttpClientService>();
 builder.Services.AddScoped<IProductService, ProductService>();
+
+// Register admin services
+builder.Services.AddScoped<IAdminProductService, AdminProductService>();
 
 var app = builder.Build();
 

@@ -63,33 +63,37 @@ public class ProductService : IProductService
         {
             var queryParams = new List<string>();
             
-            // Only add search parameters if they are provided
-            if (!string.IsNullOrEmpty(name)) queryParams.Add($"searchTerm={Uri.EscapeDataString(name)}");
+            // Add all search parameters that match the backend API parameters
+            if (!string.IsNullOrEmpty(name)) queryParams.Add($"name={Uri.EscapeDataString(name)}");
             if (!string.IsNullOrEmpty(category)) queryParams.Add($"category={Uri.EscapeDataString(category)}");
+            if (!string.IsNullOrEmpty(size)) queryParams.Add($"size={Uri.EscapeDataString(size)}");
+            if (!string.IsNullOrEmpty(color)) queryParams.Add($"color={Uri.EscapeDataString(color)}");
+            if (!string.IsNullOrEmpty(variantId)) queryParams.Add($"variantId={Uri.EscapeDataString(variantId)}");
+            if (price.HasValue) queryParams.Add($"price={price}");
             
             // Add pagination parameters
             queryParams.Add($"page={page}");
             queryParams.Add($"pageSize={pageSize}");
 
             var queryString = string.Join("&", queryParams);
-            var endpoint = $"{BaseEndpoint}/load?{queryString}";
+            var endpoint = $"{BaseEndpoint}/search?{queryString}";
             
-            _logger.LogInformation("Calling API to load products with filters: {Endpoint}", endpoint);
+            _logger.LogInformation("Calling API to search products: {Endpoint}", endpoint);
             var result = await _httpClient.GetAsync<List<ProductDTO>>(endpoint);
             
             if (result == null)
             {
-                _logger.LogWarning("API returned null result for filtered load");
+                _logger.LogWarning("API returned null result for search");
                 return new List<ProductDTO>();
             }
             
-            _logger.LogInformation("Successfully retrieved {Count} products with filters", result.Count);
+            _logger.LogInformation("Successfully retrieved {Count} products from search", result.Count);
             return result;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error loading filtered products");
-            throw new Exception("Failed to load filtered products from API", ex);
+            _logger.LogError(ex, "Error searching products");
+            throw new Exception("Failed to search products from API", ex);
         }
     }
 } 

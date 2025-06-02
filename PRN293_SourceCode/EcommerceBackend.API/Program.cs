@@ -8,7 +8,8 @@ using Microsoft.AspNetCore.Authorization;
 using PdfSharp.Fonts;
 using EcommerceBackend.API.Configurations;
 using EcommerceBackend.API.Hubs;
-
+using EcommerceBackend.BusinessObject.Services;
+using EcommerceBackend.BusinessObject.Services.AdminService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,7 +17,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
 
 // Config Authentication Jwt
 JwtConfig.ConfigureJwtAuthentication(builder.Services, builder.Configuration);
@@ -35,7 +35,6 @@ builder.Services.AddSession(options =>
 });
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddHttpContextAccessor();
-
 
 builder.Services.AddAuthorization();
 
@@ -69,6 +68,5 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
 
 app.Run();
