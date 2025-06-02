@@ -37,27 +37,31 @@ namespace EcommerceBackend.API.Controllers.AdminController
             [FromQuery] string? category = null,
             [FromQuery] string? size = null,
             [FromQuery] string? color = null,
-            [FromQuery] decimal? price = null,
+            [FromQuery] decimal? minPrice = null,
+            [FromQuery] decimal? maxPrice = null,
+            [FromQuery] DateTime? startDate = null,
+            [FromQuery] DateTime? endDate = null,
             [FromQuery] bool? isFeatured = null,
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 10)
         {
             try
             {
-                _logger.LogInformation(
-                    "Getting products with parameters: name={Name}, category={Category}, size={Size}, color={Color}, price={Price}, isFeatured={IsFeatured}, page={Page}, pageSize={PageSize}",
-                    name, category, size, color, price, isFeatured, page, pageSize);
+                var eventId = new EventId(1, "GetProducts");
+                _logger.LogInformation(eventId,
+                    "Getting products with parameters: name={Name}, category={Category}, size={Size}, color={Color}, minPrice={MinPrice}, maxPrice={MaxPrice}, startDate={StartDate}, endDate={EndDate}, isFeatured={IsFeatured}, page={Page}, pageSize={PageSize}",
+                    name, category, size, color, minPrice, maxPrice, startDate, endDate, isFeatured, page, pageSize);
 
                 var products = await _adminProductService.SearchProductsAsync(
-                    name, category, size, color, null, price, isFeatured, page, pageSize);
+                    name, category, size, color, minPrice, maxPrice, startDate, endDate, isFeatured, page, pageSize);
 
-                _logger.LogInformation("Successfully retrieved {Count} products", products.Count);
+                _logger.LogInformation(eventId, "Successfully retrieved {Count} products", products.Count);
                 return Ok(products);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting products with parameters: name={Name}, category={Category}, size={Size}, color={Color}, price={Price}, isFeatured={IsFeatured}, page={Page}, pageSize={PageSize}",
-                    name, category, size, color, price, isFeatured, page, pageSize);
+                _logger.LogError(ex, "Error getting products with parameters: name={Name}, category={Category}, size={Size}, color={Color}, minPrice={MinPrice}, maxPrice={MaxPrice}, startDate={StartDate}, endDate={EndDate}, isFeatured={IsFeatured}, page={Page}, pageSize={PageSize}",
+                    name, category, size, color, minPrice, maxPrice, startDate, endDate, isFeatured, page, pageSize);
                 return StatusCode(500, new { message = "An error occurred while retrieving products", error = ex.Message });
             }
         }
@@ -186,8 +190,10 @@ namespace EcommerceBackend.API.Controllers.AdminController
             [FromQuery] string? category = null,
             [FromQuery] string? size = null,
             [FromQuery] string? color = null,
-            [FromQuery] string? variantId = null,
-            [FromQuery] decimal? price = null,
+            [FromQuery] decimal? minPrice = null,
+            [FromQuery] decimal? maxPrice = null,
+            [FromQuery] DateTime? startDate = null,
+            [FromQuery] DateTime? endDate = null,
             [FromQuery] bool? isFeatured = null,
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 10)
@@ -202,8 +208,8 @@ namespace EcommerceBackend.API.Controllers.AdminController
                 }
 
                 var products = await _adminProductService.SearchProductsAsync(
-                    name, category, size, color, variantId, price,
-                    isFeatured, page, pageSize);
+                    name, category, size, color, minPrice, maxPrice,
+                    startDate, endDate, isFeatured, page, pageSize);
                 return Ok(products);
             }
             catch (Exception ex)

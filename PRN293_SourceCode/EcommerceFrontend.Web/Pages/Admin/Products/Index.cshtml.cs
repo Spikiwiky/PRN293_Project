@@ -14,7 +14,10 @@ namespace EcommerceFrontend.Web.Pages.Admin.Products
         public string? Category { get; set; }
         public string? Size { get; set; }
         public string? Color { get; set; }
-        public decimal? Price { get; set; }
+        public decimal? MinPrice { get; set; }
+        public decimal? MaxPrice { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
         public bool? IsFeatured { get; set; }
     }
 
@@ -46,8 +49,10 @@ namespace EcommerceFrontend.Web.Pages.Admin.Products
             try
             {
                 _logger.LogInformation(
-                    "Fetching products with parameters: name={Name}, category={Category}, size={Size}, color={Color}, price={Price}, page={Page}, pageSize={PageSize}",
-                    SearchFilters.Name, SearchFilters.Category, SearchFilters.Size, SearchFilters.Color, SearchFilters.Price, CurrentPage, PageSize);
+                    "Fetching products with parameters: name={Name}, category={Category}, size={Size}, color={Color}, minPrice={MinPrice}, maxPrice={MaxPrice}, startDate={StartDate}, endDate={EndDate}, page={Page}, pageSize={PageSize}",
+                    SearchFilters.Name, SearchFilters.Category, SearchFilters.Size, SearchFilters.Color, 
+                    SearchFilters.MinPrice, SearchFilters.MaxPrice, SearchFilters.StartDate, SearchFilters.EndDate, 
+                    CurrentPage, PageSize);
 
                 // Get total count for pagination
                 var totalCount = await _adminProductService.GetTotalProductCountAsync();
@@ -59,7 +64,10 @@ namespace EcommerceFrontend.Web.Pages.Admin.Products
                     category: SearchFilters.Category,
                     size: SearchFilters.Size,
                     color: SearchFilters.Color,
-                    price: SearchFilters.Price,
+                    minPrice: SearchFilters.MinPrice,
+                    maxPrice: SearchFilters.MaxPrice,
+                    startDate: SearchFilters.StartDate,
+                    endDate: SearchFilters.EndDate,
                     isFeatured: SearchFilters.IsFeatured,
                     page: CurrentPage,
                     pageSize: PageSize
@@ -94,8 +102,17 @@ namespace EcommerceFrontend.Web.Pages.Admin.Products
             if (!string.IsNullOrEmpty(SearchFilters.Color))
                 routeData.Add("SearchFilters.Color", SearchFilters.Color);
             
-            if (SearchFilters.Price.HasValue)
-                routeData.Add("SearchFilters.Price", SearchFilters.Price.Value.ToString());
+            if (SearchFilters.MinPrice.HasValue)
+                routeData.Add("SearchFilters.MinPrice", SearchFilters.MinPrice.Value.ToString());
+            
+            if (SearchFilters.MaxPrice.HasValue)
+                routeData.Add("SearchFilters.MaxPrice", SearchFilters.MaxPrice.Value.ToString());
+            
+            if (SearchFilters.StartDate.HasValue)
+                routeData.Add("SearchFilters.StartDate", SearchFilters.StartDate.Value.ToString("yyyy-MM-dd"));
+            
+            if (SearchFilters.EndDate.HasValue)
+                routeData.Add("SearchFilters.EndDate", SearchFilters.EndDate.Value.ToString("yyyy-MM-dd"));
             
             if (SearchFilters.IsFeatured.HasValue)
                 routeData.Add("SearchFilters.IsFeatured", SearchFilters.IsFeatured.Value.ToString());

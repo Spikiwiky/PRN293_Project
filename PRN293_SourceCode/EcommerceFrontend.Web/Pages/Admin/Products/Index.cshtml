@@ -37,8 +37,20 @@
                                asp-for="SearchFilters.Color">
                     </div>
                     <div class="col-md-2">
-                        <input type="number" class="form-control" placeholder="Price" 
-                               asp-for="SearchFilters.Price">
+                        <input type="number" class="form-control" placeholder="Min Price" 
+                               asp-for="SearchFilters.MinPrice">
+                    </div>
+                    <div class="col-md-2">
+                        <input type="number" class="form-control" placeholder="Max Price" 
+                               asp-for="SearchFilters.MaxPrice">
+                    </div>
+                    <div class="col-md-2">
+                        <input type="date" class="form-control" placeholder="Start Date" 
+                               asp-for="SearchFilters.StartDate">
+                    </div>
+                    <div class="col-md-2">
+                        <input type="date" class="form-control" placeholder="End Date" 
+                               asp-for="SearchFilters.EndDate">
                     </div>
                     <div class="col-md-2">
                         <select class="form-select" asp-for="SearchFilters.IsFeatured">
