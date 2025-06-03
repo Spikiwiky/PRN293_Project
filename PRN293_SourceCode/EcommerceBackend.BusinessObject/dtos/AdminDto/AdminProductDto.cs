@@ -29,19 +29,5 @@ namespace EcommerceBackend.BusinessObject.dtos.AdminDto
         [Required(ErrorMessage = "At least one variant is required")]
         [MinLength(1, ErrorMessage = "At least one variant is required")]
         public List<ProductVariant> Variants { get; set; } = new();
-
-        // Audit fields
-        public DateTime? CreatedAt { get; set; }
-        public DateTime? UpdatedAt { get; set; }
-        public string? CreatedBy { get; set; }
-        public string? UpdatedBy { get; set; }
-
-        // Legacy fields for backward compatibility
-        public string? Category => Variants.FirstOrDefault()?.Categories;
-        public decimal Price => Variants.FirstOrDefault()?.Price ?? 0;
-        public string? Size => Variants.FirstOrDefault()?.Size;
-        public string? Color => Variants.FirstOrDefault()?.Color;
-        public int StockQuantity => Variants.FirstOrDefault()?.StockQuantity ?? 0;
-        public bool IsFeatured => Variants.FirstOrDefault()?.IsFeatured ?? false;
     }
 } 

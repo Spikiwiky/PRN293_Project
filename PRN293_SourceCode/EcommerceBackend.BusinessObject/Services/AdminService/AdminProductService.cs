@@ -303,28 +303,6 @@ namespace EcommerceBackend.BusinessObject.Services.AdminService
 
                     product.Variants = SerializeVariants(existingVariants);
                 }
-                // Handle legacy fields
-                else if (!string.IsNullOrEmpty(updateDto.Size) && !string.IsNullOrEmpty(updateDto.Color))
-                {
-                    var variant = new ProductVariant
-                    {
-                        Size = updateDto.Size,
-                        Color = updateDto.Color,
-                        Categories = updateDto.Category ?? string.Empty,
-                        VariantId = $"{updateDto.Size}-{updateDto.Color}",
-                        Price = updateDto.Price ?? 0,
-                        StockQuantity = updateDto.StockQuantity ?? 0,
-                        IsFeatured = updateDto.IsFeatured ?? false
-                    };
-
-                    if (!IsValidVariant(variant))
-                    {
-                        throw new ArgumentException($"Invalid variant: Size={variant.Size}, Color={variant.Color}");
-                    }
-
-                    var variants = new List<ProductVariant> { variant };
-                    product.Variants = SerializeVariants(variants);
-                }
 
                 // Handle image URLs
                 if (updateDto.ImageUrls != null)
@@ -338,8 +316,6 @@ namespace EcommerceBackend.BusinessObject.Services.AdminService
                 await _context.SaveChangesAsync();
 
                 var dto = await MapToDto(product);
-                dto.UpdatedAt = DateTime.UtcNow;
-                dto.UpdatedBy = updateDto.UpdatedBy;
                 return dto;
             }
             catch (Exception ex)

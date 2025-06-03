@@ -69,44 +69,31 @@ namespace EcommerceBackend.API.Controllers.AdminController
 
         private ActionResult ValidateProductVariant(AdminProductUpdateDto updateDto)
         {
-            // If using legacy fields, validate them
-            if (!string.IsNullOrEmpty(updateDto.Size) || !string.IsNullOrEmpty(updateDto.Color))
+            if (updateDto.Variants?.Any() != true)
             {
-                if (string.IsNullOrEmpty(updateDto.Size) || string.IsNullOrEmpty(updateDto.Color))
-                {
-                    return BadRequest("Both size and color must be provided together");
-                }
-
-                if (!ValidSizes.Contains(updateDto.Size))
-                {
-                    return BadRequest($"Invalid size. Valid sizes are: {string.Join(", ", ValidSizes)}");
-                }
-
-                if (!ValidColors.Contains(updateDto.Color))
-                {
-                    return BadRequest($"Invalid color. Valid colors are: {string.Join(", ", ValidColors)}");
-                }
+                return BadRequest("At least one variant is required");
             }
 
-            // If using new variants array, validate each variant
-            if (updateDto.Variants?.Any() == true)
+            foreach (var variant in updateDto.Variants)
             {
-                foreach (var variant in updateDto.Variants)
+                if (string.IsNullOrEmpty(variant.Size) || string.IsNullOrEmpty(variant.Color))
                 {
-                    if (string.IsNullOrEmpty(variant.Size) || string.IsNullOrEmpty(variant.Color))
-                    {
-                        return BadRequest("Each variant must have both size and color");
-                    }
+                    return BadRequest("Each variant must have both size and color");
+                }
 
-                    if (!ValidSizes.Contains(variant.Size))
-                    {
-                        return BadRequest($"Invalid size '{variant.Size}'. Valid sizes are: {string.Join(", ", ValidSizes)}");
-                    }
+                if (!ValidSizes.Contains(variant.Size))
+                {
+                    return BadRequest($"Invalid size '{variant.Size}'. Valid sizes are: {string.Join(", ", ValidSizes)}");
+                }
 
-                    if (!ValidColors.Contains(variant.Color))
-                    {
-                        return BadRequest($"Invalid color '{variant.Color}'. Valid colors are: {string.Join(", ", ValidColors)}");
-                    }
+                if (!ValidColors.Contains(variant.Color))
+                {
+                    return BadRequest($"Invalid color '{variant.Color}'. Valid colors are: {string.Join(", ", ValidColors)}");
+                }
+
+                if (variant.Price <= 0)
+                {
+                    return BadRequest("Price must be greater than 0 for all variants");
                 }
             }
 
@@ -218,19 +205,6 @@ namespace EcommerceBackend.API.Controllers.AdminController
                     return validationResult;
                 }
 
-                // Check price in variants or legacy field
-                if (updateDto.Variants?.Any() == true)
-                {
-                    if (updateDto.Variants.Any(v => v.Price <= 0))
-                    {
-                        return BadRequest("Price must be greater than 0 for all variants");
-                    }
-                }
-                else if (updateDto.Price.HasValue && updateDto.Price <= 0)
-                {
-                    return BadRequest("Price must be greater than 0");
-                }
-
                 var product = await _adminProductService.UpdateProductAsync(updateDto);
                 return Ok(product);
             }
@@ -284,10 +258,14 @@ namespace EcommerceBackend.API.Controllers.AdminController
         {
             try
             {
-                var validationResult = ValidateProductVariant(new AdminProductUpdateDto { Size = size, Color = color });
-                if (validationResult is BadRequestObjectResult)
+                if (!string.IsNullOrEmpty(size) && !ValidSizes.Contains(size))
                 {
-                    return validationResult;
+                    return BadRequest($"Invalid size. Valid sizes are: {string.Join(", ", ValidSizes)}");
+                }
+
+                if (!string.IsNullOrEmpty(color) && !ValidColors.Contains(color))
+                {
+                    return BadRequest($"Invalid color. Valid colors are: {string.Join(", ", ValidColors)}");
                 }
 
                 var products = await _adminProductService.SearchProductsAsync(
