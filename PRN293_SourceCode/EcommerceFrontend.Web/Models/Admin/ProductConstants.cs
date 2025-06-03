@@ -29,6 +29,7 @@ namespace EcommerceFrontend.Web.Models.Admin
             { "Pink", "#FFC0CB" },
             { "Brown", "#A52A2A" },
             { "Gray", "#808080" },
+            { "Grey", "#808080" },
             { "Navy", "#000080" }
         };
     }
