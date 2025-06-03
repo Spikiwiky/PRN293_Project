@@ -10,6 +10,9 @@ using EcommerceBackend.API.Configurations;
 using EcommerceBackend.API.Hubs;
 using EcommerceBackend.BusinessObject.Services;
 using EcommerceBackend.BusinessObject.Services.AdminService;
+using EcommerceBackend.DataAccess.Abstract.BlogAbstract;
+using EcommerceBackend.DataAccess.Repository.BlogRepository;
+
 using EcommerceBackend.BusinessObject.Services.UserService;
 using EcommerceBackend.DataAccess.Repository.UserRepository;
 
@@ -19,6 +22,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddScoped<IBlogRepository, BlogRepository>();
+builder.Services.AddScoped<BlogService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 
