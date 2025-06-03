@@ -11,8 +11,10 @@ namespace EcommerceBackend.DataAccess.Abstract.BlogAbstract
     {
         Task<IEnumerable<Blog>> GetAllAsync();
         Task<Blog> GetByIdAsync(int id);
-        Task AddAsync(Blog blog); 
+        Task AddAsync(Blog blog);
+        Task<IEnumerable<Blog>> GetPagedAsync(int page, int pageSize);
         Task UpdateAsync(Blog blog);
         Task DeleteAsync(int id);
+     
     }
 }

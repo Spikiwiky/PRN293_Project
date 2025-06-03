@@ -1,4 +1,5 @@
-﻿using EcommerceBackend.BusinessObject.dtos.BlogDto;
+﻿using EcommerceBackend.BusinessObject.Abstract.BlogAbstract;
+using EcommerceBackend.BusinessObject.dtos.BlogDto;
 using EcommerceBackend.BusinessObject.Services;
 using EcommerceBackend.DataAccess.Abstract.BlogAbstract;
 using EcommerceBackend.DataAccess.Models;
@@ -18,8 +19,19 @@ namespace EcommerceBackend.API.Controllers.BlogController
             _service = service;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetAll() => Ok(await _service.GetAllAsync());
+        [HttpGet("all")]
+        public async Task<IActionResult> GetAll()
+        {
+            var blogs = await _service.GetAllAsync();
+            return Ok(blogs);
+        }
+
+        [HttpGet("load")]
+        public async Task<IActionResult> LoadBlogs([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        {
+            var blogs = await _service.LoadBlogsAsync(page, pageSize);
+            return Ok(blogs);
+        }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)

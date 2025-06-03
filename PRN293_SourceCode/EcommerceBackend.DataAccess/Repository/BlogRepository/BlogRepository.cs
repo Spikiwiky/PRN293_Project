@@ -55,5 +55,14 @@ namespace EcommerceBackend.DataAccess.Repository.BlogRepository
         {
             throw new NotImplementedException();
         }
+        public async Task<IEnumerable<Blog>> GetPagedAsync(int page, int pageSize)
+        {
+            return await _context.Blogs
+                .OrderByDescending(b => b.BlogId)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+        }
+
     }
 }
