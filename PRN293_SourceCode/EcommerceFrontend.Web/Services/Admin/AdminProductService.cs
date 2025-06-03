@@ -2,6 +2,7 @@ using System.Net.Http.Json;
 using EcommerceFrontend.Web.Models.Admin;
 using EcommerceFrontend.Web.Extensions;
 using Microsoft.Extensions.Logging;
+using System.Text.Json;
 
 namespace EcommerceFrontend.Web.Services.Admin
 {
@@ -9,6 +10,7 @@ namespace EcommerceFrontend.Web.Services.Admin
     {
         private readonly HttpClient _httpClient;
         private readonly ILogger<AdminProductService> _logger;
+        private const string BaseEndpoint = "api/admin/products";
 
         public AdminProductService(IHttpClientFactory clientFactory, IConfiguration configuration, ILogger<AdminProductService> logger)
         {
@@ -19,14 +21,14 @@ namespace EcommerceFrontend.Web.Services.Admin
 
         public async Task<List<AdminProductDto>> GetAllProductsAsync(int page = 1, int pageSize = 10)
         {
-            var response = await _httpClient.GetAsync($"api/admin/products?page={page}&pageSize={pageSize}");
+            var response = await _httpClient.GetAsync($"{BaseEndpoint}?page={page}&pageSize={pageSize}");
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<List<AdminProductDto>>() ?? new List<AdminProductDto>();
         }
 
         public async Task<AdminProductDto?> GetProductByIdAsync(int id)
         {
-            var response = await _httpClient.GetAsync($"api/admin/products/{id}");
+            var response = await _httpClient.GetAsync($"{BaseEndpoint}/{id}");
             if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
                 return null;
@@ -62,24 +64,64 @@ namespace EcommerceFrontend.Web.Services.Admin
                 if (!string.IsNullOrEmpty(color)) queryParams.Add($"color={Uri.EscapeDataString(color)}");
                 if (minPrice.HasValue) queryParams.Add($"minPrice={minPrice}");
                 if (maxPrice.HasValue) queryParams.Add($"maxPrice={maxPrice}");
-                if (startDate.HasValue) queryParams.Add($"startDate={startDate.Value:yyyy-MM-dd}");
-                if (endDate.HasValue) queryParams.Add($"endDate={endDate.Value:yyyy-MM-dd}");
+                if (startDate.HasValue) queryParams.Add($"startDate={startDate.Value.ToString("yyyy-MM-dd")}");
+                if (endDate.HasValue) queryParams.Add($"endDate={endDate.Value.ToString("yyyy-MM-dd")}");
                 if (isFeatured.HasValue) queryParams.Add($"isFeatured={isFeatured}");
 
-                _logger.LogInformation("Sending search request to API with parameters: {Params}", string.Join("&", queryParams));
-                var response = await _httpClient.GetAsync($"api/admin/products/search?{string.Join("&", queryParams)}");
+                var queryString = string.Join("&", queryParams);
+                _logger.LogInformation("Sending search request to API. Endpoint: {Endpoint}, Parameters: {Params}", 
+                    $"{BaseEndpoint}/search", queryString);
+
+                var response = await _httpClient.GetAsync($"{BaseEndpoint}/search?{queryString}");
                 
+                if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    _logger.LogWarning("No products found matching the search criteria");
+                    return new List<AdminProductDto>();
+                }
+
                 if (!response.IsSuccessStatusCode)
                 {
                     var errorContent = await response.Content.ReadAsStringAsync();
                     _logger.LogError("API returned error {StatusCode}: {Error}", 
                         response.StatusCode, errorContent);
-                    throw new HttpRequestException($"API returned {response.StatusCode}: {errorContent}");
+
+                    var errorMessage = response.StatusCode switch
+                    {
+                        System.Net.HttpStatusCode.BadRequest => $"Invalid search parameters: {errorContent}",
+                        System.Net.HttpStatusCode.Unauthorized => "Authentication required to search products",
+                        System.Net.HttpStatusCode.Forbidden => "You don't have permission to search products",
+                        System.Net.HttpStatusCode.InternalServerError => "An error occurred on the server while searching products",
+                        _ => $"Error searching products: {response.StatusCode}"
+                    };
+
+                    throw new HttpRequestException(errorMessage, null, response.StatusCode);
                 }
 
-                var products = await response.Content.ReadFromJsonAsync<List<AdminProductDto>>();
-                _logger.LogInformation("Successfully retrieved {Count} products from API", products?.Count ?? 0);
-                return products ?? new List<AdminProductDto>();
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                };
+
+                var products = await response.Content.ReadFromJsonAsync<List<AdminProductDto>>(options);
+                if (products == null)
+                {
+                    _logger.LogWarning("API returned null result");
+                    return new List<AdminProductDto>();
+                }
+
+                _logger.LogInformation("Successfully retrieved {Count} products from API", products.Count);
+                return products;
+            }
+            catch (HttpRequestException ex)
+            {
+                _logger.LogError(ex, "HTTP request error while searching products. Status code: {StatusCode}", ex.StatusCode);
+                throw;
+            }
+            catch (JsonException ex)
+            {
+                _logger.LogError(ex, "Error deserializing product search results");
+                throw new HttpRequestException("Invalid response format from the server", ex);
             }
             catch (Exception ex)
             {
@@ -91,7 +133,7 @@ namespace EcommerceFrontend.Web.Services.Admin
 
         public async Task<AdminProductDto> CreateProductAsync(AdminProductCreateDto createDto)
         {
-            var response = await _httpClient.PostAsJsonAsync("api/admin/products", createDto);
+            var response = await _httpClient.PostAsJsonAsync($"{BaseEndpoint}", createDto);
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<AdminProductDto>() 
                 ?? throw new InvalidOperationException("Failed to deserialize the created product");
@@ -99,7 +141,7 @@ namespace EcommerceFrontend.Web.Services.Admin
 
         public async Task<AdminProductDto> UpdateProductAsync(AdminProductUpdateDto updateDto)
         {
-            var response = await _httpClient.PutAsJsonAsync($"api/admin/products/{updateDto.ProductId}", updateDto);
+            var response = await _httpClient.PutAsJsonAsync($"{BaseEndpoint}/{updateDto.ProductId}", updateDto);
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<AdminProductDto>()
                 ?? throw new InvalidOperationException("Failed to deserialize the updated product");
@@ -110,7 +152,7 @@ namespace EcommerceFrontend.Web.Services.Admin
             try
             {
                 _logger.LogInformation("Attempting to delete product with ID: {Id}", id);
-                var response = await _httpClient.DeleteAsync($"api/admin/products/{id}");
+                var response = await _httpClient.DeleteAsync($"{BaseEndpoint}/{id}");
                 
                 if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
                 {
@@ -140,7 +182,7 @@ namespace EcommerceFrontend.Web.Services.Admin
         {
             try
             {
-                var response = await _httpClient.PatchAsJsonAsync($"api/admin/products/{id}/featured", isFeatured);
+                var response = await _httpClient.PatchAsJsonAsync($"{BaseEndpoint}/{id}/featured", isFeatured);
                 return response.IsSuccessStatusCode;
             }
             catch (Exception ex)
@@ -153,7 +195,7 @@ namespace EcommerceFrontend.Web.Services.Admin
         {
             try
             {
-                var response = await _httpClient.PatchAsJsonAsync($"api/admin/products/{id}/status", status);
+                var response = await _httpClient.PatchAsJsonAsync($"{BaseEndpoint}/{id}/status", status);
                 return response.IsSuccessStatusCode;
             }
             catch (Exception ex)
@@ -164,7 +206,7 @@ namespace EcommerceFrontend.Web.Services.Admin
 
         public async Task<int> GetTotalProductCountAsync()
         {
-            var response = await _httpClient.GetAsync("api/admin/products/count");
+            var response = await _httpClient.GetAsync($"{BaseEndpoint}/count");
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<int>();
         }

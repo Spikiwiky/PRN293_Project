@@ -15,10 +15,15 @@ builder.Services.AddHttpClient("MyAPI", client =>
     client.BaseAddress = new Uri(apiBaseUrl!); 
 });
 builder.Services.AddScoped<IHttpClientService, HttpClientService>();
+
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IUserService, UserService>();
+
 // Register admin services
 builder.Services.AddScoped<IAdminProductService, AdminProductService>();
+
+// Register product services
+builder.Services.AddScoped<IProductService, ProductService>();
 
 var app = builder.Build();
 

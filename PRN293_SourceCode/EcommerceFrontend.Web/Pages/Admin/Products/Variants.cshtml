@@ -1,0 +1,122 @@
+@page
+@model EcommerceFrontend.Web.Pages.Admin.Products.VariantsModel
+@{
+    ViewData["Title"] = "Product Variants";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Product Variants</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="/Admin/Products">Products</a></li>
+        <li class="breadcrumb-item active">Variants for @Model.Product?.ProductName</li>
+    </ol>
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @Model.ErrorMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @Model.SuccessMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-table me-1"></i>
+            Existing Variants
+        </div>
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Size</th>
+                        <th>Color</th>
+                        <th>Price</th>
+                        <th>Stock</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Product?.Variants != null)
+                    {
+                        @foreach (var variant in Model.Product.Variants)
+                        {
+                            <tr>
+                                <td>@variant.Size</td>
+                                <td>@variant.Color</td>
+                                <td>@variant.Price.ToString("C")</td>
+                                <td>@variant.StockQuantity</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary me-2" onclick="editVariant('@variant.VariantId')">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteVariant('@variant.VariantId')">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-plus me-1"></i>
+            Add New Variant
+        </div>
+        <div class="card-body">
+            <form method="post">
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <label asp-for="NewVariant.Size" class="form-label">Size</label>
+                        <input asp-for="NewVariant.Size" class="form-control" />
+                        <span asp-validation-for="NewVariant.Size" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-3">
+                        <label asp-for="NewVariant.Color" class="form-label">Color</label>
+                        <input asp-for="NewVariant.Color" class="form-control" />
+                        <span asp-validation-for="NewVariant.Color" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-3">
+                        <label asp-for="NewVariant.Price" class="form-label">Price</label>
+                        <input asp-for="NewVariant.Price" class="form-control" type="number" step="0.01" />
+                        <span asp-validation-for="NewVariant.Price" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-3">
+                        <label asp-for="NewVariant.Stock" class="form-label">Stock</label>
+                        <input asp-for="NewVariant.Stock" class="form-control" type="number" />
+                        <span asp-validation-for="NewVariant.Stock" class="text-danger"></span>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Add Variant</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function editVariant(variantId) {
+            // Implement edit functionality
+            alert('Edit variant ' + variantId);
+        }
+
+        function deleteVariant(variantId) {
+            if (confirm('Are you sure you want to delete this variant?')) {
+                // Implement delete functionality
+                alert('Delete variant ' + variantId);
+            }
+        }
+    </script>
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+} 

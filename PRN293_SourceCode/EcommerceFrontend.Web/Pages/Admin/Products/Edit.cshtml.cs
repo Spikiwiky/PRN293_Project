@@ -23,7 +23,7 @@ namespace EcommerceFrontend.Web.Pages.Admin.Products
         [BindProperty]
         public string? ImageUrlsInput { get; set; }
 
-        public SelectList Categories { get; set; }
+        public List<SelectListItem> Categories { get; set; } = new();
 
         public async Task<IActionResult> OnGetAsync(int id)
         {
@@ -32,64 +32,71 @@ namespace EcommerceFrontend.Web.Pages.Admin.Products
                 var product = await _adminProductService.GetProductByIdAsync(id);
                 if (product == null)
                 {
-                    return NotFound();
+                    return RedirectToPage("./Index");
                 }
 
                 // Get categories for dropdown
                 var categories = await _adminProductService.GetCategoriesAsync();
-                Categories = new SelectList(categories, "Id", "Name");
+                Categories = categories.Select(c => new SelectListItem
+                {
+                    Value = c.Id.ToString(),
+                    Text = c.Name
+                }).ToList();
 
-                // Map the product data to the update DTO
+                // Map product data to form
                 Product = new AdminProductUpdateDto
                 {
                     ProductId = product.ProductId,
                     ProductName = product.ProductName,
                     Description = product.Description,
                     ProductCategoryId = product.ProductCategoryId,
-                    Category = product.Category,
-                    Price = product.Price,
-                    Size = product.Size,
-                    Color = product.Color,
-                    IsFeatured = product.IsFeatured,
                     Status = product.Status,
-                    StockQuantity = product.StockQuantity
+                    Variants = product.Variants,
+                    ImageUrls = product.ImageUrls,
+                    UpdatedBy = "admin" // Set a default value or get from user session
                 };
 
                 // Set image URLs input
-                if (product.ImageUrls?.Any() == true)
-                {
-                    ImageUrlsInput = string.Join(",", product.ImageUrls);
-                }
+                ImageUrlsInput = string.Join(Environment.NewLine, product.ImageUrls);
 
                 return Page();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error fetching product with ID {Id}", id);
-                ModelState.AddModelError("", $"An error occurred: {ex.Message}");
-                return Page();
+                _logger.LogError(ex, "Error loading product for edit");
+                TempData["Error"] = "Failed to load product. Please try again later.";
+                return RedirectToPage("./Index");
             }
         }
 
         public async Task<IActionResult> OnPostAsync()
         {
-            if (!ModelState.IsValid)
-            {
-                // Reload categories on validation error
-                var categories = await _adminProductService.GetCategoriesAsync();
-                Categories = new SelectList(categories, "Id", "Name");
-                return Page();
-            }
-
             try
             {
-                // Process image URLs from comma-separated input
+                if (!ModelState.IsValid)
+                {
+                    var categories = await _adminProductService.GetCategoriesAsync();
+                    Categories = categories.Select(c => new SelectListItem
+                    {
+                        Value = c.Id.ToString(),
+                        Text = c.Name
+                    }).ToList();
+                    return Page();
+                }
+
+                // Handle image URLs
                 if (!string.IsNullOrEmpty(ImageUrlsInput))
                 {
-                    Product.ImageUrls = ImageUrlsInput.Split(',')
+                    Product.ImageUrls = ImageUrlsInput
+                        .Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries)
                         .Select(url => url.Trim())
-                        .Where(url => !string.IsNullOrEmpty(url))
                         .ToList();
+                }
+
+                // Set UpdatedBy if not already set
+                if (string.IsNullOrEmpty(Product.UpdatedBy))
+                {
+                    Product.UpdatedBy = "admin"; // Set a default value or get from user session
                 }
 
                 await _adminProductService.UpdateProductAsync(Product);
@@ -99,11 +106,13 @@ namespace EcommerceFrontend.Web.Pages.Admin.Products
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error updating product");
-                ModelState.AddModelError("", $"An error occurred: {ex.Message}");
-                
-                // Reload categories on error
+                ModelState.AddModelError("", "Error updating product. Please try again.");
                 var categories = await _adminProductService.GetCategoriesAsync();
-                Categories = new SelectList(categories, "Id", "Name");
+                Categories = categories.Select(c => new SelectListItem
+                {
+                    Value = c.Id.ToString(),
+                    Text = c.Name
+                }).ToList();
                 return Page();
             }
         }

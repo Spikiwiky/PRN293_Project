@@ -1,22 +1,17 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.ComponentModel.DataAnnotations;
 using EcommerceBackend.BusinessObject.dtos.Shared;
 
 namespace EcommerceBackend.BusinessObject.dtos.ProductDto
 {
-    public class ProductsDto
+    public class ProductDetailDto
     {
         public int ProductId { get; set; }
 
         [Required]
         [StringLength(200)]
         public string ProductName { get; set; } = string.Empty;
-
-        public int ProductCategoryId { get; set; }
-
-        public string ProductCategoryTitle { get; set; } = string.Empty;
 
         public string Description { get; set; } = string.Empty;
 
@@ -37,4 +32,4 @@ namespace EcommerceBackend.BusinessObject.dtos.ProductDto
         public int StockQuantity => Variants.FirstOrDefault()?.StockQuantity ?? 0;
         public bool IsFeatured => Variants.FirstOrDefault()?.IsFeatured ?? false;
     }
-}
+} 

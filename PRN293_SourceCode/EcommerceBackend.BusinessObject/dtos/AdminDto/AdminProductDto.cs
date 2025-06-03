@@ -1,42 +1,47 @@
-using System;
-using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using EcommerceBackend.BusinessObject.dtos.Shared;
 
 namespace EcommerceBackend.BusinessObject.dtos.AdminDto
 {
     public class AdminProductDto
     {
         public int ProductId { get; set; }
-        
+
+        [Required(ErrorMessage = "Product name is required")]
+        [StringLength(200, ErrorMessage = "Product name cannot exceed 200 characters")]
         public string ProductName { get; set; } = string.Empty;
-        
-        public int? ProductCategoryId { get; set; }
-        
-        public string? ProductCategoryTitle { get; set; }
-        
-        public string? Description { get; set; }
-        
-        public string? Size { get; set; }
-        
-        public string? Color { get; set; }
-        
-        public string? Category { get; set; }
-        
-        public string? VariantId { get; set; }
-        
-        public decimal? Price { get; set; }
-        
+
+        [StringLength(1000, ErrorMessage = "Description cannot exceed 1000 characters")]
+        public string Description { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Product category is required")]
+        public int ProductCategoryId { get; set; }
+
+        public string ProductCategoryTitle { get; set; } = string.Empty;
+
+        [Range(0, int.MaxValue, ErrorMessage = "Status must be a non-negative number")]
         public int Status { get; set; }
-        
+
         public bool IsDelete { get; set; }
-        
+
         public List<string> ImageUrls { get; set; } = new();
 
-        // Additional admin-specific properties
+        [Required(ErrorMessage = "At least one variant is required")]
+        [MinLength(1, ErrorMessage = "At least one variant is required")]
+        public List<ProductVariant> Variants { get; set; } = new();
+
+        // Audit fields
         public DateTime? CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
         public string? CreatedBy { get; set; }
         public string? UpdatedBy { get; set; }
-        public int StockQuantity { get; set; }
-        public bool IsFeatured { get; set; }
+
+        // Legacy fields for backward compatibility
+        public string? Category => Variants.FirstOrDefault()?.Categories;
+        public decimal Price => Variants.FirstOrDefault()?.Price ?? 0;
+        public string? Size => Variants.FirstOrDefault()?.Size;
+        public string? Color => Variants.FirstOrDefault()?.Color;
+        public int StockQuantity => Variants.FirstOrDefault()?.StockQuantity ?? 0;
+        public bool IsFeatured => Variants.FirstOrDefault()?.IsFeatured ?? false;
     }
 } 

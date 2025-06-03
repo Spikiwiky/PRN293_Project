@@ -27,6 +27,18 @@ public class IndexModel : PageModel
     public string? Category { get; set; }
     
     [BindProperty(SupportsGet = true)]
+    public string? Size { get; set; }
+    
+    [BindProperty(SupportsGet = true)]
+    public string? Color { get; set; }
+    
+    [BindProperty(SupportsGet = true)]
+    public decimal? MinPrice { get; set; }
+    
+    [BindProperty(SupportsGet = true)]
+    public decimal? MaxPrice { get; set; }
+    
+    [BindProperty(SupportsGet = true)]
     public int PageNumber { get; set; } = 1;
     
     [BindProperty(SupportsGet = true)]
@@ -36,39 +48,45 @@ public class IndexModel : PageModel
     {
         try
         {
-            _logger.LogInformation("Received request - SearchTerm: {SearchTerm}, Category: {Category}", SearchTerm, Category);
+            _logger.LogInformation(
+                "Loading products - SearchTerm: {SearchTerm}, Category: {Category}, Size: {Size}, Color: {Color}, MinPrice: {MinPrice}, MaxPrice: {MaxPrice}, Page: {Page}, PageSize: {PageSize}", 
+                SearchTerm, Category, Size, Color, MinPrice, MaxPrice, PageNumber, PageSize);
 
-            // Only use search if we have a search term. For category-only filtering, use the load endpoint
-            if (!string.IsNullOrEmpty(SearchTerm))
+            if (!string.IsNullOrEmpty(SearchTerm) || !string.IsNullOrEmpty(Category) || 
+                !string.IsNullOrEmpty(Size) || !string.IsNullOrEmpty(Color) || 
+                MinPrice.HasValue || MaxPrice.HasValue)
             {
-                _logger.LogInformation("Using search with term: {SearchTerm}", SearchTerm);
-                Products = await _productService.GetAllProductsAsync(PageNumber, PageSize);
-                
-                // Filter the results in memory if we have a category
-                if (!string.IsNullOrEmpty(Category))
-                {
-                    Products = Products.Where(p => p.ProductCategoryTitle == Category).ToList();
-                    _logger.LogInformation("Filtered to {Count} products in category {Category}", Products.Count, Category);
-                }
-            }
-            else if (!string.IsNullOrEmpty(Category))
-            {
-                _logger.LogInformation("Getting products for category: {Category}", Category);
-                Products = await _productService.GetAllProductsAsync(PageNumber, PageSize);
-                Products = Products.Where(p => p.ProductCategoryTitle == Category).ToList();
-                _logger.LogInformation("Found {Count} products in category {Category}", Products.Count, Category);
+                Products = await _productService.SearchProductsAsync(
+                    name: SearchTerm,
+                    category: Category,
+                    size: Size,
+                    color: Color,
+                    minPrice: MinPrice,
+                    maxPrice: MaxPrice,
+                    page: PageNumber,
+                    pageSize: PageSize);
             }
             else
             {
-                _logger.LogInformation("Getting all products without filters");
                 Products = await _productService.GetAllProductsAsync(PageNumber, PageSize);
-                _logger.LogInformation("Retrieved {Count} products total", Products.Count);
+            }
+
+            if (Products == null || !Products.Any())
+            {
+                _logger.LogInformation("No products found for the given criteria");
+                ErrorMessage = "No products found.";
+                Products = new List<ProductDTO>();
+            }
+            else
+            {
+                _logger.LogInformation("Successfully loaded {Count} products", Products.Count);
             }
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error loading products");
-            ErrorMessage = "Failed to load products. Please try again later.";
+            ErrorMessage = "An error occurred while loading products. Please try again later.";
+            Products = new List<ProductDTO>();
         }
     }
 } 
