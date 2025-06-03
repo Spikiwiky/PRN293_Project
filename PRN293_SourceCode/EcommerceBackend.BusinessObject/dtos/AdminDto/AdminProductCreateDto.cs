@@ -28,22 +28,5 @@ namespace EcommerceBackend.BusinessObject.dtos.AdminDto
 
         [Required(ErrorMessage = "Created by is required")]
         public string CreatedBy { get; set; } = string.Empty;
-
-        // Legacy fields for backward compatibility
-        public string? Category { get; set; }
-        
-        [StringLength(10, ErrorMessage = "Size cannot exceed 10 characters")]
-        public string? Size { get; set; }
-        
-        [StringLength(50, ErrorMessage = "Color cannot exceed 50 characters")]
-        public string? Color { get; set; }
-        
-        [Range(0, double.MaxValue, ErrorMessage = "Price must be a non-negative number")]
-        public decimal Price { get; set; }
-        
-        [Range(0, int.MaxValue, ErrorMessage = "Stock quantity must be a non-negative number")]
-        public int StockQuantity { get; set; }
-        
-        public bool IsFeatured { get; set; }
     }
 } 

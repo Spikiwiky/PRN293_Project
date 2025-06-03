@@ -181,27 +181,6 @@ namespace EcommerceBackend.BusinessObject.Services.AdminService
                         variants.Add(variant);
                     }
                 }
-                // Handle legacy fields
-                else if (!string.IsNullOrEmpty(createDto.Size) && !string.IsNullOrEmpty(createDto.Color))
-                {
-                    var variant = new ProductVariant
-                    {
-                        Size = createDto.Size,
-                        Color = createDto.Color,
-                        Categories = createDto.Category ?? string.Empty,
-                        VariantId = $"{createDto.Size}-{createDto.Color}",
-                        Price = createDto.Price,
-                        StockQuantity = createDto.StockQuantity,
-                        IsFeatured = createDto.IsFeatured
-                    };
-
-                    if (!IsValidVariant(variant))
-                    {
-                        throw new ArgumentException($"Invalid variant: Size={variant.Size}, Color={variant.Color}");
-                    }
-
-                    variants.Add(variant);
-                }
 
                 product.Variants = SerializeVariants(variants);
 
