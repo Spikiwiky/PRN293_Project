@@ -36,44 +36,31 @@ namespace EcommerceBackend.API.Controllers.AdminController
 
         private ActionResult ValidateProductVariant(AdminProductCreateDto createDto)
         {
-            // If using legacy fields, validate them
-            if (!string.IsNullOrEmpty(createDto.Size) || !string.IsNullOrEmpty(createDto.Color))
+            if (createDto.Variants?.Any() != true)
             {
-                if (string.IsNullOrEmpty(createDto.Size) || string.IsNullOrEmpty(createDto.Color))
-                {
-                    return BadRequest("Both size and color must be provided together");
-                }
-
-                if (!ValidSizes.Contains(createDto.Size))
-                {
-                    return BadRequest($"Invalid size. Valid sizes are: {string.Join(", ", ValidSizes)}");
-                }
-
-                if (!ValidColors.Contains(createDto.Color))
-                {
-                    return BadRequest($"Invalid color. Valid colors are: {string.Join(", ", ValidColors)}");
-                }
+                return BadRequest("At least one variant is required");
             }
 
-            // If using new variants array, validate each variant
-            if (createDto.Variants?.Any() == true)
+            foreach (var variant in createDto.Variants)
             {
-                foreach (var variant in createDto.Variants)
+                if (string.IsNullOrEmpty(variant.Size) || string.IsNullOrEmpty(variant.Color))
                 {
-                    if (string.IsNullOrEmpty(variant.Size) || string.IsNullOrEmpty(variant.Color))
-                    {
-                        return BadRequest("Each variant must have both size and color");
-                    }
+                    return BadRequest("Each variant must have both size and color");
+                }
 
-                    if (!ValidSizes.Contains(variant.Size))
-                    {
-                        return BadRequest($"Invalid size '{variant.Size}'. Valid sizes are: {string.Join(", ", ValidSizes)}");
-                    }
+                if (!ValidSizes.Contains(variant.Size))
+                {
+                    return BadRequest($"Invalid size '{variant.Size}'. Valid sizes are: {string.Join(", ", ValidSizes)}");
+                }
 
-                    if (!ValidColors.Contains(variant.Color))
-                    {
-                        return BadRequest($"Invalid color '{variant.Color}'. Valid colors are: {string.Join(", ", ValidColors)}");
-                    }
+                if (!ValidColors.Contains(variant.Color))
+                {
+                    return BadRequest($"Invalid color '{variant.Color}'. Valid colors are: {string.Join(", ", ValidColors)}");
+                }
+
+                if (variant.Price <= 0)
+                {
+                    return BadRequest("Price must be greater than 0 for all variants");
                 }
             }
 
@@ -197,19 +184,6 @@ namespace EcommerceBackend.API.Controllers.AdminController
                 if (string.IsNullOrEmpty(createDto.ProductName))
                 {
                     return BadRequest("Product name is required");
-                }
-
-                // Check price in variants or legacy field
-                if (createDto.Variants?.Any() == true)
-                {
-                    if (createDto.Variants.Any(v => v.Price <= 0))
-                    {
-                        return BadRequest("Price must be greater than 0 for all variants");
-                    }
-                }
-                else if (createDto.Price <= 0)
-                {
-                    return BadRequest("Price must be greater than 0");
                 }
 
                 var product = await _adminProductService.CreateProductAsync(createDto);
