@@ -258,7 +258,7 @@ namespace EcommerceBackend.BusinessObject.Services.ProductService
 
                 var newVariant = new ProductVariant
                 {
-                    VariantId = Guid.NewGuid().ToString(),
+                    VariantId = $"{variant.Size}-{variant.Color}",
                     Size = variant.Size,
                     Color = variant.Color,
                     Price = variant.Price,
