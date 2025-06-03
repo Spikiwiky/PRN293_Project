@@ -1,25 +1,40 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
+using EcommerceBackend.BusinessObject.dtos.Shared;
 
 namespace EcommerceBackend.BusinessObject.dtos.ProductDto
 {
     public class ProductsDto
     {
         public int ProductId { get; set; }
-        public string ProductName { get; set; }
+
+        [Required]
+        [StringLength(200)]
+        public string ProductName { get; set; } = string.Empty;
+
         public int ProductCategoryId { get; set; }
-        public string ProductCategoryTitle { get; set; }
-        public string Description { get; set; }
-        public string Size { get; set; }
-        public string Color { get; set; }
-        public string Category { get; set; }
-        public string variant_id { get; set; } 
-        public decimal? Price { get; set; }   
+
+        public string ProductCategoryTitle { get; set; } = string.Empty;
+
+        public string Description { get; set; } = string.Empty;
+
         public int Status { get; set; }
+
         public bool IsDelete { get; set; }
-        public List<string> ImageUrls { get; set; }
+
+        public List<string> ImageUrls { get; set; } = new();
+
+        public List<ProductVariant> Variants { get; set; } = new();
+
+        // Helper properties to get first variant's data (for backward compatibility)
+        public string? Category => Variants.FirstOrDefault()?.Categories;
+        public decimal? Price => Variants.FirstOrDefault()?.Price;
+        public string? Size => Variants.FirstOrDefault()?.Size;
+        public string? Color => Variants.FirstOrDefault()?.Color;
+        public string? VariantId => Variants.FirstOrDefault()?.VariantId;
+        public int StockQuantity => Variants.FirstOrDefault()?.StockQuantity ?? 0;
+        public bool IsFeatured => Variants.FirstOrDefault()?.IsFeatured ?? false;
     }
 }

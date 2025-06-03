@@ -1,7 +1,12 @@
 @page
+@using System.Text.Json
 @model EcommerceFrontend.Web.Pages.Products.IndexModel
 @{
     ViewData["Title"] = "Products";
+    var jsonOptions = new JsonSerializerOptions
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+    };
 }
 
 <div class="container mt-4">
@@ -35,9 +40,9 @@
         {
             <div class="col">
                 <div class="card h-100">
-                    @if (!string.IsNullOrEmpty(product.Image))
+                    @if (product.ImageUrls.Any())
                     {
-                        <img src="@product.Image" class="card-img-top" alt="@product.ProductName" style="height: 200px; object-fit: cover;">
+                        <img src="@product.ImageUrls.First()" class="card-img-top" alt="@product.ProductName" style="height: 200px; object-fit: cover;">
                     }
                     else
                     {
@@ -48,27 +53,60 @@
                     <div class="card-body">
                         <h5 class="card-title">@product.ProductName</h5>
                         <p class="card-text">@product.Description</p>
-                        @if (product.Price.HasValue)
+                        
+                        @if (product.Variants.Any())
+                        {
+                            <div class="variants-section mb-3">
+                                <h6 class="mb-2">Available Variants:</h6>
+                                <div class="variant-options">
+                                    <div class="sizes mb-2">
+                                        <small class="text-muted">Sizes:</small>
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            @foreach (var size in product.Variants.Select(v => v.Size).Distinct())
+                                            {
+                                                <input type="radio" class="btn-check" name="size_@product.ProductId" id="size_@(product.ProductId)_@size" autocomplete="off">
+                                                <label class="btn btn-outline-secondary" for="size_@(product.ProductId)_@size">@size</label>
+                                            }
+                                        </div>
+                                    </div>
+                                    <div class="colors mb-2">
+                                        <small class="text-muted">Colors:</small>
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            @foreach (var color in product.Variants.Select(v => v.Color).Distinct())
+                                            {
+                                                <input type="radio" class="btn-check" name="color_@product.ProductId" id="color_@(product.ProductId)_@color" autocomplete="off">
+                                                <label class="btn btn-outline-secondary" for="color_@(product.ProductId)_@color">@color</label>
+                                            }
+                                        </div>
+                                    </div>
+                                    <div class="price-range">
+                                        <small class="text-muted">Price Range:</small>
+                                        <span class="text-primary">
+                                            $@product.Variants.Min(v => v.Price).ToString("N2") - $@product.Variants.Max(v => v.Price).ToString("N2")
+                                        </span>
+                                    </div>
+                                    @{
+                                        var variantsJson = JsonSerializer.Serialize(product.Variants, jsonOptions);
+                                    }
+                                    <input type="hidden" id="variants_@product.ProductId" value="@Html.Raw(variantsJson)" />
+                                </div>
+                            </div>
+                        }
+                        
+                        @if (!string.IsNullOrEmpty(product.ProductCategoryTitle))
                         {
                             <p class="card-text">
-                                <strong class="text-primary">$@product.Price.Value.ToString("N2")</strong>
+                                <small class="text-muted">Category: @product.ProductCategoryTitle</small>
                             </p>
                         }
-                        <div class="mb-2">
-                            <span class="badge bg-info">Size: @product.Variants.Size</span>
-                            <span class="badge bg-secondary">Color: @product.Variants.Color</span>
-                        </div>
-                        @if (!string.IsNullOrEmpty(product.CategoryName))
-                        {
-                            <p class="card-text">
-                                <small class="text-muted">Category: @product.CategoryName</small>
-                            </p>
-                        }
-                        <div class="d-flex justify-content-between align-items-center">
+                        
+                        <div class="d-flex justify-content-between align-items-center mt-3">
                             <a href="/Products/Details/@product.ProductId" class="btn btn-primary">View Details</a>
-                            @if (product.IsActive)
+                            @if (product.Status == 1)
                             {
-                                <button class="btn btn-success">Add to Cart</button>
+                                <button class="btn btn-success add-to-cart" data-product-id="@product.ProductId" disabled>
+                                    Add to Cart
+                                </button>
                             }
                             else
                             {
@@ -106,6 +144,39 @@
 
 @section Scripts {
     <script>
-        // Add any JavaScript functionality here
+        $(document).ready(function() {
+            // Handle variant selection
+            $('.btn-check').change(function() {
+                const productId = $(this).attr('name').split('_')[1];
+                const selectedSize = $(`input[name="size_${productId}"]:checked`).next('label').text();
+                const selectedColor = $(`input[name="color_${productId}"]:checked`).next('label').text();
+                
+                if (selectedSize && selectedColor) {
+                    // Enable add to cart button and update price
+                    const variants = JSON.parse($(`#variants_${productId}`).val());
+                    const selectedVariant = variants.find(v => v.size === selectedSize && v.color === selectedColor);
+                    if (selectedVariant) {
+                        $(`#price_${productId}`).text(`$${selectedVariant.price.toFixed(2)}`);
+                        $(`button[data-product-id="${productId}"]`)
+                            .prop('disabled', false)
+                            .attr('data-variant-id', selectedVariant.variantId);
+                    }
+                }
+            });
+
+            // Handle add to cart
+            $('.add-to-cart').click(function() {
+                const productId = $(this).data('product-id');
+                const variantId = $(this).data('variant-id');
+                
+                if (!variantId) {
+                    alert('Please select size and color first');
+                    return;
+                }
+
+                // Add to cart logic here
+                console.log('Adding to cart:', { productId, variantId });
+            });
+        });
     </script>
 }

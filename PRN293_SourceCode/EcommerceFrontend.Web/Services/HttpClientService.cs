@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using System.Text.Json;
 
 namespace EcommerceFrontend.Web.Services;
@@ -47,20 +47,31 @@ public class HttpClientService : IHttpClientService
     {
         try
         {
-            _logger.LogInformation("Making GET request to {BaseUrl}{Endpoint}", _httpClient.BaseAddress, endpoint);
+            // Remove any double slashes in the URL except after http:// or https://
+            var cleanEndpoint = endpoint.Replace("//", "/").Replace(":/", "://");
+            var fullUrl = new Uri(_httpClient.BaseAddress!, cleanEndpoint).ToString();
             
-            var response = await _httpClient.GetAsync(endpoint);
+            _logger.LogInformation("Making GET request to {FullUrl}", fullUrl);
+            
+            using var response = await _httpClient.GetAsync(cleanEndpoint);
             var content = await response.Content.ReadAsStringAsync();
             
             _logger.LogInformation("Received response from {Endpoint}. Status: {StatusCode}, Content Length: {ContentLength}", 
                 endpoint, response.StatusCode, content?.Length ?? 0);
-            _logger.LogDebug("Response Content: {Content}", content);
 
             if (!response.IsSuccessStatusCode)
             {
-                _logger.LogError("API request failed. Status: {StatusCode}, Content: {Content}", 
-                    response.StatusCode, content);
-                throw new HttpRequestException($"API request failed with status code {response.StatusCode}. Content: {content}");
+                var errorMessage = $"API request failed with status code {response.StatusCode}.";
+                if (!string.IsNullOrEmpty(content))
+                {
+                    errorMessage += $" Content: {content}";
+                }
+
+                _logger.LogError("API Error: {ErrorMessage}", errorMessage);
+                _logger.LogError("Request URL: {Url}", fullUrl);
+                _logger.LogError("Response Headers: {Headers}", string.Join(", ", response.Headers.Select(h => $"{h.Key}: {string.Join(", ", h.Value)}")));
+
+                throw new HttpRequestException(errorMessage, null, response.StatusCode);
             }
             
             if (string.IsNullOrEmpty(content))
@@ -69,19 +80,24 @@ public class HttpClientService : IHttpClientService
                 return default;
             }
 
-            var result = JsonSerializer.Deserialize<T>(content, _jsonOptions);
-            return result;
+            try
+            {
+                var result = JsonSerializer.Deserialize<T>(content, _jsonOptions);
+                _logger.LogDebug("Successfully deserialized response to type {Type}", typeof(T).Name);
+                return result;
+            }
+            catch (JsonException ex)
+            {
+                _logger.LogError(ex, "Failed to deserialize response. Content: {Content}", content);
+                _logger.LogError("Expected Type: {Type}, Content Type: {ContentType}", 
+                    typeof(T).Name, response.Content.Headers.ContentType?.MediaType);
+                throw;
+            }
         }
         catch (HttpRequestException ex)
         {
             _logger.LogError(ex, "HTTP request failed for {BaseUrl}{Endpoint}. Status code: {StatusCode}", 
                 _httpClient.BaseAddress, endpoint, ex.StatusCode);
-            throw;
-        }
-        catch (JsonException ex)
-        {
-            _logger.LogError(ex, "Failed to deserialize response from {Endpoint}. Content: {Content}", 
-                endpoint, await _httpClient.GetAsync(endpoint).Result.Content.ReadAsStringAsync());
             throw;
         }
         catch (Exception ex)
@@ -107,7 +123,15 @@ public class HttpClientService : IHttpClientService
             _logger.LogInformation("Received response from POST {Endpoint}. Status: {StatusCode}, Content: {Content}", 
                 endpoint, response.StatusCode, responseContent);
 
-            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorMessage = $"API request failed with status code {response.StatusCode}.";
+                if (!string.IsNullOrEmpty(responseContent))
+                {
+                    errorMessage += $" Content: {responseContent}";
+                }
+                throw new HttpRequestException(errorMessage, null, response.StatusCode);
+            }
             
             if (string.IsNullOrEmpty(responseContent))
             {
@@ -138,7 +162,15 @@ public class HttpClientService : IHttpClientService
             _logger.LogInformation("Received response from PUT {Endpoint}. Status: {StatusCode}, Content: {Content}", 
                 endpoint, response.StatusCode, responseContent);
 
-            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorMessage = $"API request failed with status code {response.StatusCode}.";
+                if (!string.IsNullOrEmpty(responseContent))
+                {
+                    errorMessage += $" Content: {responseContent}";
+                }
+                throw new HttpRequestException(errorMessage, null, response.StatusCode);
+            }
             
             if (string.IsNullOrEmpty(responseContent))
             {
@@ -161,11 +193,20 @@ public class HttpClientService : IHttpClientService
             _logger.LogInformation("Making DELETE request to {Endpoint}", endpoint);
             
             var response = await _httpClient.DeleteAsync(endpoint);
+            var responseContent = await response.Content.ReadAsStringAsync();
             
             _logger.LogInformation("Received response from DELETE {Endpoint}. Status: {StatusCode}", 
                 endpoint, response.StatusCode);
 
-            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorMessage = $"API request failed with status code {response.StatusCode}.";
+                if (!string.IsNullOrEmpty(responseContent))
+                {
+                    errorMessage += $" Content: {responseContent}";
+                }
+                throw new HttpRequestException(errorMessage, null, response.StatusCode);
+            }
         }
         catch (Exception ex)
         {

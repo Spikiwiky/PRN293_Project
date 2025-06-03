@@ -32,7 +32,7 @@ namespace EcommerceBackend.API.Configurations
 
             // Register Dependency injection
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-            services.AddScoped<IProductRepository, ProductRepository>();
+            services.AddScoped<DataAccess.Repository.IProductRepository, ProductRepository>();
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<IAdminProductService, AdminProductService>();
             //Register for auth

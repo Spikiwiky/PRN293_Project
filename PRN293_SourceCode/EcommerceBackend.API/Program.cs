@@ -13,6 +13,8 @@ using EcommerceBackend.BusinessObject.Services.AdminService;
 using EcommerceBackend.DataAccess.Abstract.BlogAbstract;
 using EcommerceBackend.DataAccess.Repository.BlogRepository;
 
+using EcommerceBackend.BusinessObject.Services.UserService;
+using EcommerceBackend.DataAccess.Repository.UserRepository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +24,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IBlogRepository, BlogRepository>();
 builder.Services.AddScoped<BlogService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 // Config Authentication Jwt
 JwtConfig.ConfigureJwtAuthentication(builder.Services, builder.Configuration);
@@ -48,7 +52,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontendApp", policy =>
     {
-        policy.WithOrigins("https://localhost:7107")
+        policy.WithOrigins("https://localhost:7107", "https://localhost:7257")
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
@@ -59,9 +63,8 @@ builder.Services.AddSignalR();
 
 var app = builder.Build();
 
-app.MapHub<SignalrHub>("/SignalrHub"); // Đăng ký đường dẫn của Hub
-
-// Configure the HTTP request pipeline.
+app.MapHub<SignalrHub>("/SignalrHub");  
+ 
 app.UseSwagger();
 app.UseSwaggerUI();
 app.UseSession();
