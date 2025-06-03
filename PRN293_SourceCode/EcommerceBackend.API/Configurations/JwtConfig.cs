@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using System.Reflection;
 
 namespace EcommerceBackend.API.Configurations
 {
@@ -41,7 +42,23 @@ namespace EcommerceBackend.API.Configurations
         {
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "BepKhoi API", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo 
+                { 
+                    Title = "BepKhoi API", 
+                    Version = "v1",
+                    Description = "API for BepKhoi E-commerce Platform"
+                });
+
+                // Use fully qualified type names
+                c.CustomSchemaIds(type => type.FullName);
+
+                // Add XML comments if they exist
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                if (File.Exists(xmlPath))
+                {
+                    c.IncludeXmlComments(xmlPath);
+                }
 
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
@@ -56,21 +73,20 @@ namespace EcommerceBackend.API.Configurations
                 });
 
                 c.AddSecurityRequirement(new OpenApiSecurityRequirement
-        {
-            {
-                new OpenApiSecurityScheme
                 {
-                    Reference = new OpenApiReference
                     {
-                        Type = ReferenceType.SecurityScheme,
-                        Id = "Bearer"
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        Array.Empty<string>()
                     }
-                },
-                Array.Empty<string>()
-            }
-        });
+                });
             });
         }
-
     }
 }

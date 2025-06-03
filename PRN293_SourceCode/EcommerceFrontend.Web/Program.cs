@@ -9,10 +9,13 @@ builder.Services.AddRazorPages();
 // Register HTTP client services
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<IHttpClientService, HttpClientService>();
-builder.Services.AddScoped<IProductService, ProductService>();
+
 
 // Register admin services
 builder.Services.AddScoped<IAdminProductService, AdminProductService>();
+
+// Register product services
+builder.Services.AddScoped<IProductService, ProductService>();
 
 var app = builder.Build();
 

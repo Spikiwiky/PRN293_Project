@@ -16,6 +16,7 @@ namespace EcommerceFrontend.Web.Pages.Admin.Products
         public string? Color { get; set; }
         public decimal? MinPrice { get; set; }
         public decimal? MaxPrice { get; set; }
+        public int? Status { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public bool? IsFeatured { get; set; }
@@ -54,11 +55,19 @@ namespace EcommerceFrontend.Web.Pages.Admin.Products
                     SearchFilters.MinPrice, SearchFilters.MaxPrice, SearchFilters.StartDate, SearchFilters.EndDate, 
                     CurrentPage, PageSize);
 
-                
-                var totalCount = await _adminProductService.GetTotalProductCountAsync();
-                TotalPages = (int)Math.Ceiling(totalCount / (double)PageSize);
+                // First try to get the total count
+                try
+                {
+                    var totalCount = await _adminProductService.GetTotalProductCountAsync();
+                    TotalPages = (int)Math.Ceiling(totalCount / (double)PageSize);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error getting total product count");
+                    TotalPages = 1; // Set default value
+                }
 
-              
+                // Then try to get the products
                 Products = await _adminProductService.SearchProductsAsync(
                     name: SearchFilters.Name,
                     category: SearchFilters.Category,
@@ -73,12 +82,25 @@ namespace EcommerceFrontend.Web.Pages.Admin.Products
                     pageSize: PageSize
                 );
 
+                if (!Products.Any())
+                {
+                    TempData["Warning"] = "No products found matching your criteria.";
+                }
+
+                return Page();
+            }
+            catch (HttpRequestException ex)
+            {
+                _logger.LogError(ex, "HTTP request error while fetching products: {Message}", ex.Message);
+                TempData["Error"] = $"Error connecting to the product service. Please try again later. ({ex.Message})";
+                Products = new List<AdminProductDto>();
                 return Page();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error fetching products");
-                TempData["Error"] = "An error occurred while fetching products. Please try again.";
+                _logger.LogError(ex, "Unexpected error while fetching products");
+                TempData["Error"] = "An unexpected error occurred while fetching products. Please try again.";
+                Products = new List<AdminProductDto>();
                 return Page();
             }
         }

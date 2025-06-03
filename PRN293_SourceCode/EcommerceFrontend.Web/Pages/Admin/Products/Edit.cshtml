@@ -1,113 +1,100 @@
 @page "{id:int}"
+@using EcommerceFrontend.Web.Models.Admin
 @model EcommerceFrontend.Web.Pages.Admin.Products.EditModel
 @{
     ViewData["Title"] = "Edit Product";
 }
 
-<div class="container-fluid px-4">
-    <h1 class="mt-4">Edit Product</h1>
+<div class="container-fluid">
+    <h2>Edit Product</h2>
 
-    <div class="card mb-4">
-        <div class="card-header">
-            <i class="fas fa-edit me-1"></i>
-            Product Details
-        </div>
-        <div class="card-body">
-            <form method="post">
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                <input type="hidden" asp-for="Product.ProductId" />
+    <form method="post" id="editForm">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-body">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <input type="hidden" asp-for="Product.ProductId" />
 
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label asp-for="Product.ProductName" class="control-label">Product Name</label>
+                        <div class="mb-3">
+                            <label asp-for="Product.ProductName" class="form-label">Product Name</label>
                             <input asp-for="Product.ProductName" class="form-control" required />
                             <span asp-validation-for="Product.ProductName" class="text-danger"></span>
                         </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label asp-for="Product.ProductCategoryId" class="control-label">Product Category</label>
-                            <select asp-for="Product.ProductCategoryId" asp-items="Model.Categories" class="form-control">
-                                <option value="">-- Select Category --</option>
-                            </select>
-                            <span asp-validation-for="Product.ProductCategoryId" class="text-danger"></span>
-                        </div>
-                    </div>
-                </div>
 
-                <div class="row mb-3">
-                    <div class="col-md-12">
-                        <div class="form-group">
-                            <label asp-for="Product.Description" class="control-label">Description</label>
+                        <div class="mb-3">
+                            <label asp-for="Product.Description" class="form-label">Description</label>
                             <textarea asp-for="Product.Description" class="form-control" rows="3"></textarea>
                             <span asp-validation-for="Product.Description" class="text-danger"></span>
                         </div>
-                    </div>
-                </div>
 
-                <div class="row mb-3">
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label asp-for="Product.Size" class="control-label">Size</label>
-                            <select asp-for="Product.Size" class="form-control">
-                                <option value="">-- Select Size --</option>
-                                <option value="S">S</option>
-                                <option value="M">M</option>
-                                <option value="L">L</option>
-                                <option value="XL">XL</option>
-                                <option value="2XL">2XL</option>
+                        <div class="mb-3">
+                            <label asp-for="Product.ProductCategoryId" class="form-label">Category</label>
+                            <select asp-for="Product.ProductCategoryId" asp-items="Model.Categories" class="form-select" required>
+                                <option value="">Select Category</option>
                             </select>
-                            <span asp-validation-for="Product.Size" class="text-danger"></span>
+                            <span asp-validation-for="Product.ProductCategoryId" class="text-danger"></span>
                         </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label asp-for="Product.Color" class="control-label">Color</label>
-                            <select asp-for="Product.Color" class="form-control">
-                                <option value="">-- Select Color --</option>
-                                <option value="Red">Red</option>
-                                <option value="Blue">Blue</option>
-                                <option value="Green">Green</option>
-                                <option value="Yellow">Yellow</option>
-                                <option value="Purple">Purple</option>
-                                <option value="Black">Black</option>
-                                <option value="White">White</option>
-                                <option value="Orange">Orange</option>
-                                <option value="Pink">Pink</option>
-                                <option value="Brown">Brown</option>
-                            </select>
-                            <span asp-validation-for="Product.Color" class="text-danger"></span>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label asp-for="Product.Category" class="control-label">Category Tag</label>
-                            <input asp-for="Product.Category" class="form-control" />
-                            <span asp-validation-for="Product.Category" class="text-danger"></span>
-                        </div>
-                    </div>
-                </div>
 
-                <div class="row mb-3">
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label asp-for="Product.Price" class="control-label">Price</label>
-                            <input asp-for="Product.Price" class="form-control" type="number" step="0.01" />
-                            <span asp-validation-for="Product.Price" class="text-danger"></span>
+                        <div class="mb-3">
+                            <label class="form-label">Product Variants</label>
+                            <div id="variants-container">
+                                @if (Model.Product.Variants != null && Model.Product.Variants.Any())
+                                {
+                                    @for (var i = 0; i < Model.Product.Variants.Count; i++)
+                                    {
+                                        <div class="variant-item mb-3 border p-3 rounded">
+                                            <div class="row">
+                                                <div class="col-md-3">
+                                                    <label class="form-label">Size</label>
+                                                    <select class="form-select" asp-for="Product.Variants[i].Size" required>
+                                                        <option value="">Select Size</option>
+                                                        @foreach (var size in ProductConstants.ValidSizes)
+                                                        {
+                                                            <option value="@size">@size</option>
+                                                        }
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label">Color</label>
+                                                    <select class="form-select color-select" asp-for="Product.Variants[i].Color" required>
+                                                        <option value="">Select Color</option>
+                                                        @foreach (var color in ProductConstants.ValidColors)
+                                                        {
+                                                            <option value="@color" data-color="@ProductConstants.ColorHexCodes[color]">@color</option>
+                                                        }
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label class="form-label">Price</label>
+                                                    <input type="number" class="form-control" asp-for="Product.Variants[i].Price" required min="0" step="0.01" />
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label class="form-label">Stock</label>
+                                                    <input type="number" class="form-control" asp-for="Product.Variants[i].StockQuantity" required min="0" />
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label class="form-label">&nbsp;</label>
+                                                    <button type="button" class="btn btn-danger form-control remove-variant">
+                                                        <i class="fas fa-trash"></i> Remove
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                            </div>
+                            <button type="button" class="btn btn-secondary" onclick="addVariant()">
+                                <i class="fas fa-plus"></i> Add Variant
+                            </button>
+                            <div id="variants-error" class="text-danger mt-2" style="display: none;">
+                                At least one variant is required.
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label asp-for="Product.StockQuantity" class="control-label">Stock Quantity</label>
-                            <input asp-for="Product.StockQuantity" class="form-control" type="number" min="0" />
-                            <span asp-validation-for="Product.StockQuantity" class="text-danger"></span>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label asp-for="Product.Status" class="control-label">Status</label>
-                            <select asp-for="Product.Status" class="form-control">
+
+                        <div class="mb-3">
+                            <label asp-for="Product.Status" class="form-label">Status</label>
+                            <select asp-for="Product.Status" class="form-select">
                                 <option value="1">Active</option>
                                 <option value="0">Inactive</option>
                             </select>
@@ -115,32 +102,142 @@
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label asp-for="ImageUrlsInput" class="control-label">Image URLs</label>
-                            <input asp-for="ImageUrlsInput" class="form-control" />
-                            <small class="form-text text-muted">Enter image URLs separated by commas</small>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-check mt-4">
-                            <input asp-for="Product.IsFeatured" class="form-check-input" type="checkbox" />
-                            <label asp-for="Product.IsFeatured" class="form-check-label">Featured Product</label>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Product Images</label>
+                            <textarea class="form-control" asp-for="ImageUrlsInput" rows="5" placeholder="Enter image URLs, one per line"></textarea>
                         </div>
                     </div>
                 </div>
-
-                <div class="form-group">
-                    <button type="submit" class="btn btn-primary">Save</button>
-                    <a asp-page="./Index" class="btn btn-secondary">Back to List</a>
-                </div>
-            </form>
+            </div>
         </div>
-    </div>
+
+        <div class="mt-3">
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+            <a asp-page="./Index" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        let variantCount = @(Model.Product.Variants?.Count ?? 0);
+
+        function addVariant() {
+            const container = document.getElementById('variants-container');
+            const newVariant = document.createElement('div');
+            newVariant.className = 'variant-item mb-3 border p-3 rounded';
+            newVariant.innerHTML = `
+                <div class="row">
+                    <div class="col-md-3">
+                        <label class="form-label">Size</label>
+                        <select class="form-select" name="Product.Variants[${variantCount}].Size" required>
+                            <option value="">Select Size</option>
+                            ${@Html.Raw(Json.Serialize(ProductConstants.ValidSizes))}.map(size => 
+                                `<option value="${size}">${size}</option>`
+                            ).join('')}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Color</label>
+                        <select class="form-select color-select" name="Product.Variants[${variantCount}].Color" required>
+                            <option value="">Select Color</option>
+                            ${@Html.Raw(Json.Serialize(ProductConstants.ValidColors))}.map(color => 
+                                `<option value="${color}" data-color="${@Html.Raw(Json.Serialize(ProductConstants.ColorHexCodes))}[color]">${color}</option>`
+                            ).join('')}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Price</label>
+                        <input type="number" class="form-control" name="Product.Variants[${variantCount}].Price" required min="0" step="0.01" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Stock</label>
+                        <input type="number" class="form-control" name="Product.Variants[${variantCount}].StockQuantity" required min="0" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">&nbsp;</label>
+                        <button type="button" class="btn btn-danger form-control remove-variant">
+                            <i class="fas fa-trash"></i> Remove
+                        </button>
+                    </div>
+                </div>
+            `;
+            container.appendChild(newVariant);
+            variantCount++;
+            initializeColorSelects();
+        }
+
+        function initializeColorSelects() {
+            document.querySelectorAll('.color-select').forEach(select => {
+                Array.from(select.options).forEach(option => {
+                    if (option.value) {
+                        const colorHexCodes = @Html.Raw(Json.Serialize(ProductConstants.ColorHexCodes));
+                        const color = colorHexCodes[option.value];
+                        option.style.backgroundColor = color;
+                        option.style.color = isLightColor(color) ? 'black' : 'white';
+                    }
+                });
+            });
+        }
+
+        function isLightColor(hexColor) {
+            const r = parseInt(hexColor.slice(1, 3), 16);
+            const g = parseInt(hexColor.slice(3, 5), 16);
+            const b = parseInt(hexColor.slice(5, 7), 16);
+            const brightness = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+            return brightness > 128;
+        }
+
+        // Handle variant removal
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('remove-variant') || e.target.closest('.remove-variant')) {
+                const variantItem = e.target.closest('.variant-item');
+                if (document.querySelectorAll('.variant-item').length > 1) {
+                    variantItem.remove();
+                } else {
+                    alert('At least one variant is required.');
+                }
+            }
+        });
+
+        // Form validation
+        document.getElementById('editForm').addEventListener('submit', function(e) {
+            const variants = document.querySelectorAll('.variant-item');
+            const variantsError = document.getElementById('variants-error');
+            
+            if (variants.length === 0) {
+                e.preventDefault();
+                variantsError.style.display = 'block';
+                return;
+            }
+            
+            variantsError.style.display = 'none';
+            
+            // Validate each variant
+            let isValid = true;
+            variants.forEach(variant => {
+                const size = variant.querySelector('select[name*="Size"]').value;
+                const color = variant.querySelector('select[name*="Color"]').value;
+                const price = parseFloat(variant.querySelector('input[name*="Price"]').value);
+                const stock = parseInt(variant.querySelector('input[name*="StockQuantity"]').value);
+                
+                if (!size || !color || isNaN(price) || price <= 0 || isNaN(stock) || stock < 0) {
+                    isValid = false;
+                }
+            });
+            
+            if (!isValid) {
+                e.preventDefault();
+                alert('Please ensure all variants have valid size, color, price (> 0), and stock (>= 0).');
+            }
+        });
+
+        // Initialize color selects on page load
+        document.addEventListener('DOMContentLoaded', initializeColorSelects);
+    </script>
 } 

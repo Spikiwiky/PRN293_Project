@@ -7,11 +7,24 @@ namespace EcommerceBackend.API.Controllers.AdminController
 {
     [Route("api/admin/products")]
     [ApiController]
-   
     public class AdminProductController : ControllerBase
     {
         private readonly IAdminProductService _adminProductService;
         private readonly ILogger<AdminProductController> _logger;
+
+        // Predefined valid sizes
+        private static readonly HashSet<string> ValidSizes = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "XS", "S", "M", "L", "XL", "XXL"
+        };
+
+        // Predefined valid colors
+        private static readonly HashSet<string> ValidColors = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "Red", "Blue", "Green", "Black", "White", 
+            "Yellow", "Purple", "Orange", "Pink", 
+            "Brown", "Gray", "Navy"
+        };
 
         public AdminProductController(
             IAdminProductService adminProductService,
@@ -21,13 +34,95 @@ namespace EcommerceBackend.API.Controllers.AdminController
             _logger = logger;
         }
 
-        private ActionResult ValidateProductVariant(string? size, string? color)
+        private ActionResult ValidateProductVariant(AdminProductCreateDto createDto)
         {
-            if ((string.IsNullOrEmpty(size) && !string.IsNullOrEmpty(color)) ||
-                (!string.IsNullOrEmpty(size) && string.IsNullOrEmpty(color)))
+            // If using legacy fields, validate them
+            if (!string.IsNullOrEmpty(createDto.Size) || !string.IsNullOrEmpty(createDto.Color))
             {
-                return BadRequest("Both size and color must be provided together or both must be empty");
+                if (string.IsNullOrEmpty(createDto.Size) || string.IsNullOrEmpty(createDto.Color))
+                {
+                    return BadRequest("Both size and color must be provided together");
+                }
+
+                if (!ValidSizes.Contains(createDto.Size))
+                {
+                    return BadRequest($"Invalid size. Valid sizes are: {string.Join(", ", ValidSizes)}");
+                }
+
+                if (!ValidColors.Contains(createDto.Color))
+                {
+                    return BadRequest($"Invalid color. Valid colors are: {string.Join(", ", ValidColors)}");
+                }
             }
+
+            // If using new variants array, validate each variant
+            if (createDto.Variants?.Any() == true)
+            {
+                foreach (var variant in createDto.Variants)
+                {
+                    if (string.IsNullOrEmpty(variant.Size) || string.IsNullOrEmpty(variant.Color))
+                    {
+                        return BadRequest("Each variant must have both size and color");
+                    }
+
+                    if (!ValidSizes.Contains(variant.Size))
+                    {
+                        return BadRequest($"Invalid size '{variant.Size}'. Valid sizes are: {string.Join(", ", ValidSizes)}");
+                    }
+
+                    if (!ValidColors.Contains(variant.Color))
+                    {
+                        return BadRequest($"Invalid color '{variant.Color}'. Valid colors are: {string.Join(", ", ValidColors)}");
+                    }
+                }
+            }
+
+            return Ok();
+        }
+
+        private ActionResult ValidateProductVariant(AdminProductUpdateDto updateDto)
+        {
+            // If using legacy fields, validate them
+            if (!string.IsNullOrEmpty(updateDto.Size) || !string.IsNullOrEmpty(updateDto.Color))
+            {
+                if (string.IsNullOrEmpty(updateDto.Size) || string.IsNullOrEmpty(updateDto.Color))
+                {
+                    return BadRequest("Both size and color must be provided together");
+                }
+
+                if (!ValidSizes.Contains(updateDto.Size))
+                {
+                    return BadRequest($"Invalid size. Valid sizes are: {string.Join(", ", ValidSizes)}");
+                }
+
+                if (!ValidColors.Contains(updateDto.Color))
+                {
+                    return BadRequest($"Invalid color. Valid colors are: {string.Join(", ", ValidColors)}");
+                }
+            }
+
+            // If using new variants array, validate each variant
+            if (updateDto.Variants?.Any() == true)
+            {
+                foreach (var variant in updateDto.Variants)
+                {
+                    if (string.IsNullOrEmpty(variant.Size) || string.IsNullOrEmpty(variant.Color))
+                    {
+                        return BadRequest("Each variant must have both size and color");
+                    }
+
+                    if (!ValidSizes.Contains(variant.Size))
+                    {
+                        return BadRequest($"Invalid size '{variant.Size}'. Valid sizes are: {string.Join(", ", ValidSizes)}");
+                    }
+
+                    if (!ValidColors.Contains(variant.Color))
+                    {
+                        return BadRequest($"Invalid color '{variant.Color}'. Valid colors are: {string.Join(", ", ValidColors)}");
+                    }
+                }
+            }
+
             return Ok();
         }
 
@@ -47,22 +142,25 @@ namespace EcommerceBackend.API.Controllers.AdminController
         {
             try
             {
-                var eventId = new EventId(1, "GetProducts");
-                _logger.LogInformation(eventId,
-                    "Getting products with parameters: name={Name}, category={Category}, size={Size}, color={Color}, minPrice={MinPrice}, maxPrice={MaxPrice}, startDate={StartDate}, endDate={EndDate}, isFeatured={IsFeatured}, page={Page}, pageSize={PageSize}",
-                    name, category, size, color, minPrice, maxPrice, startDate, endDate, isFeatured, page, pageSize);
-
                 var products = await _adminProductService.SearchProductsAsync(
-                    name, category, size, color, minPrice, maxPrice, startDate, endDate, isFeatured, page, pageSize);
+                    name, category, size, color, minPrice, maxPrice,
+                    startDate, endDate, isFeatured, page, pageSize);
 
-                _logger.LogInformation(eventId, "Successfully retrieved {Count} products", products.Count);
-                return Ok(products);
+                var totalCount = await _adminProductService.GetTotalProductCountAsync();
+
+                return Ok(new
+                {
+                    Products = products,
+                    TotalCount = totalCount,
+                    Page = page,
+                    PageSize = pageSize,
+                    TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+                });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting products with parameters: name={Name}, category={Category}, size={Size}, color={Color}, minPrice={MinPrice}, maxPrice={MaxPrice}, startDate={StartDate}, endDate={EndDate}, isFeatured={IsFeatured}, page={Page}, pageSize={PageSize}",
-                    name, category, size, color, minPrice, maxPrice, startDate, endDate, isFeatured, page, pageSize);
-                return StatusCode(500, new { message = "An error occurred while retrieving products", error = ex.Message });
+                _logger.LogError(ex, "Error getting products");
+                return StatusCode(500, "Internal server error");
             }
         }
 
@@ -90,20 +188,26 @@ namespace EcommerceBackend.API.Controllers.AdminController
         {
             try
             {
-                
-                var validationResult = ValidateProductVariant(createDto.Size, createDto.Color);
+                var validationResult = ValidateProductVariant(createDto);
                 if (validationResult is BadRequestObjectResult)
                 {
                     return validationResult;
                 }
 
-              
                 if (string.IsNullOrEmpty(createDto.ProductName))
                 {
                     return BadRequest("Product name is required");
                 }
 
-                if (createDto.Price <= 0)
+                // Check price in variants or legacy field
+                if (createDto.Variants?.Any() == true)
+                {
+                    if (createDto.Variants.Any(v => v.Price <= 0))
+                    {
+                        return BadRequest("Price must be greater than 0 for all variants");
+                    }
+                }
+                else if (createDto.Price <= 0)
                 {
                     return BadRequest("Price must be greater than 0");
                 }
@@ -134,15 +238,21 @@ namespace EcommerceBackend.API.Controllers.AdminController
                     return BadRequest("ID mismatch");
                 }
 
-             
-                var validationResult = ValidateProductVariant(updateDto.Size, updateDto.Color);
+                var validationResult = ValidateProductVariant(updateDto);
                 if (validationResult is BadRequestObjectResult)
                 {
                     return validationResult;
                 }
 
-             
-                if (updateDto.Price.HasValue && updateDto.Price <= 0)
+                // Check price in variants or legacy field
+                if (updateDto.Variants?.Any() == true)
+                {
+                    if (updateDto.Variants.Any(v => v.Price <= 0))
+                    {
+                        return BadRequest("Price must be greater than 0 for all variants");
+                    }
+                }
+                else if (updateDto.Price.HasValue && updateDto.Price <= 0)
                 {
                     return BadRequest("Price must be greater than 0");
                 }
@@ -196,12 +306,11 @@ namespace EcommerceBackend.API.Controllers.AdminController
             [FromQuery] DateTime? endDate = null,
             [FromQuery] bool? isFeatured = null,
             [FromQuery] int page = 1,
-            [FromQuery] int pageSize = 10                                                                                                                                         )
+            [FromQuery] int pageSize = 10)
         {
             try
             {
-               
-                var validationResult = ValidateProductVariant(size, color);
+                var validationResult = ValidateProductVariant(new AdminProductUpdateDto { Size = size, Color = color });
                 if (validationResult is BadRequestObjectResult)
                 {
                     return validationResult;
@@ -258,22 +367,18 @@ namespace EcommerceBackend.API.Controllers.AdminController
             }
         }
 
-        [HttpPatch("{id}/featured")]
-        public async Task<IActionResult> UpdateProductFeatured(int id, [FromBody] bool isFeatured)
+        [HttpGet("categories")]
+        public async Task<ActionResult<List<BusinessObject.dtos.AdminDto.CategoryDto>>> GetCategories()
         {
             try
             {
-                var result = await _adminProductService.UpdateProductFeaturedStatusAsync(id, isFeatured);
-                if (!result)
-                {
-                    return NotFound($"Product with ID {id} not found");
-                }
-                return NoContent();
+                var categories = await _adminProductService.GetCategoriesAsync();
+                return Ok(categories);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating featured status for product with ID {Id}", id);
-                return StatusCode(500, "An error occurred while updating the product featured status");
+                _logger.LogError(ex, "Error getting categories");
+                return StatusCode(500, "An error occurred while getting categories");
             }
         }
     }
