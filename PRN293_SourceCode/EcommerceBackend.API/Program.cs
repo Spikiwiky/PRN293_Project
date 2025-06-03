@@ -10,6 +10,8 @@ using EcommerceBackend.API.Configurations;
 using EcommerceBackend.API.Hubs;
 using EcommerceBackend.BusinessObject.Services;
 using EcommerceBackend.BusinessObject.Services.AdminService;
+using EcommerceBackend.BusinessObject.Services.UserService;
+using EcommerceBackend.DataAccess.Repository.UserRepository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +19,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 // Config Authentication Jwt
 JwtConfig.ConfigureJwtAuthentication(builder.Services, builder.Configuration);
@@ -43,7 +47,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontendApp", policy =>
     {
-        policy.WithOrigins("https://localhost:7107")
+        policy.WithOrigins("https://localhost:7107", "https://localhost:7257")
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
@@ -54,9 +58,8 @@ builder.Services.AddSignalR();
 
 var app = builder.Build();
 
-app.MapHub<SignalrHub>("/SignalrHub"); // Đăng ký đường dẫn của Hub
-
-// Configure the HTTP request pipeline.
+app.MapHub<SignalrHub>("/SignalrHub");  
+ 
 app.UseSwagger();
 app.UseSwaggerUI();
 app.UseSession();

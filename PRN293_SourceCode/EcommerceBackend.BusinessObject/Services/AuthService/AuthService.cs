@@ -1,6 +1,7 @@
 ﻿using EcommerceBackend.BusinessObject.Abstract.AuthAbstract;
 using EcommerceBackend.BusinessObject.dtos.AuthDto;
 using EcommerceBackend.DataAccess.Abstract.AuthAbstract;
+using EcommerceBackend.DataAccess.Models;
 using EcommerceBackend.DataAccess.Repository.AuthRepository;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -81,5 +82,46 @@ namespace EcommerceBackend.BusinessObject.Services.AuthService
                 UserName = user.UserName ?? "",
             };
         }
+
+        public UserDto RegisterUser(string email, string password, string userName, string? phone, DateTime? dateOfBirth, string? address)
+        {
+            // Kiểm tra email đã tồn tại chưa
+            var existingUser = _authRepository.GetUserByEmail(email);
+            if (existingUser != null)
+            {
+                throw new InvalidOperationException("Email already exists.");
+            }
+
+            // Tạo mới người dùng
+            var user = new User
+            {
+                Email = email,
+                Password = password, 
+                UserName = userName,
+                Phone = phone,
+                DateOfBirth = dateOfBirth,
+                Address = address,
+                RoleId = 3,
+                CreateDate = DateTime.Now,
+                Status = 1, 
+                IsDelete = false
+            };
+            var createdUser = _authRepository.CreateUser(user);
+            if(createdUser == null) 
+            {
+                throw new Exception();
+            }
+            return new UserDto
+            {
+                UserId = user.UserId,
+                Email = user.Email,
+                RoleName = user.Role.RoleName ?? "",
+                UserName = user.UserName ?? "",
+            };
+        }
+
+
+
+
     }
 }

@@ -1,0 +1,211 @@
+﻿@page
+@model EcommerceFrontend.Web.Pages.RegisterPage.RegisterModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Register V1</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/png" href="~/LoginPage/images/icons/favicon.ico" />
+    <link rel="stylesheet" type="text/css" href="~/LoginPage/vendor/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="~/LoginPage/fonts/font-awesome-4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="~/LoginPage/vendor/animate/animate.css">
+    <link rel="stylesheet" type="text/css" href="~/LoginPage/vendor/css-hamburgers/hamburgers.min.css">
+    <link rel="stylesheet" type="text/css" href="~/LoginPage/vendor/select2/select2.min.css">
+    <link rel="stylesheet" type="text/css" href="~/LoginPage/css/util.css">
+    <link rel="stylesheet" type="text/css" href="~/LoginPage/css/main.css">
+</head>
+<body>
+    <div class="limiter">
+        <div class="container-login100">
+            <div class="wrap-login100">
+                <div class="login100-pic js-tilt" data-tilt>
+                    <img src="~/LoginPage/images/img-01.png" alt="IMG">
+                </div>
+
+                <form class="login100-form validate-form" asp-page-handler="OnPostAsync" method="post" id="registerForm">
+                    <span class="login100-form-title">
+                        Register
+                    </span>
+
+                    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                    {
+                        <div class="text-danger text-center p-b-12">
+                            @Model.ErrorMessage
+                        </div>
+                    }
+
+                    <div class="wrap-input100 validate-input" data-validate="Valid email is required: ex@abc.xyz">
+                        <input class="input100" type="email" asp-for="Input.Email" placeholder="Email" title="Please enter a valid email address">
+                        <span class="focus-input100"></span>
+                        <span class="symbol-input100">
+                            <i class="fa fa-envelope" aria-hidden="true"></i>
+                        </span>
+                        <span asp-validation-for="Input.Email" class="text-danger"></span>
+                    </div>
+
+                    <div class="wrap-input100 validate-input" data-validate="Password is required">
+                        <input class="input100" type="password" asp-for="Input.Password" placeholder="Password" required minlength="6" title="Password must be at least 6 characters">
+                        <span class="focus-input100"></span>
+                        <span class="symbol-input100">
+                            <i class="fa fa-lock" aria-hidden="true"></i>
+                        </span>
+                        <span asp-validation-for="Input.Password" class="text-danger"></span>
+                    </div>
+
+                    <div class="wrap-input100 validate-input" data-validate="Username is required">
+                        <input class="input100" type="text" asp-for="Input.UserName" placeholder="Username" required maxlength="255" title="Username must not exceed 255 characters">
+                        <span class="focus-input100"></span>
+                        <span class="symbol-input100">
+                            <i class="fa fa-user" aria-hidden="true"></i>
+                        </span>
+                        <span asp-validation-for="Input.UserName" class="text-danger"></span>
+                    </div>
+
+                    <div class="wrap-input100 validate-input" data-validate="Phone number is required">
+                        <input class="input100" type="tel" asp-for="Input.Phone" placeholder="Phone" required maxlength="20" title="Phone must not exceed 20 characters">
+                        <span class="focus-input100"></span>
+                        <span class="symbol-input100">
+                            <i class="fa fa-phone" aria-hidden="true"></i>
+                        </span>
+                        <span asp-validation-for="Input.Phone" class="text-danger"></span>
+                    </div>
+
+                    <div class="wrap-input100">
+                        <input class="input100" type="date" asp-for="Input.DateOfBirth" placeholder="Date of Birth (Optional)">
+                        <span class="focus-input100"></span>
+                        <span class="symbol-input100">
+                            <i class="fa fa-calendar" aria-hidden="true"></i>
+                        </span>
+                        <span asp-validation-for="Input.DateOfBirth" class="text-danger"></span>
+                    </div>
+
+                    <div class="wrap-input100">
+                        <input class="input100" type="text" asp-for="Input.Address" placeholder="Address (Optional)" maxlength="500" title="Address must not exceed 500 characters">
+                        <span class="focus-input100"></span>
+                        <span class="symbol-input100">
+                            <i class="fa fa-map-marker" aria-hidden="true"></i>
+                        </span>
+                        <span asp-validation-for="Input.Address" class="text-danger"></span>
+                    </div>
+
+                    <div class="container-login100-form-btn">
+                        <button class="login100-form-btn" type="submit">
+                            Register
+                        </button>
+                    </div>
+
+                    <div class="text-center p-t-12">
+                        <span class="txt1">
+                            Already have an account?
+                        </span>
+                        <a class="txt2" asp-page="/LoginPage/Login">
+                            Login here
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/LoginPage/vendor/jquery/jquery-3.2.1.min.js"></script>
+    <script src="~/LoginPage/vendor/bootstrap/js/popper.js"></script>
+    <script src="~/LoginPage/vendor/bootstrap/js/bootstrap.min.js"></script>
+    <script src="~/LoginPage/vendor/select2/select2.min.js"></script>
+    <script src="~/LoginPage/vendor/tilt/tilt.jquery.min.js"></script>
+    <script src="~/LoginPage/js/main.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+    <script>
+        $('.js-tilt').tilt({
+            scale: 1.1
+        });
+
+        $(document).ready(function () {
+            $("#registerForm").validate({
+                rules: {
+                    "Input.Email": {
+                        required: true,
+                        email: true,
+                        maxlength: 255
+                    },
+                    "Input.Password": {
+                        required: true,
+                        minlength: 6,
+                        maxlength: 255
+                    },
+                    "Input.UserName": {
+                        required: true,
+                        maxlength: 255
+                    },
+                    "Input.Phone": {
+                        required: true,
+                        maxlength: 20
+                    },
+                    "Input.Address": {
+                        required: false,
+                        maxlength: 500
+                    }
+                },
+                messages: {
+                    "Input.Email": {
+                        required: "Please enter your email.",
+                        email: "Please enter a valid email address.",
+                        maxlength: "Email must not exceed 255 characters."
+                    },
+                    "Input.Password": {
+                        required: "Please enter your password.",
+                        minlength: "Password must be at least 6 characters.",
+                        maxlength: "Password must not exceed 255 characters."
+                    },
+                    "Input.UserName": {
+                        required: "Please enter your username.",
+                        maxlength: "Username must not exceed 255 characters."
+                    },
+                    "Input.Phone": {
+                        required: "Please enter your phone number.",
+                        maxlength: "Phone must not exceed 20 characters."
+                    },
+                    "Input.Address": {
+                        maxlength: "Address must not exceed 500 characters."
+                    }
+                },
+                submitHandler: function (form) {
+                    form.submit();
+                }
+            });
+        });
+    </script>
+
+    @{
+        var token = ViewData["Token"]?.ToString() ?? "";
+        var userId = ViewData["UserId"]?.ToString() ?? "";
+        var roleName = ViewData["RoleName"]?.ToString() ?? "";
+        var userName = ViewData["UserName"]?.ToString() ?? "";
+    }
+    <script>
+        var token = @Html.Raw(Json.Serialize(token));
+        var userId = @Html.Raw(Json.Serialize(userId));
+        var roleName = @Html.Raw(Json.Serialize(roleName));
+        var userName = @Html.Raw(Json.Serialize(userName));
+
+        if (token && token !== '') {
+            localStorage.setItem('token', token);
+            localStorage.setItem('userId', userId);
+            localStorage.setItem('roleName', roleName);
+            localStorage.setItem('userName', userName);
+            window.location.href = '/CommonPage/Homepage';
+        }
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+

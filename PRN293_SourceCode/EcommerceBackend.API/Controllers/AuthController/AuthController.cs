@@ -1,5 +1,6 @@
 ﻿using EcommerceBackend.BusinessObject.Abstract.AuthAbstract;
 using EcommerceBackend.BusinessObject.dtos.AuthDto;
+using EcommerceBackend.DataAccess.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -81,5 +82,85 @@ namespace EcommerceBackend.API.Controllers.AuthController
                 });
             }
         }
+
+
+        [HttpPost("register")]
+        public IActionResult Register([FromBody] RegisterRequestDto registerRequest)
+        {
+            if (registerRequest == null)
+            {
+                return BadRequest(new { message = "Invalid request data." });
+            }
+
+            // Kiểm tra các trường bắt buộc
+            if (string.IsNullOrWhiteSpace(registerRequest.Email) || string.IsNullOrWhiteSpace(registerRequest.Password) || string.IsNullOrWhiteSpace(registerRequest.UserName))
+            {
+                return BadRequest(new { message = "Email, Password, and UserName are required." });
+            }
+
+            if (registerRequest.Email.Length > 255)
+            {
+                return BadRequest(new { message = "Email must be at most 255 characters long." });
+            }
+
+            if (registerRequest.Password.Length > 255)
+            {
+                return BadRequest(new { message = "Password must be at most 255 characters long." });
+            }
+
+            if (registerRequest.UserName.Length > 255)
+            {
+                return BadRequest(new { message = "UserName must be at most 255 characters long." });
+            }
+
+            if (registerRequest.Phone != null && registerRequest.Phone.Length > 20)
+            {
+                return BadRequest(new { message = "Phone must be at most 20 characters long." });
+            }
+
+            if (registerRequest.Address != null && registerRequest.Address.Length > 500)
+            {
+                return BadRequest(new { message = "Address must be at most 500 characters long." });
+            }
+            if (!_authService.IsValidEmail(registerRequest.Email))
+            {
+                return BadRequest(new { message = "Email address does not match format." });
+            }
+            try
+            {
+                var user = _authService.RegisterUser(
+                    registerRequest.Email,
+                    registerRequest.Password,
+                    registerRequest.UserName,
+                    registerRequest.Phone,
+                    registerRequest.DateOfBirth,
+                    registerRequest.Address
+                );
+
+                var token = _authService.GenerateJwtToken(user);
+                // Lưu thông tin vào Session
+                var session = _httpContextAccessor.HttpContext.Session;
+                session.SetString("Token", token);
+                session.SetString("UserId", user.UserId.ToString());
+                session.SetString("Email", user.Email);
+                var role = User.FindFirst(ClaimTypes.Role)?.Value;
+
+                return Ok(new { message = "successful", token, userId = user.UserId, RoleName = user.RoleName, UserName = user.UserName });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Lỗi không xác định.", error = ex.Message });
+            }
+        }
+
+
+
+
+
+
     }
 }
