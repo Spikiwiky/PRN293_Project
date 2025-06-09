@@ -1,41 +1,58 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EcommerceBackend.DataAccess.Models
 {
-    public partial class Product
+    [Table("products")]
+    public class Product
     {
-        public Product()
-        {
-            CartDetails = new HashSet<CartDetail>();
-            OrderDetails = new HashSet<OrderDetail>();
-            ProductImages = new HashSet<ProductImage>();
-        }
-
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Column("product_id")]
         public int ProductId { get; set; }
 
         [Required]
-        [StringLength(200)]
-        public string? ProductName { get; set; }
+        [Column("name")]
+        [StringLength(255)]
+        public string Name { get; set; }
 
-        [StringLength(1000)]
-        public string? Description { get; set; }
+        [Column("description")]
+        public string Description { get; set; }
 
+        [Column("product_category_id")]
         public int? ProductCategoryId { get; set; }
 
-        [ForeignKey("ProductCategoryId")]
-        public virtual ProductCategory? ProductCategory { get; set; }
+        [Column("brand")]
+        [StringLength(100)]
+        public string Brand { get; set; }
 
+        [Column("base_price")]
+        [Precision(10, 2)]
+        public decimal BasePrice { get; set; }
+
+        [Column("available_attributes")]
+        public string AvailableAttributes { get; set; }
+
+        [Column("status")]
         public int? Status { get; set; }
 
-        public bool? IsDelete { get; set; }
+        [Column("is_delete")]
+        public bool IsDelete { get; set; } = false;
 
-        public string? Variants { get; set; }
+        [Column("created_at")]
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-   
-        public virtual ICollection<ProductImage>? ProductImages { get; set; }
+        [Column("updated_at")]
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
+        // Navigation properties
+        [ForeignKey("ProductCategoryId")]
+        public virtual ProductCategory ProductCategory { get; set; }
+        public virtual ICollection<ProductVariant> Variants { get; set; }
+        public virtual ICollection<ProductImage> ProductImages { get; set; }
         public virtual ICollection<CartDetail> CartDetails { get; set; }
         public virtual ICollection<OrderDetail> OrderDetails { get; set; }
     }

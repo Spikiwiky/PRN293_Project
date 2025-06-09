@@ -7,9 +7,9 @@ using EcommerceBackend.BusinessObject.Services.AuthService;
 
 using EcommerceBackend.DataAccess.Repository;
 using EcommerceBackend.BusinessObject.Services;
-using EcommerceBackend.BusinessObject.Services.ProductService;
+
 using EcommerceBackend.DataAccess.Abstract;
-using EcommerceBackend.BusinessObject.Services.AdminService;
+
 
 namespace EcommerceBackend.API.Configurations
 {
@@ -31,7 +31,7 @@ namespace EcommerceBackend.API.Configurations
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.AddScoped<DataAccess.Repository.IProductRepository, ProductRepository>();
             services.AddScoped<IProductService, ProductService>();
-            services.AddScoped<IAdminProductService, AdminProductService>();
+           
             //Register for auth
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IAuthRepository, AuthRepository>();

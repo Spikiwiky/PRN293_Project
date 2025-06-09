@@ -1,4 +1,4 @@
-using EcommerceFrontend.Web.Models.DTOs;
+using EcommerceFrontend.Web.Models;
 using EcommerceFrontend.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -17,76 +17,70 @@ public class IndexModel : PageModel
         _logger = logger;
     }
 
-    public List<ProductDTO> Products { get; set; } = new();
+    public List<ProductDTO> Products { get; set; } = new List<ProductDTO>();
+    public ProductSearchParams SearchParams { get; set; } = new ProductSearchParams();
+    public int CurrentPage { get; set; } = 1;
+    public int PageSize { get; set; } = 10;
+    public int TotalPages { get; set; }
     public string? ErrorMessage { get; set; }
-    
-    [BindProperty(SupportsGet = true)]
-    public string? SearchTerm { get; set; }
-    
-    [BindProperty(SupportsGet = true)]
-    public string? Category { get; set; }
-    
-    [BindProperty(SupportsGet = true)]
-    public string? Size { get; set; }
-    
-    [BindProperty(SupportsGet = true)]
-    public string? Color { get; set; }
-    
-    [BindProperty(SupportsGet = true)]
-    public decimal? MinPrice { get; set; }
-    
-    [BindProperty(SupportsGet = true)]
-    public decimal? MaxPrice { get; set; }
-    
-    [BindProperty(SupportsGet = true)]
-    public int PageNumber { get; set; } = 1;
-    
-    [BindProperty(SupportsGet = true)]
-    public int PageSize { get; set; } = 12;
 
-    public async Task OnGetAsync()
+    public async Task<IActionResult> OnGetAsync(
+        string? name = null,
+        string? category = null,
+        decimal? minPrice = null,
+        decimal? maxPrice = null,
+        int page = 1)
     {
         try
         {
-            _logger.LogInformation(
-                "Loading products - SearchTerm: {SearchTerm}, Category: {Category}, Size: {Size}, Color: {Color}, MinPrice: {MinPrice}, MaxPrice: {MaxPrice}, Page: {Page}, PageSize: {PageSize}", 
-                SearchTerm, Category, Size, Color, MinPrice, MaxPrice, PageNumber, PageSize);
+            SearchParams = new ProductSearchParams
+            {
+                Name = name,
+                Category = category,
+                MinPrice = minPrice,
+                MaxPrice = maxPrice,
+                Page = page,
+                PageSize = PageSize
+            };
 
-            if (!string.IsNullOrEmpty(SearchTerm) || !string.IsNullOrEmpty(Category) || 
-                !string.IsNullOrEmpty(Size) || !string.IsNullOrEmpty(Color) || 
-                MinPrice.HasValue || MaxPrice.HasValue)
-            {
-                Products = await _productService.SearchProductsAsync(
-                    name: SearchTerm,
-                    category: Category,
-                    size: Size,
-                    color: Color,
-                    minPrice: MinPrice,
-                    maxPrice: MaxPrice,
-                    page: PageNumber,
-                    pageSize: PageSize);
-            }
-            else
-            {
-                Products = await _productService.GetAllProductsAsync(PageNumber, PageSize);
-            }
+            // Get products with search parameters
+            Products = await _productService.SearchProductsAsync(SearchParams);
 
-            if (Products == null || !Products.Any())
-            {
-                _logger.LogInformation("No products found for the given criteria");
-                ErrorMessage = "No products found.";
-                Products = new List<ProductDTO>();
-            }
-            else
-            {
-                _logger.LogInformation("Successfully loaded {Count} products", Products.Count);
-            }
+            CurrentPage = page;
+
+            // Get total count of products for pagination
+            var totalProducts = await _productService.GetTotalProductsCountAsync(
+                name: name,
+                category: category,
+                minPrice: minPrice,
+                maxPrice: maxPrice
+            );
+
+            TotalPages = (int)Math.Ceiling(totalProducts / (double)PageSize);
+
+            return Page();
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error loading products");
             ErrorMessage = "An error occurred while loading products. Please try again later.";
-            Products = new List<ProductDTO>();
+            return Page();
+        }
+    }
+
+    public async Task<IActionResult> OnPostDeleteAsync(int id)
+    {
+        try
+        {
+            // Note: Delete functionality is not implemented in the service yet
+            // You'll need to add it to the service if needed
+            return RedirectToPage();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting product");
+            ErrorMessage = "An error occurred while deleting the product.";
+            return Page();
         }
     }
 } 

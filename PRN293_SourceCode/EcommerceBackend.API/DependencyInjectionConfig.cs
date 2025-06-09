@@ -1,5 +1,4 @@
-using EcommerceBackend.BusinessObject.Services.AdminService;
-using EcommerceBackend.BusinessObject.Services.ProductService;
+
 using EcommerceBackend.DataAccess;
 using EcommerceBackend.DataAccess.Models;
 using EcommerceBackend.DataAccess.Repository;
@@ -19,8 +18,7 @@ namespace EcommerceBackend.API
             services.AddScoped<IProductRepository, ProductRepository>();
 
             // Add Services
-            services.AddScoped<IProductService, ProductService>();
-            services.AddScoped<IAdminProductService, AdminProductService>();
+         
 
             return services;
         }
