@@ -1,228 +1,250 @@
-using EcommerceFrontend.Web.Models.DTOs;
+using System.Linq;
+using System.Text;
 using System.Text.Json;
+using EcommerceFrontend.Web.Models;
+using Microsoft.Extensions.Logging;
 
-namespace EcommerceFrontend.Web.Services;
-
-public interface IProductService
+namespace EcommerceFrontend.Web.Services
 {
-    Task<List<ProductDTO>> GetAllProductsAsync(int page = 1, int pageSize = 10);
-    Task<List<ProductDTO>> SearchProductsAsync(
-        string? name = null, 
-        string? category = null, 
-        string? size = null, 
-        string? color = null, 
-        decimal? minPrice = null,
-        decimal? maxPrice = null,
-        int page = 1, 
-        int pageSize = 10);
-    Task<ProductVariant> AddVariantAsync(AddVariantDTO variantDto);
-    Task<ProductDTO?> GetProductByIdAsync(int productId);
-    Task<List<ProductVariant>> GetProductVariantsAsync(int productId);
-}
-
-public class ProductService : IProductService
-{
-    private readonly IHttpClientService _httpClient;
-    private readonly ILogger<ProductService> _logger;
-    private readonly IConfiguration _configuration;
-    private const string BaseEndpoint = "/api/Product";
-
-    public ProductService(IHttpClientService httpClient, ILogger<ProductService> logger, IConfiguration configuration)
+    public interface IProductService
     {
-        _httpClient = httpClient;
-        _logger = logger;
-        _configuration = configuration;
+        Task<List<ProductDTO>> GetAllProductsAsync(int page = 1, int pageSize = 10);
+        Task<ProductDTO?> GetProductByIdAsync(int id);
+        Task<List<ProductDTO>> SearchProductsAsync(ProductSearchParams searchParams);
+        Task<int> GetTotalProductsCountAsync(string? name = null, string? category = null, decimal? minPrice = null, decimal? maxPrice = null);
+        Task<Dictionary<string, List<string>>> GetProductAttributesAsync(int productId);
+        Task<bool> AddProductAttributeAsync(int productId, string attributeName, List<string> attributeValues);
+        Task<bool> UpdateProductAttributeAsync(int productId, string attributeName, List<string> attributeValues);
+        Task<bool> DeleteProductAttributeAsync(int productId, string attributeName);
+        Task<bool> UpdateProductAvailableAttributesAsync(int productId, Dictionary<string, List<string>> availableAttributes);
+        Task<bool> AddProductVariantAsync(ProductVariantDTO variant);
+        Task<bool> UpdateProductVariantAsync(ProductVariantDTO variant);
+        Task<bool> DeleteProductVariantAsync(int variantId);
+        Task<List<Dictionary<string, string>>> GetVariantValuesAsync(int variantId);
+        Task<bool> AddVariantValueAsync(int variantId, Dictionary<string, string> variantValue);
+        Task<bool> UpdateVariantValueAsync(int variantId, int valueIndex, Dictionary<string, string> variantValue);
+        Task<bool> DeleteVariantValueAsync(int variantId, int valueIndex);
     }
 
-    public async Task<List<ProductDTO>> GetAllProductsAsync(int page = 1, int pageSize = 10)
+    public class ProductService : IProductService
     {
-        try
+        private readonly HttpClient _httpClient;
+        private readonly JsonSerializerOptions _jsonOptions;
+        private readonly IConfiguration _configuration;
+        private readonly ILogger<ProductService> _logger;
+
+        public ProductService(HttpClient httpClient, IConfiguration configuration, ILogger<ProductService> logger)
         {
-            var apiUrl = _configuration["ApiSettings:BaseUrl"];
-            _logger.LogInformation("API Base URL configured as: {ApiUrl}", apiUrl);
-            _logger.LogInformation("Calling API to get all products. Endpoint: {Endpoint}, Page: {Page}, PageSize: {PageSize}", 
-                $"{BaseEndpoint}", page, pageSize);
-
-            var result = await _httpClient.GetAsync<List<ProductDTO>>($"{BaseEndpoint}?page={page}&pageSize={pageSize}");
-            
-            if (result == null)
+            _httpClient = httpClient;
+            _configuration = configuration;
+            _jsonOptions = new JsonSerializerOptions
             {
-                _logger.LogWarning("API returned null result");
-                return new List<ProductDTO>();
-            }
+                PropertyNameCaseInsensitive = true,
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            };
 
-            // Ensure variants are properly initialized
-            foreach (var product in result)
-            {
-                product.Variants ??= new List<ProductVariant>();
-                if (!product.Variants.Any() && product.Price.HasValue)
-                {
-                    // Create a default variant from legacy fields if no variants exist
-                    product.Variants.Add(new ProductVariant
-                    {
-                        Size = product.Size,
-                        Color = product.Color,
-                        Categories = product.Category,
-                        Price = product.Price.Value,
-                        VariantId = product.VariantId
-                    });
-                }
-            }
-            
-            _logger.LogInformation("Successfully retrieved {Count} products", result.Count);
-            return result;
+            var apiUrl = _configuration["ApiSettings:BaseUrl"] ?? "http://localhost:5000";
+            _httpClient.BaseAddress = new Uri(apiUrl);
+            _logger = logger;
         }
-        catch (Exception ex)
+
+        public async Task<List<ProductDTO>> GetAllProductsAsync(int page = 1, int pageSize = 10)
         {
-            _logger.LogError(ex, "Error getting all products. Full exception details: {ExceptionDetails}", 
-                ex.ToString());
-            throw new Exception($"Failed to load products from API. Base URL: {_configuration["ApiSettings:BaseUrl"]}", ex);
+            _logger.LogInformation($"minPrice={null}, maxPrice={null}, page={page}, pageSize={pageSize}");
+            var response = await _httpClient.GetAsync($"/api/product?page={page}&pageSize={pageSize}");
+            response.EnsureSuccessStatusCode();
+            var content = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<List<ProductDTO>>(content, _jsonOptions) ?? new List<ProductDTO>();
         }
-    }
 
-    public async Task<List<ProductDTO>> SearchProductsAsync(
-        string? name = null, 
-        string? category = null, 
-        string? size = null, 
-        string? color = null, 
-        decimal? minPrice = null,
-        decimal? maxPrice = null,
-        int page = 1, 
-        int pageSize = 10)
-    {
-        try
+        public async Task<ProductDTO?> GetProductByIdAsync(int id)
+        {
+            var response = await _httpClient.GetAsync($"/api/product/{id}");
+            if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                return null;
+            response.EnsureSuccessStatusCode();
+            var content = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<ProductDTO>(content, _jsonOptions);
+        }
+
+        public async Task<List<ProductDTO>> SearchProductsAsync(ProductSearchParams searchParams)
         {
             var queryParams = new List<string>();
-            
-            if (!string.IsNullOrEmpty(name)) queryParams.Add($"name={Uri.EscapeDataString(name)}");
-            if (!string.IsNullOrEmpty(category)) queryParams.Add($"category={Uri.EscapeDataString(category)}");
-            if (!string.IsNullOrEmpty(size)) queryParams.Add($"size={Uri.EscapeDataString(size)}");
-            if (!string.IsNullOrEmpty(color)) queryParams.Add($"color={Uri.EscapeDataString(color)}");
-            if (minPrice.HasValue) queryParams.Add($"minPrice={minPrice}");
-            if (maxPrice.HasValue) queryParams.Add($"maxPrice={maxPrice}");
-            queryParams.Add($"page={page}");
-            queryParams.Add($"pageSize={pageSize}");
+            if (!string.IsNullOrEmpty(searchParams.Name))
+                queryParams.Add($"name={Uri.EscapeDataString(searchParams.Name)}");
+            if (!string.IsNullOrEmpty(searchParams.Category))
+                queryParams.Add($"category={Uri.EscapeDataString(searchParams.Category)}");
+            if (searchParams.Attributes != null && searchParams.Attributes.Any())
+                queryParams.Add($"attributes={Uri.EscapeDataString(JsonSerializer.Serialize(searchParams.Attributes))}");
+            if (searchParams.MinPrice.HasValue)
+                queryParams.Add($"minPrice={searchParams.MinPrice}");
+            if (searchParams.MaxPrice.HasValue)
+                queryParams.Add($"maxPrice={searchParams.MaxPrice}");
+            if (searchParams.Page.HasValue)
+                queryParams.Add($"page={searchParams.Page}");
+            if (searchParams.PageSize.HasValue)
+                queryParams.Add($"pageSize={searchParams.PageSize}");
 
             var queryString = string.Join("&", queryParams);
-            _logger.LogInformation("Searching products with query string: {QueryString}", queryString);
+            _logger.LogInformation($"name={searchParams.Name}, category={searchParams.Category}, minPrice={searchParams.MinPrice}, maxPrice={searchParams.MaxPrice}, page={searchParams.Page}, pageSize={searchParams.PageSize}");
+            var response = await _httpClient.GetAsync($"/api/product/search?{queryString}");
+            response.EnsureSuccessStatusCode();
+            var content = await response.Content.ReadAsStringAsync();
+            var products = JsonSerializer.Deserialize<List<ProductDTO>>(content, _jsonOptions) ?? new List<ProductDTO>();
 
-            var result = await _httpClient.GetAsync<List<ProductDTO>>($"{BaseEndpoint}/search?{queryString}");
-            
-            if (result == null)
+            if (searchParams.Attributes != null && searchParams.Attributes.Any())
             {
-                _logger.LogWarning("API returned null result for search");
-                return new List<ProductDTO>();
-            }
-
-            // Ensure variants are properly initialized
-            foreach (var product in result)
-            {
-                product.Variants ??= new List<ProductVariant>();
-                if (!product.Variants.Any() && product.Price.HasValue)
+                products = products.Where(p => p.Variants.Any(variant =>
                 {
-                    // Create a default variant from legacy fields if no variants exist
-                    product.Variants.Add(new ProductVariant
+                    try
                     {
-                        Size = product.Size,
-                        Color = product.Color,
-                        Categories = product.Category,
-                        Price = product.Price.Value,
-                        VariantId = product.VariantId
-                    });
-                }
-            }
-            
-            _logger.LogInformation("Successfully found {Count} products", result.Count);
-            return result;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error searching products. Full exception details: {ExceptionDetails}", 
-                ex.ToString());
-            throw new Exception($"Failed to search products from API. Base URL: {_configuration["ApiSettings:BaseUrl"]}", ex);
-        }
-    }
-
-    public async Task<ProductVariant> AddVariantAsync(AddVariantDTO variantDto)
-    {
-        try
-        {
-            _logger.LogInformation("Adding new variant for product {ProductId}", variantDto.ProductId);
-            
-            var result = await _httpClient.PostAsync<ProductVariant>($"{BaseEndpoint}/variants", variantDto);
-            return result;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error adding variant for product {ProductId}. Full exception details: {ExceptionDetails}", 
-                variantDto.ProductId, ex.ToString());
-            throw new Exception($"Failed to add variant. Base URL: {_configuration["ApiSettings:BaseUrl"]}", ex);
-        }
-    }
-
-    public async Task<ProductDTO?> GetProductByIdAsync(int productId)
-    {
-        try
-        {
-            _logger.LogInformation("Getting product by ID: {ProductId}", productId);
-            
-            var result = await _httpClient.GetAsync<ProductDTO>($"{BaseEndpoint}/{productId}");
-            
-            if (result == null)
-            {
-                _logger.LogWarning("Product with ID {ProductId} not found", productId);
-                return null;
+                        if (string.IsNullOrEmpty(variant.Attributes)) return false;
+                        var variantAttributes = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(variant.Attributes);
+                        return searchParams.Attributes.All(attr =>
+                            variantAttributes != null &&
+                            variantAttributes.TryGetValue(attr.Key, out var value) &&
+                            value == attr.Value);
+                    }
+                    catch
+                    {
+                        return false;
+                    }
+                })).ToList();
             }
 
-            // Ensure variants are properly initialized
-            result.Variants ??= new List<ProductVariant>();
-            if (!result.Variants.Any() && result.Price.HasValue)
-            {
-                // Create a default variant from legacy fields if no variants exist
-                result.Variants.Add(new ProductVariant
-                {
-                    Size = result.Size,
-                    Color = result.Color,
-                    Categories = result.Category,
-                    Price = result.Price.Value,
-                    VariantId = result.VariantId
-                });
-            }
-            
-            _logger.LogInformation("Successfully retrieved product {ProductId}", productId);
-            return result;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting product {ProductId}. Full exception details: {ExceptionDetails}", 
-                productId, ex.ToString());
-            throw new Exception($"Failed to load product from API. Base URL: {_configuration["ApiSettings:BaseUrl"]}", ex);
-        }
-    }
+            if (searchParams.Page < 1) searchParams.Page = 1;
+            if (searchParams.PageSize <= 0) searchParams.PageSize = 10;
 
-    public async Task<List<ProductVariant>> GetProductVariantsAsync(int productId)
-    {
-        try
-        {
-            _logger.LogInformation("Getting variants for product {ProductId}", productId);
-            
-            var result = await _httpClient.GetAsync<List<ProductVariant>>($"{BaseEndpoint}/{productId}/variants");
-            
-            if (result == null)
-            {
-                _logger.LogWarning("No variants found for product {ProductId}", productId);
-                return new List<ProductVariant>();
-            }
-            
-            _logger.LogInformation("Successfully retrieved {Count} variants for product {ProductId}", 
-                result.Count, productId);
-            return result;
+            products = products
+                .OrderByDescending(p => p.ProductId)
+                .Skip((int)((searchParams.Page - 1) * searchParams.PageSize))
+                .Take((int)searchParams.PageSize)
+                .ToList();
+
+            return products;
         }
-        catch (Exception ex)
+
+        public async Task<int> GetTotalProductsCountAsync(string? name = null, string? category = null, decimal? minPrice = null, decimal? maxPrice = null)
         {
-            _logger.LogError(ex, "Error getting variants for product {ProductId}. Full exception details: {ExceptionDetails}", 
-                productId, ex.ToString());
-            throw new Exception($"Failed to load variants from API. Base URL: {_configuration["ApiSettings:BaseUrl"]}", ex);
+            var queryParams = new List<string>();
+            if (!string.IsNullOrEmpty(name))
+                queryParams.Add($"name={Uri.EscapeDataString(name)}");
+            if (!string.IsNullOrEmpty(category))
+                queryParams.Add($"category={Uri.EscapeDataString(category)}");
+            if (minPrice.HasValue)
+                queryParams.Add($"minPrice={minPrice}");
+            if (maxPrice.HasValue)
+                queryParams.Add($"maxPrice={maxPrice}");
+
+            var queryString = string.Join("&", queryParams);
+            var response = await _httpClient.GetAsync($"/api/product/count?{queryString}");
+            response.EnsureSuccessStatusCode();
+            var content = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<int>(content, _jsonOptions);
+        }
+
+        public async Task<Dictionary<string, List<string>>> GetProductAttributesAsync(int productId)
+        {
+            var response = await _httpClient.GetAsync($"/api/product/{productId}/attributes");
+            response.EnsureSuccessStatusCode();
+            var content = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<Dictionary<string, List<string>>>(content, _jsonOptions) ?? new Dictionary<string, List<string>>();
+        }
+
+        public async Task<bool> AddProductAttributeAsync(int productId, string attributeName, List<string> attributeValues)
+        {
+            var request = new { attributeName, attributeValues };
+            var content = new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
+            var response = await _httpClient.PostAsync($"/api/product/{productId}/attributes", content);
+            response.EnsureSuccessStatusCode();
+            var responseContent = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<bool>(responseContent, _jsonOptions);
+        }
+
+        public async Task<bool> UpdateProductAttributeAsync(int productId, string attributeName, List<string> attributeValues)
+        {
+            var content = new StringContent(JsonSerializer.Serialize(attributeValues), Encoding.UTF8, "application/json");
+            var response = await _httpClient.PutAsync($"/api/product/{productId}/attributes/{attributeName}", content);
+            response.EnsureSuccessStatusCode();
+            var responseContent = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<bool>(responseContent, _jsonOptions);
+        }
+
+        public async Task<bool> DeleteProductAttributeAsync(int productId, string attributeName)
+        {
+            var response = await _httpClient.DeleteAsync($"/api/product/{productId}/attributes/{attributeName}");
+            response.EnsureSuccessStatusCode();
+            var content = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<bool>(content, _jsonOptions);
+        }
+
+        public async Task<bool> UpdateProductAvailableAttributesAsync(int productId, Dictionary<string, List<string>> availableAttributes)
+        {
+            var content = new StringContent(JsonSerializer.Serialize(availableAttributes), Encoding.UTF8, "application/json");
+            var response = await _httpClient.PutAsync($"/api/product/{productId}/available-attributes", content);
+            response.EnsureSuccessStatusCode();
+            var responseContent = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<bool>(responseContent, _jsonOptions);
+        }
+
+        public async Task<bool> AddProductVariantAsync(ProductVariantDTO variant)
+        {
+            var content = new StringContent(JsonSerializer.Serialize(variant), Encoding.UTF8, "application/json");
+            var response = await _httpClient.PostAsync("/api/product/variants", content);
+            response.EnsureSuccessStatusCode();
+            var responseContent = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<bool>(responseContent, _jsonOptions);
+        }
+
+        public async Task<bool> UpdateProductVariantAsync(ProductVariantDTO variant)
+        {
+            var content = new StringContent(JsonSerializer.Serialize(variant), Encoding.UTF8, "application/json");
+            var response = await _httpClient.PutAsync("/api/product/variants", content);
+            response.EnsureSuccessStatusCode();
+            var responseContent = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<bool>(responseContent, _jsonOptions);
+        }
+
+        public async Task<bool> DeleteProductVariantAsync(int variantId)
+        {
+            var response = await _httpClient.DeleteAsync($"/api/product/variants/{variantId}");
+            response.EnsureSuccessStatusCode();
+            var content = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<bool>(content, _jsonOptions);
+        }
+
+        public async Task<List<Dictionary<string, string>>> GetVariantValuesAsync(int variantId)
+        {
+            var response = await _httpClient.GetAsync($"/api/product/variants/{variantId}/values");
+            response.EnsureSuccessStatusCode();
+            var content = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<List<Dictionary<string, string>>>(content, _jsonOptions) ?? new List<Dictionary<string, string>>();
+        }
+
+        public async Task<bool> AddVariantValueAsync(int variantId, Dictionary<string, string> variantValue)
+        {
+            var content = new StringContent(JsonSerializer.Serialize(variantValue), Encoding.UTF8, "application/json");
+            var response = await _httpClient.PostAsync($"/api/product/variants/{variantId}/values", content);
+            response.EnsureSuccessStatusCode();
+            var responseContent = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<bool>(responseContent, _jsonOptions);
+        }
+
+        public async Task<bool> UpdateVariantValueAsync(int variantId, int valueIndex, Dictionary<string, string> variantValue)
+        {
+            var content = new StringContent(JsonSerializer.Serialize(variantValue), Encoding.UTF8, "application/json");
+            var response = await _httpClient.PutAsync($"/api/product/variants/{variantId}/values/{valueIndex}", content);
+            response.EnsureSuccessStatusCode();
+            var responseContent = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<bool>(responseContent, _jsonOptions);
+        }
+
+        public async Task<bool> DeleteVariantValueAsync(int variantId, int valueIndex)
+        {
+            var response = await _httpClient.DeleteAsync($"/api/product/variants/{variantId}/values/{valueIndex}");
+            response.EnsureSuccessStatusCode();
+            var content = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<bool>(content, _jsonOptions);
         }
     }
 } 

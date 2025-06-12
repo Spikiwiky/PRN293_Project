@@ -1,13 +1,14 @@
 ﻿using EcommerceFrontend.Web.Services;
-using EcommerceFrontend.Web.Services.Admin;
 using EcommerceFrontend.Web.Services.User;
 using EcommerceFrontend.Web.Services.Admin.Blog;
 using EcommerceFrontend.Web.Services.Blog;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
+builder.Services.AddServerSideBlazor();
 
 // Register HTTP client services
 var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"];
@@ -18,7 +19,7 @@ builder.Services.AddHttpClient("MyAPI", client =>
 });
 builder.Services.AddScoped<IHttpClientService, HttpClientService>();
 
-builder.Services.AddScoped<IProductService, ProductService>();
+
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddHttpClient<IAdminBlogService, AdminBlogService>();
 builder.Services.AddHttpClient<BlogService>();
@@ -29,9 +30,6 @@ builder.Services.AddHttpClient<IAdminBlogService, AdminBlogService>(client =>
 
 
 // Register admin services
-builder.Services.AddScoped<IAdminProductService, AdminProductService>();
-
-// Register product services
 builder.Services.AddScoped<IProductService, ProductService>();
 
 var app = builder.Build();
@@ -52,5 +50,6 @@ app.UseRouting();
 app.UseAuthorization();
 
 app.MapRazorPages();
+app.MapBlazorHub();
 
 app.Run();
