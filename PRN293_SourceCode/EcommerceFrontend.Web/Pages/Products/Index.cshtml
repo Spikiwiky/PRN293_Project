@@ -68,7 +68,7 @@
                                     var attributes = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, List<string>>>(firstVariant.Attributes);
                                     var attributeNames = attributes?.Keys.ToList() ?? new List<string>();
                                     
-                                    // Prepare variant data for JavaScript
+                                
                                     var variantData = product.Variants.Select(v => new {
                                         Attributes = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, List<string>>>(v.Attributes),
                                         Variants = v.Variants
@@ -177,12 +177,12 @@
                     const allSelects = document.querySelectorAll(`.variant-select[data-product-id="${productId}"]`);
                     
                     if (!selectedValue) {
-                        // Reset to base price and hide subsequent options if no value selected
+                       
                         const basePrice = this.closest('.card').querySelector('.selected-price').dataset.basePrice;
                         priceElement.innerHTML = `<strong>Base Price: $${basePrice}</strong>`;
                         detailsElement.style.display = 'none';
                         
-                        // Hide all subsequent options
+                       
                         allOptions.forEach((option, index) => {
                             if (index > currentIndex) {
                                 option.style.display = 'none';
@@ -192,7 +192,7 @@
                         return;
                     }
                     
-                    // Collect all selected values up to current index
+                   
                     const selectedAttributes = {};
                     for (let i = 0; i <= currentIndex; i++) {
                         const select = allSelects[i];
@@ -203,7 +203,7 @@
                         }
                     }
                     
-                    // Find matching variant
+                  
                     const matchingVariant = variantData.find(v => {
                         return v.variants.some(variant => 
                             Object.entries(selectedAttributes).every(([key, value]) => 
@@ -236,16 +236,16 @@
                         }
                     }
                     
-                    // Show next option if available
+                 
                     if (currentIndex < allOptions.length - 1) {
                         const nextOption = allOptions[currentIndex + 1];
                         nextOption.style.display = 'block';
                         
-                        // Filter options in next dropdown
+                      
                         const nextSelect = nextOption.querySelector('select');
                         const nextAttrName = nextSelect.dataset.attribute;
                         
-                        // Get available values for next attribute based on current selection
+                        
                         const availableValues = new Set();
                         variantData.forEach(v => {
                             v.variants.forEach(variant => {
@@ -257,13 +257,13 @@
                             });
                         });
                         
-                        // Update next select options
+                       
                         Array.from(nextSelect.options).forEach(option => {
-                            if (option.value === "") return; // Skip the "Select" option
+                            if (option.value === "") return; 
                             option.disabled = !availableValues.has(option.value);
                         });
                         
-                        // Reset next select value
+                       
                         nextSelect.value = '';
                     }
                 });

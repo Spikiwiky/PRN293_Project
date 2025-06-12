@@ -83,12 +83,12 @@ namespace EcommerceBackend.DataAccess.Repository
                 query = query.Where(p => p.BasePrice != null && p.BasePrice <= maxPrice.Value);
             }
 
-            // Phân trang
+          
             query = query.OrderByDescending(p => p.ProductId)
                          .Skip((page - 1) * pageSize)
                          .Take(pageSize);
 
-            // Thực thi truy vấn
+           
             var products = await query.ToListAsync();
 
             // Lọc theo attributes nếu có
@@ -298,6 +298,11 @@ namespace EcommerceBackend.DataAccess.Repository
                 var product = await _context.Products.FindAsync(productId);
                 if (product == null) return false;
 
+                // var product = await _context.Product.Find(productId)
+                // if product == null, return fasle;
+                // var availableatt = jsonSerial.Deserial Dictionary, sitrng, list string
+                // availabelatt[attributeName] = List
+                // context.savechagne
                 var availableAttributes = JsonSerializer.Deserialize<Dictionary<string, List<string>>>(
                     product.AvailableAttributes, _jsonOptions) ?? new Dictionary<string, List<string>>();
 
@@ -458,7 +463,7 @@ namespace EcommerceBackend.DataAccess.Repository
                     return false; // Invalid index
                 }
 
-                // Remove variant value
+                
                 variants.RemoveAt(valueIndex);
                 variant.Variants = JsonSerializer.Serialize(variants, _jsonOptions);
                 variant.UpdatedAt = DateTime.UtcNow;

@@ -42,8 +42,8 @@ public class IndexModel : PageModel
                 Page = page,
                 PageSize = PageSize
             };
-
-            // Get products with search parameters
+             // search bàng  parameter
+           
             Products = await _productService.SearchProductsAsync(SearchParams);
 
             CurrentPage = page;
@@ -72,8 +72,7 @@ public class IndexModel : PageModel
     {
         try
         {
-            // Note: Delete functionality is not implemented in the service yet
-            // You'll need to add it to the service if needed
+           
             return RedirectToPage();
         }
         catch (Exception ex)
