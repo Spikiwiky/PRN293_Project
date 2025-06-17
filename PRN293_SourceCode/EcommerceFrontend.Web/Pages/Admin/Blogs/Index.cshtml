@@ -1,0 +1,66 @@
+﻿@page
+@model EcommerceFrontend.Web.Pages.Admin.Blogs.IndexModel
+@{
+    ViewData["Title"] = "Blog Management";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Blog Management</h1>
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div><i class="fas fa-table me-1"></i>Blogs List</div>
+            <a asp-page="./Create" class="btn btn-primary">Create New Blog</a>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Title</th>
+                            <th>CategoryId</th>
+                            <th>Content</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var blog in Model.Blogs)
+                        {
+                            <tr>
+                                <td>@blog.BlogId</td>
+                                <td>@blog.BlogTittle</td>
+                                <td>@blog.BlogCategoryId</td>
+                                <td>@blog.BlogContent</td>
+                                <td>
+                                    <div class="btn-group">
+                                        <a asp-page="./Edit" asp-route-id="@blog.BlogId" class="btn btn-sm btn-primary">Edit</a>
+                                        <button type="button" class="btn btn-sm btn-danger" onclick="deleteBlog(@blog.BlogId)">Delete</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function deleteBlog(id) {
+            if (confirm("Are you sure you want to delete this blog?")) {
+                fetch(`/api/blog/${id}?confirm=true`, {
+                    method: "DELETE"
+                })
+                .then(response => {
+                    if (response.ok) {
+                        location.reload();
+                    } else {
+                        alert("Error deleting blog.");
+                    }
+                });
+            }
+        }
+    </script>
+}

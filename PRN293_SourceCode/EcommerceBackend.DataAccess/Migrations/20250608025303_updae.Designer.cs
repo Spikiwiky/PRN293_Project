@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EcommerceBackend.DataAccess.Migrations
 {
     [DbContext(typeof(EcommerceDBContext))]
-    [Migration("20250531104458_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250608025303_updae")]
+    partial class updae
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -281,41 +281,71 @@ namespace EcommerceBackend.DataAccess.Migrations
                     b.Property<int>("ProductId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
-                        .HasColumnName("Product_id");
+                        .HasColumnName("product_id");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProductId"), 1L, 1);
 
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<string>("AvailableAttributes")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("available_attributes");
 
-                    b.Property<bool?>("IsDelete")
+                    b.Property<decimal>("BasePrice")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)")
+                        .HasColumnName("base_price");
+
+                    b.Property<string>("Brand")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("brand");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("description");
+
+                    b.Property<bool>("IsDelete")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
-                        .HasDefaultValueSql("((0))");
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_delete");
 
-                    b.Property<int?>("ProductCategoryId")
-                        .HasColumnType("int")
-                        .HasColumnName("Product_category_id");
-
-                    b.Property<string>("ProductName")
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)")
-                        .HasColumnName("Product_name");
+                        .HasColumnName("name");
+
+                    b.Property<int?>("ProductCategoryId")
+                        .IsRequired()
+                        .HasColumnType("int")
+                        .HasColumnName("product_category_id");
 
                     b.Property<int?>("Status")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("int")
-                        .HasDefaultValueSql("((1))");
+                        .HasColumnName("status");
 
-                    b.Property<string>("Variants")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("updated_at")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.HasKey("ProductId");
 
                     b.HasIndex("ProductCategoryId");
 
-                    b.ToTable("Product", (string)null);
+                    b.ToTable("products", (string)null);
+
+                    b.HasCheckConstraint("chk_available_attributes", "available_attributes IS NULL OR ISJSON(available_attributes) = 1");
                 });
 
             modelBuilder.Entity("EcommerceBackend.DataAccess.Models.ProductCategory", b =>
@@ -366,6 +396,56 @@ namespace EcommerceBackend.DataAccess.Migrations
                     b.HasIndex("ProductId");
 
                     b.ToTable("Product_image", (string)null);
+                });
+
+            modelBuilder.Entity("EcommerceBackend.DataAccess.Models.ProductVariant", b =>
+                {
+                    b.Property<int>("VariantId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("variant_id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("VariantId"), 1L, 1);
+
+                    b.Property<string>("Attributes")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(max)")
+                        .HasDefaultValue("{}")
+                        .HasColumnName("attributes");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int")
+                        .HasColumnName("product_id");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("updated_at")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.Property<string>("Variants")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(max)")
+                        .HasDefaultValue("[]")
+                        .HasColumnName("variants");
+
+                    b.HasKey("VariantId");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("variants", (string)null);
+
+                    b.HasCheckConstraint("chk_attributes", "ISJSON(attributes) = 1");
+
+                    b.HasCheckConstraint("chk_variants", "ISJSON(variants) = 1");
                 });
 
             modelBuilder.Entity("EcommerceBackend.DataAccess.Models.User", b =>
@@ -535,7 +615,9 @@ namespace EcommerceBackend.DataAccess.Migrations
                     b.HasOne("EcommerceBackend.DataAccess.Models.ProductCategory", "ProductCategory")
                         .WithMany("Products")
                         .HasForeignKey("ProductCategoryId")
-                        .HasConstraintName("FK__Product__Product__2F10007B");
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_product_category");
 
                     b.Navigation("ProductCategory");
                 });
@@ -546,6 +628,18 @@ namespace EcommerceBackend.DataAccess.Migrations
                         .WithMany("ProductImages")
                         .HasForeignKey("ProductId")
                         .HasConstraintName("FK__Product_i__Produ__34C8D9D1");
+
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("EcommerceBackend.DataAccess.Models.ProductVariant", b =>
+                {
+                    b.HasOne("EcommerceBackend.DataAccess.Models.Product", "Product")
+                        .WithMany("Variants")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_product_id");
 
                     b.Navigation("Product");
                 });
@@ -592,6 +686,8 @@ namespace EcommerceBackend.DataAccess.Migrations
                     b.Navigation("OrderDetails");
 
                     b.Navigation("ProductImages");
+
+                    b.Navigation("Variants");
                 });
 
             modelBuilder.Entity("EcommerceBackend.DataAccess.Models.ProductCategory", b =>

@@ -4,6 +4,7 @@ using EcommerceBackend.DataAccess.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EcommerceBackend.DataAccess.Migrations
 {
     [DbContext(typeof(EcommerceDBContext))]
-    partial class EcommerceDBContextModelSnapshot : ModelSnapshot
+    [Migration("20250606221608_AddNewProductAndVariantTables")]
+    partial class AddNewProductAndVariantTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -407,9 +409,7 @@ namespace EcommerceBackend.DataAccess.Migrations
 
                     b.Property<string>("Attributes")
                         .IsRequired()
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("nvarchar(max)")
-                        .HasDefaultValue("{}")
                         .HasColumnName("attributes");
 
                     b.Property<DateTime>("CreatedAt")
@@ -418,22 +418,30 @@ namespace EcommerceBackend.DataAccess.Migrations
                         .HasColumnName("created_at")
                         .HasDefaultValueSql("GETDATE()");
 
+                    b.Property<decimal>("Price")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)")
+                        .HasColumnName("price");
+
                     b.Property<int>("ProductId")
                         .HasColumnType("int")
                         .HasColumnName("product_id");
+
+                    b.Property<string>("SKU")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("sku");
+
+                    b.Property<int>("Stock")
+                        .HasColumnType("int")
+                        .HasColumnName("stock");
 
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
                         .HasColumnName("updated_at")
                         .HasDefaultValueSql("GETDATE()");
-
-                    b.Property<string>("Variants")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("nvarchar(max)")
-                        .HasDefaultValue("[]")
-                        .HasColumnName("variants");
 
                     b.HasKey("VariantId");
 
@@ -442,8 +450,6 @@ namespace EcommerceBackend.DataAccess.Migrations
                     b.ToTable("variants", (string)null);
 
                     b.HasCheckConstraint("chk_attributes", "ISJSON(attributes) = 1");
-
-                    b.HasCheckConstraint("chk_variants", "ISJSON(variants) = 1");
                 });
 
             modelBuilder.Entity("EcommerceBackend.DataAccess.Models.User", b =>

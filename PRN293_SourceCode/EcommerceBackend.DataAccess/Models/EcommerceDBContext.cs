@@ -28,6 +28,7 @@ namespace EcommerceBackend.DataAccess.Models
         public virtual DbSet<Product> Products { get; set; } = null!;
         public virtual DbSet<ProductCategory> ProductCategories { get; set; } = null!;
         public virtual DbSet<ProductImage> ProductImages { get; set; } = null!;
+        public virtual DbSet<ProductVariant> ProductVariants { get; set; } = null!;
         public virtual DbSet<User> Users { get; set; } = null!;
         public virtual DbSet<UserRole> UserRoles { get; set; } = null!;
 
@@ -228,24 +229,56 @@ namespace EcommerceBackend.DataAccess.Models
 
             modelBuilder.Entity<Product>(entity =>
             {
-                entity.ToTable("Product");
+                entity.ToTable("products");
 
-                entity.Property(e => e.ProductId).HasColumnName("Product_id");
+                entity.Property(e => e.ProductId)
+                    .HasColumnName("product_id");
 
-                entity.Property(e => e.IsDelete).HasDefaultValueSql("((0))");
-
-                entity.Property(e => e.ProductCategoryId).HasColumnName("Product_category_id");
-
-                entity.Property(e => e.ProductName)
+                entity.Property(e => e.Name)
+                    .IsRequired()
                     .HasMaxLength(255)
-                    .HasColumnName("Product_name");
+                    .HasColumnName("name");
 
-                entity.Property(e => e.Status).HasDefaultValueSql("((1))");
+                entity.Property(e => e.Description)
+                    .HasColumnName("description");
+
+                entity.Property(e => e.ProductCategoryId)
+                    .HasColumnName("product_category_id");
+
+                entity.Property(e => e.Brand)
+                    .HasMaxLength(100)
+                    .HasColumnName("brand");
+
+                entity.Property(e => e.BasePrice)
+                    .HasColumnType("decimal(10,2)")
+                    .HasColumnName("base_price");
+
+                entity.Property(e => e.AvailableAttributes)
+                    .HasColumnName("available_attributes");
+
+                entity.Property(e => e.Status)
+                    .HasColumnName("status");
+
+                entity.Property(e => e.IsDelete)
+                    .HasColumnName("is_delete")
+                    .HasDefaultValue(false);
+
+                entity.Property(e => e.CreatedAt)
+                    .HasColumnType("datetime2")
+                    .HasColumnName("created_at")
+                    .HasDefaultValueSql("GETDATE()");
+
+                entity.Property(e => e.UpdatedAt)
+                    .HasColumnType("datetime2")
+                    .HasColumnName("updated_at")
+                    .HasDefaultValueSql("GETDATE()");
 
                 entity.HasOne(d => d.ProductCategory)
                     .WithMany(p => p.Products)
                     .HasForeignKey(d => d.ProductCategoryId)
-                    .HasConstraintName("FK__Product__Product__2F10007B");
+                    .HasConstraintName("fk_product_category");
+
+                entity.HasCheckConstraint("chk_available_attributes", "available_attributes IS NULL OR ISJSON(available_attributes) = 1");
             });
 
             modelBuilder.Entity<ProductCategory>(entity =>
@@ -277,6 +310,44 @@ namespace EcommerceBackend.DataAccess.Models
                     .WithMany(p => p.ProductImages)
                     .HasForeignKey(d => d.ProductId)
                     .HasConstraintName("FK__Product_i__Produ__34C8D9D1");
+            });
+
+            modelBuilder.Entity<ProductVariant>(entity =>
+            {
+                entity.ToTable("variants");
+
+                entity.Property(e => e.VariantId)
+                    .HasColumnName("variant_id");
+
+                entity.Property(e => e.ProductId)
+                    .HasColumnName("product_id");
+
+                entity.Property(e => e.Attributes)
+                    .HasColumnName("attributes")
+                    .HasDefaultValue("{}");
+
+                entity.Property(e => e.Variants)
+                    .HasColumnName("variants")
+                    .HasDefaultValue("[]");
+
+                entity.Property(e => e.CreatedAt)
+                    .HasColumnType("datetime2")
+                    .HasColumnName("created_at")
+                    .HasDefaultValueSql("GETDATE()");
+
+                entity.Property(e => e.UpdatedAt)
+                    .HasColumnType("datetime2")
+                    .HasColumnName("updated_at")
+                    .HasDefaultValueSql("GETDATE()");
+
+                entity.HasOne(d => d.Product)
+                    .WithMany(p => p.Variants)
+                    .HasForeignKey(d => d.ProductId)
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .HasConstraintName("fk_product_id");
+
+                entity.HasCheckConstraint("chk_attributes", "ISJSON(attributes) = 1");
+                entity.HasCheckConstraint("chk_variants", "ISJSON(variants) = 1");
             });
 
             modelBuilder.Entity<User>(entity =>

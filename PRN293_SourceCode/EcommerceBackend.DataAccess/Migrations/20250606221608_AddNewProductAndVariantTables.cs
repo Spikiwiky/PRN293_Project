@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace EcommerceBackend.DataAccess.Migrations
 {
-    public partial class InitialCreate : Migration
+    public partial class AddNewProductAndVariantTables : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -97,26 +97,32 @@ namespace EcommerceBackend.DataAccess.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Product",
+                name: "products",
                 columns: table => new
                 {
-                    Product_id = table.Column<int>(type: "int", nullable: false)
+                    product_id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Product_name = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
-                    Product_category_id = table.Column<int>(type: "int", nullable: true),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Variants = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Status = table.Column<int>(type: "int", nullable: true, defaultValueSql: "((1))"),
-                    IsDelete = table.Column<bool>(type: "bit", nullable: true, defaultValueSql: "((0))")
+                    name = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    product_category_id = table.Column<int>(type: "int", nullable: false),
+                    brand = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    base_price = table.Column<decimal>(type: "decimal(10,2)", precision: 10, scale: 2, nullable: false),
+                    available_attributes = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    status = table.Column<int>(type: "int", nullable: true),
+                    is_delete = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
+                    created_at = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETDATE()"),
+                    updated_at = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETDATE()")
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Product", x => x.Product_id);
+                    table.PrimaryKey("PK_products", x => x.product_id);
+                    table.CheckConstraint("CK_products_chk_available_attributes", "available_attributes IS NULL OR ISJSON(available_attributes) = 1");
                     table.ForeignKey(
-                        name: "FK__Product__Product__2F10007B",
-                        column: x => x.Product_category_id,
+                        name: "fk_product_category",
+                        column: x => x.product_category_id,
                         principalTable: "Product_category",
-                        principalColumn: "Product_category_id");
+                        principalColumn: "Product_category_id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -161,8 +167,34 @@ namespace EcommerceBackend.DataAccess.Migrations
                     table.ForeignKey(
                         name: "FK__Product_i__Produ__34C8D9D1",
                         column: x => x.Product_id,
-                        principalTable: "Product",
-                        principalColumn: "Product_id");
+                        principalTable: "products",
+                        principalColumn: "product_id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "variants",
+                columns: table => new
+                {
+                    variant_id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    product_id = table.Column<int>(type: "int", nullable: false),
+                    attributes = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    sku = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    price = table.Column<decimal>(type: "decimal(10,2)", precision: 10, scale: 2, nullable: false),
+                    stock = table.Column<int>(type: "int", nullable: false),
+                    created_at = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETDATE()"),
+                    updated_at = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETDATE()")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_variants", x => x.variant_id);
+                    table.CheckConstraint("CK_variants_chk_attributes", "ISJSON(attributes) = 1");
+                    table.ForeignKey(
+                        name: "fk_product_id",
+                        column: x => x.product_id,
+                        principalTable: "products",
+                        principalColumn: "product_id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -242,8 +274,8 @@ namespace EcommerceBackend.DataAccess.Migrations
                     table.ForeignKey(
                         name: "FK__Cart_deta__Produ__3D5E1FD2",
                         column: x => x.Product_id,
-                        principalTable: "Product",
-                        principalColumn: "Product_id");
+                        principalTable: "products",
+                        principalColumn: "product_id");
                 });
 
             migrationBuilder.CreateTable(
@@ -270,8 +302,8 @@ namespace EcommerceBackend.DataAccess.Migrations
                     table.ForeignKey(
                         name: "FK__Order_det__Produ__49C3F6B7",
                         column: x => x.Product_id,
-                        principalTable: "Product",
-                        principalColumn: "Product_id");
+                        principalTable: "products",
+                        principalColumn: "product_id");
                 });
 
             migrationBuilder.CreateIndex(
@@ -320,19 +352,24 @@ namespace EcommerceBackend.DataAccess.Migrations
                 column: "Product_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Product_Product_category_id",
-                table: "Product",
-                column: "Product_category_id");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Product_image_Product_id",
                 table: "Product_image",
                 column: "Product_id");
 
             migrationBuilder.CreateIndex(
+                name: "IX_products_product_category_id",
+                table: "products",
+                column: "product_category_id");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_User_Role_id",
                 table: "User",
                 column: "Role_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_variants_product_id",
+                table: "variants",
+                column: "product_id");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -350,6 +387,9 @@ namespace EcommerceBackend.DataAccess.Migrations
                 name: "Product_image");
 
             migrationBuilder.DropTable(
+                name: "variants");
+
+            migrationBuilder.DropTable(
                 name: "Blog_category");
 
             migrationBuilder.DropTable(
@@ -359,7 +399,7 @@ namespace EcommerceBackend.DataAccess.Migrations
                 name: "Order");
 
             migrationBuilder.DropTable(
-                name: "Product");
+                name: "products");
 
             migrationBuilder.DropTable(
                 name: "User");
