@@ -3,6 +3,7 @@ using EcommerceFrontend.Web.Services.Admin;
 using EcommerceFrontend.Web.Services.User;
 using EcommerceFrontend.Web.Services.Admin.Blog;
 using EcommerceFrontend.Web.Services.Blog;
+using EcommerceFrontend.Web.Services.Sale;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,20 +17,24 @@ builder.Services.AddHttpClient("MyAPI", client =>
 {
     client.BaseAddress = new Uri(apiBaseUrl!); 
 });
-builder.Services.AddScoped<IHttpClientService, HttpClientService>();
 
+builder.Services.AddScoped<IHttpClientService, HttpClientService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddHttpClient<IAdminBlogService, AdminBlogService>();
 builder.Services.AddHttpClient<BlogService>();
 builder.Services.AddHttpClient<IAdminBlogService, AdminBlogService>(client =>
 {
-    client.BaseAddress = new Uri("https://localhost:7107/"); // Adjust accordingly
+    client.BaseAddress = new Uri("https://localhost:7107/"); 
 });
 
 
 // Register admin services
 builder.Services.AddScoped<IAdminProductService, AdminProductService>();
+
+// Register admin services
+//Tri
+builder.Services.AddScoped<ISaleProductService, SaleProductService>();
 
 // Register product services
 builder.Services.AddScoped<IProductService, ProductService>();
