@@ -1,32 +1,11 @@
 @page
-@using System.Text.Json
 @model EcommerceFrontend.Web.Pages.Products.IndexModel
 @{
     ViewData["Title"] = "Products";
-    var jsonOptions = new JsonSerializerOptions
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-    };
 }
 
 <div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>Products</h1>
-        <div class="d-flex gap-2">
-            <form method="get" class="d-flex gap-2">
-                <input type="text" name="SearchTerm" value="@Model.SearchTerm" class="form-control" placeholder="Search products...">
-                <select name="Category" class="form-select">
-                    <option value="">All Categories</option>
-                    <option value="Men Clothing" selected="@(Model.Category == "Men Clothing")">Men Clothing</option>
-                    <option value="Women Clothing" selected="@(Model.Category == "Women Clothing")">Women Clothing</option>
-                    <option value="Kids Clothing" selected="@(Model.Category == "Kids Clothing")">Kids Clothing</option>
-                    <option value="Sportswear" selected="@(Model.Category == "Sportswear")">Sportswear</option>
-                    <option value="Accessories" selected="@(Model.Category == "Accessories")">Accessories</option>
-                </select>
-                <button type="submit" class="btn btn-primary">Search</button>
-            </form>
-        </div>
-    </div>
+    <h1 class="mb-4">Products</h1>
 
     @if (!string.IsNullOrEmpty(Model.ErrorMessage))
     {
@@ -35,83 +14,119 @@
         </div>
     }
 
+    <!-- Search Form -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label for="name" class="form-label">Product Name</label>
+                    <input type="text" class="form-control" id="name" name="name" value="@Model.SearchParams.Name">
+                </div>
+                <div class="col-md-4">
+                    <label for="category" class="form-label">Category</label>
+                    <input type="text" class="form-control" id="category" name="category" value="@Model.SearchParams.Category">
+                </div>
+                <div class="col-md-2">
+                    <label for="minPrice" class="form-label">Min Price</label>
+                    <input type="number" class="form-control" id="minPrice" name="minPrice" value="@Model.SearchParams.MinPrice">
+                </div>
+                <div class="col-md-2">
+                    <label for="maxPrice" class="form-label">Max Price</label>
+                    <input type="number" class="form-control" id="maxPrice" name="maxPrice" value="@Model.SearchParams.MaxPrice">
+                </div>
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">Search</button>
+                    <a asp-page="./Index" class="btn btn-secondary">Clear</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Products Grid -->
     <div class="row row-cols-1 row-cols-md-3 g-4">
         @foreach (var product in Model.Products)
         {
             <div class="col">
                 <div class="card h-100">
-                    @if (product.ImageUrls.Any())
+                    @if (product.Images.Any())
                     {
-                        <img src="@product.ImageUrls.First()" class="card-img-top" alt="@product.ProductName" style="height: 200px; object-fit: cover;">
-                    }
-                    else
-                    {
-                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
-                            <span class="text-muted">No image available</span>
-                        </div>
+                        <img src="@product.Images.First()" class="card-img-top" alt="@product.Name" style="height: 200px; object-fit: cover;">
                     }
                     <div class="card-body">
-                        <h5 class="card-title">@product.ProductName</h5>
+                        <h5 class="card-title">@product.Name</h5>
                         <p class="card-text">@product.Description</p>
+                        <p class="card-text">
+                            <small class="text-muted">Brand: @product.Brand</small><br>
+                            <small class="text-muted">Category: @product.CategoryName</small>
+                        </p>
                         
                         @if (product.Variants.Any())
                         {
-                            <div class="variants-section mb-3">
-                                <h6 class="mb-2">Available Variants:</h6>
-                                <div class="variant-options">
-                                    <div class="sizes mb-2">
-                                        <small class="text-muted">Sizes:</small>
-                                        <div class="btn-group btn-group-sm" role="group">
-                                            @foreach (var size in product.Variants.Select(v => v.Size).Distinct())
+                            <div class="variant-selection mb-3">
+                                @{
+                                    var firstVariant = product.Variants.First();
+                                    var attributes = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, List<string>>>(firstVariant.Attributes);
+                                    var attributeNames = attributes?.Keys.ToList() ?? new List<string>();
+                                    
+                                
+                                    var variantData = product.Variants.Select(v => new {
+                                        Attributes = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, List<string>>>(v.Attributes),
+                                        Variants = v.Variants
+                                    }).ToList();
+                                }
+                                
+                                @for (int i = 0; i < attributeNames.Count; i++)
+                                {
+                                    var attrName = attributeNames[i];
+                                    <div class="mb-2 variant-option" 
+                                         data-product-id="@product.ProductId"
+                                         data-attribute="@attrName"
+                                         style="display: @(i == 0 ? "block" : "none")">
+                                        <label class="form-label">@attrName:</label>
+                                        <select class="form-select variant-select" 
+                                                data-product-id="@product.ProductId"
+                                                data-attribute="@attrName"
+                                                data-index="@i">
+                                            <option value="">Select @attrName</option>
+                                            @foreach (var value in attributes[attrName].Distinct())
                                             {
-                                                <input type="radio" class="btn-check" name="size_@product.ProductId" id="size_@(product.ProductId)_@size" autocomplete="off">
-                                                <label class="btn btn-outline-secondary" for="size_@(product.ProductId)_@size">@size</label>
+                                                <option value="@value">@value</option>
                                             }
-                                        </div>
+                                        </select>
                                     </div>
-                                    <div class="colors mb-2">
-                                        <small class="text-muted">Colors:</small>
-                                        <div class="btn-group btn-group-sm" role="group">
-                                            @foreach (var color in product.Variants.Select(v => v.Color).Distinct())
-                                            {
-                                                <input type="radio" class="btn-check" name="color_@product.ProductId" id="color_@(product.ProductId)_@color" autocomplete="off">
-                                                <label class="btn btn-outline-secondary" for="color_@(product.ProductId)_@color">@color</label>
-                                            }
-                                        </div>
-                                    </div>
-                                    <div class="price-range">
-                                        <small class="text-muted">Price Range:</small>
-                                        <span class="text-primary">
-                                            $@product.Variants.Min(v => v.Price).ToString("N2") - $@product.Variants.Max(v => v.Price).ToString("N2")
-                                        </span>
-                                    </div>
-                                    @{
-                                        var variantsJson = JsonSerializer.Serialize(product.Variants, jsonOptions);
-                                    }
-                                    <input type="hidden" id="variants_@product.ProductId" value="@Html.Raw(variantsJson)" />
+                                }
+                                
+                                <div class="selected-price" id="selected-price-@product.ProductId">
+                                    <strong>Base Price: $@product.BasePrice.ToString("N2")</strong>
                                 </div>
+                                
+                                <div class="variant-details mt-2" id="variant-details-@product.ProductId" style="display: none;">
+                                    <small class="text-muted">
+                                        <span class="supplier-info"></span><br>
+                                        <span class="material-info"></span>
+                                    </small>
+                                </div>
+
+                                <script type="application/json" id="variant-data-@product.ProductId">
+                                    @Html.Raw(System.Text.Json.JsonSerializer.Serialize(variantData, new System.Text.Json.JsonSerializerOptions 
+                                    { 
+                                        WriteIndented = false,
+                                        PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase
+                                    }))
+                                </script>
                             </div>
                         }
-                        
-                        @if (!string.IsNullOrEmpty(product.ProductCategoryTitle))
+                        else
                         {
                             <p class="card-text">
-                                <small class="text-muted">Category: @product.ProductCategoryTitle</small>
+                                <strong>Price: $@product.BasePrice.ToString("N2")</strong>
                             </p>
                         }
-                        
-                        <div class="d-flex justify-content-between align-items-center mt-3">
-                            <a href="/Products/Details/@product.ProductId" class="btn btn-primary">View Details</a>
-                            @if (product.Status == 1)
-                            {
-                                <button class="btn btn-success add-to-cart" data-product-id="@product.ProductId" disabled>
-                                    Add to Cart
-                                </button>
-                            }
-                            else
-                            {
-                                <span class="badge bg-danger">Out of Stock</span>
-                            }
+                    </div>
+                    <div class="card-footer">
+                        <div class="btn-group w-100">
+                            <a asp-page="./Details" asp-route-id="@product.ProductId" class="btn btn-primary">View Details</a>
+                            <a asp-page="./Edit" asp-route-id="@product.ProductId" class="btn btn-secondary">Edit</a>
                         </div>
                     </div>
                 </div>
@@ -119,63 +134,139 @@
         }
     </div>
 
-    @if (Model.Products.Any())
+    <!-- Pagination -->
+    @if (Model.TotalPages > 1)
     {
-        <div class="d-flex justify-content-center mt-4">
-            <nav aria-label="Page navigation">
-                <ul class="pagination">
-                    @if (Model.PageNumber > 1)
-                    {
-                        <li class="page-item">
-                            <a class="page-link" href="?PageNumber=@(Model.PageNumber - 1)&SearchTerm=@Model.SearchTerm&Category=@Model.Category">Previous</a>
-                        </li>
-                    }
-                    <li class="page-item">
-                        <span class="page-link">Page @Model.PageNumber</span>
+        <nav aria-label="Page navigation" class="mt-4">
+            <ul class="pagination justify-content-center">
+                @for (int i = 1; i <= Model.TotalPages; i++)
+                {
+                    <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                        <a asp-page="./Index" 
+                           asp-route-page="@i"
+                           asp-route-name="@Model.SearchParams.Name"
+                           asp-route-category="@Model.SearchParams.Category"
+                           asp-route-minPrice="@Model.SearchParams.MinPrice"
+                           asp-route-maxPrice="@Model.SearchParams.MaxPrice"
+                           class="page-link">@i</a>
                     </li>
-                    <li class="page-item">
-                        <a class="page-link" href="?PageNumber=@(Model.PageNumber + 1)&SearchTerm=@Model.SearchTerm&Category=@Model.Category">Next</a>
-                    </li>
-                </ul>
-            </nav>
-        </div>
+                }
+            </ul>
+        </nav>
     }
 </div>
 
 @section Scripts {
     <script>
-        $(document).ready(function() {
+        document.addEventListener('DOMContentLoaded', function() {
             // Handle variant selection
-            $('.btn-check').change(function() {
-                const productId = $(this).attr('name').split('_')[1];
-                const selectedSize = $(`input[name="size_${productId}"]:checked`).next('label').text();
-                const selectedColor = $(`input[name="color_${productId}"]:checked`).next('label').text();
-                
-                if (selectedSize && selectedColor) {
-                    // Enable add to cart button and update price
-                    const variants = JSON.parse($(`#variants_${productId}`).val());
-                    const selectedVariant = variants.find(v => v.size === selectedSize && v.color === selectedColor);
-                    if (selectedVariant) {
-                        $(`#price_${productId}`).text(`$${selectedVariant.price.toFixed(2)}`);
-                        $(`button[data-product-id="${productId}"]`)
-                            .prop('disabled', false)
-                            .attr('data-variant-id', selectedVariant.variantId);
+            document.querySelectorAll('.variant-select').forEach(select => {
+                select.addEventListener('change', function() {
+                    const productId = this.dataset.productId;
+                    const attributeName = this.dataset.attribute;
+                    const selectedValue = this.value;
+                    const currentIndex = parseInt(this.dataset.index);
+                    const priceElement = document.getElementById(`selected-price-${productId}`);
+                    const detailsElement = document.getElementById(`variant-details-${productId}`);
+                    
+                    // Get variant data
+                    const variantData = JSON.parse(document.getElementById(`variant-data-${productId}`).textContent);
+                    
+                    // Get all variant options for this product
+                    const allOptions = document.querySelectorAll(`.variant-option[data-product-id="${productId}"]`);
+                    const allSelects = document.querySelectorAll(`.variant-select[data-product-id="${productId}"]`);
+                    
+                    if (!selectedValue) {
+                       
+                        const basePrice = this.closest('.card').querySelector('.selected-price').dataset.basePrice;
+                        priceElement.innerHTML = `<strong>Base Price: $${basePrice}</strong>`;
+                        detailsElement.style.display = 'none';
+                        
+                       
+                        allOptions.forEach((option, index) => {
+                            if (index > currentIndex) {
+                                option.style.display = 'none';
+                                option.querySelector('select').value = '';
+                            }
+                        });
+                        return;
                     }
-                }
-            });
-
-            // Handle add to cart
-            $('.add-to-cart').click(function() {
-                const productId = $(this).data('product-id');
-                const variantId = $(this).data('variant-id');
-                
-                if (!variantId) {
-                    alert('Please select size and color first');
-                    return;
-                }
-
-                // Add to cart logic here
-                console.log('Adding to cart:', { productId, variantId });
+                    
+                   
+                    const selectedAttributes = {};
+                    for (let i = 0; i <= currentIndex; i++) {
+                        const select = allSelects[i];
+                        const attrName = select.dataset.attribute;
+                        const value = select.value;
+                        if (value) {
+                            selectedAttributes[attrName] = value;
+                        }
+                    }
+                    
+                  
+                    const matchingVariant = variantData.find(v => {
+                        return v.variants.some(variant => 
+                            Object.entries(selectedAttributes).every(([key, value]) => 
+                                variant[key] === value
+                            )
+                        );
+                    });
+                    
+                    if (matchingVariant) {
+                        const matchingVariantInfo = matchingVariant.variants.find(variant => 
+                            Object.entries(selectedAttributes).every(([key, value]) => 
+                                variant[key] === value
+                            )
+                        );
+                        
+                        if (matchingVariantInfo) {
+                            // Update price display
+                            priceElement.innerHTML = `<strong>Price: $${parseFloat(matchingVariantInfo.price).toFixed(2)}</strong>`;
+                            
+                            // Update variant details
+                            if (matchingVariantInfo.supplier || matchingVariantInfo.material) {
+                                detailsElement.style.display = 'block';
+                                detailsElement.querySelector('.supplier-info').textContent = 
+                                    matchingVariantInfo.supplier ? `Supplier: ${matchingVariantInfo.supplier}` : '';
+                                detailsElement.querySelector('.material-info').textContent = 
+                                    matchingVariantInfo.material ? `Material: ${matchingVariantInfo.material}` : '';
+                            } else {
+                                detailsElement.style.display = 'none';
+                            }
+                        }
+                    }
+                    
+                 
+                    if (currentIndex < allOptions.length - 1) {
+                        const nextOption = allOptions[currentIndex + 1];
+                        nextOption.style.display = 'block';
+                        
+                      
+                        const nextSelect = nextOption.querySelector('select');
+                        const nextAttrName = nextSelect.dataset.attribute;
+                        
+                        
+                        const availableValues = new Set();
+                        variantData.forEach(v => {
+                            v.variants.forEach(variant => {
+                                if (Object.entries(selectedAttributes).every(([key, value]) => 
+                                    variant[key] === value
+                                )) {
+                                    availableValues.add(variant[nextAttrName]);
+                                }
+                            });
+                        });
+                        
+                       
+                        Array.from(nextSelect.options).forEach(option => {
+                            if (option.value === "") return; 
+                            option.disabled = !availableValues.has(option.value);
+                        });
+                        
+                       
+                        nextSelect.value = '';
+                    }
+                });
             });
         });
     </script>

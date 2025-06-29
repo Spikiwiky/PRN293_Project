@@ -1,35 +1,18 @@
-﻿using EcommerceBackend.BusinessObject.dtos.AdminDto;
-using EcommerceBackend.BusinessObject.dtos.ProductDto;
-using EcommerceBackend.BusinessObject.dtos.Shared;
-using EcommerceBackend.DataAccess;
+using EcommerceBackend.BusinessObject.DTOs;
 using EcommerceBackend.DataAccess.Models;
 using EcommerceBackend.DataAccess.Repository;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 
-namespace EcommerceBackend.BusinessObject.Services.ProductService
+namespace EcommerceBackend.BusinessObject.Services
 {
     public class ProductService : IProductService
     {
         private readonly IProductRepository _productRepository;
-        private readonly EcommerceDBContext _context;
-        private readonly ILogger<ProductService> _logger;
         private readonly JsonSerializerOptions _jsonOptions;
 
-        public ProductService(
-            IProductRepository productRepository,
-            EcommerceDBContext context,
-            ILogger<ProductService> logger)
+        public ProductService(IProductRepository productRepository)
         {
             _productRepository = productRepository;
-            _context = context;
-            _logger = logger;
             _jsonOptions = new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true,
@@ -37,261 +20,396 @@ namespace EcommerceBackend.BusinessObject.Services.ProductService
             };
         }
 
-        private List<ProductVariant> DeserializeVariants(string? variantsJson)
+        public async Task<List<ProductDTO>> GetAllProductsAsync(int page, int pageSize)
         {
-            if (string.IsNullOrEmpty(variantsJson))
-                return new List<ProductVariant>();
-
-            try
-            {
-                var variants = JsonSerializer.Deserialize<List<ProductVariant>>(variantsJson, _jsonOptions);
-                return variants ?? new List<ProductVariant>();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error deserializing variants JSON");
-                return new List<ProductVariant>();
-            }
+            var products = await _productRepository.GetAllProductsAsync(page, pageSize);
+            return products.Select(MapToDTO).ToList();
         }
 
-        private string SerializeVariants(List<ProductVariant> variants)
+        public async Task<ProductDTO?> GetProductByIdAsync(int productId)
         {
-            try
-            {
-                return JsonSerializer.Serialize(variants, _jsonOptions);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error serializing variants");
-                return "[]";
-            }
+            var product = await _productRepository.GetProductByIdAsync(productId);
+            return product != null ? MapToDTO(product) : null;
         }
 
-        private async Task<ProductsDto> MapToDto(Product product)
-        {
-            return new ProductsDto
-            {
-                ProductId = product.ProductId,
-                ProductName = product.ProductName,
-                Description = product.Description ?? string.Empty,
-                ProductCategoryId = product.ProductCategoryId ?? 0,
-                ProductCategoryTitle = product.ProductCategory?.ProductCategoryTitle ?? string.Empty,
-                Status = product.Status ?? 1,
-                IsDelete = product.IsDelete ?? false,
-                ImageUrls = product.ProductImages?.Select(pi => pi.ImageUrl).ToList() ?? new List<string>(),
-                Variants = DeserializeVariants(product.Variants)
-            };
-        }
-
-        public async Task<List<ProductsDto>> GetAllProductsAsync(int page = 1, int pageSize = 10)
-        {
-            try
-            {
-                var products = await _productRepository.GetAllProductsAsync(page, pageSize);
-                var dtos = new List<ProductsDto>();
-                foreach (var product in products)
-                {
-                    dtos.Add(await MapToDto(product));
-                }
-                return dtos;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting all products");
-                throw;
-            }
-        }
-
-        public async Task<ProductsDto?> GetProductByIdAsync(int id)
-        {
-            try
-            {
-                var product = await _context.Products
-                    .Include(p => p.ProductCategory)
-                    .Include(p => p.ProductImages)
-                    .FirstOrDefaultAsync(p => 
-                        p.ProductId == id && 
-                        p.IsDelete != true);
-
-                return product == null ? null : await MapToDto(product);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting product by id {Id}", id);
-                throw;
-            }
-        }
-
-        public async Task<List<ProductsDto>> SearchProductsAsync(
+        public async Task<List<ProductDTO>> SearchProductsAsync(
             string? name = null,
             string? category = null,
-            string? size = null,
-            string? color = null,
+            Dictionary<string, string>? attributes = null,
             decimal? minPrice = null,
             decimal? maxPrice = null,
             int page = 1,
             int pageSize = 10)
         {
-            try
+            var products = await _productRepository.SearchProductsAsync(
+                name, category, attributes, minPrice, maxPrice, page, pageSize);
+            return products.Select(MapToDTO).ToList();
+        }
+
+        public async Task<bool> UpdateProductAttributesAsync(int productId, string availableAttributes)
+        {
+            return await _productRepository.UpdateProductAttributesAsync(productId, availableAttributes);
+        }
+
+        public async Task<bool> AddProductVariantAsync(ProductVariantDTO variantDTO)
+        {
+            // Validate input
+            if (string.IsNullOrEmpty(variantDTO.Attributes) || variantDTO.Variants == null || !variantDTO.Variants.Any())
             {
-                var query = _context.Products
-                    .Include(p => p.ProductCategory)
-                    .Include(p => p.ProductImages)
-                    .Where(p => p.IsDelete != true && p.Status == 1);
+                return false;
+            }
 
-                if (!string.IsNullOrEmpty(name))
-                    query = query.Where(p => p.ProductName.Contains(name));
+            // Check if product exists
+            var product = await _productRepository.GetProductByIdAsync(variantDTO.ProductId);
+            if (product == null)
+            {
+                return false;
+            }
 
-                if (!string.IsNullOrEmpty(category))
-                    query = query.Where(p => p.ProductCategory.ProductCategoryTitle.Contains(category));
+            // Validate variant structure against product's available attributes
+            var availableAttributes = JsonSerializer.Deserialize<Dictionary<string, List<string>>>(
+                product.AvailableAttributes, _jsonOptions);
 
-                var products = await query.ToListAsync();
+            if (availableAttributes != null)
+            {
+                var variantAttributes = JsonSerializer.Deserialize<Dictionary<string, string>>(
+                    variantDTO.Attributes, _jsonOptions);
 
-                var filteredProducts = products.Where(p =>
+                if (variantAttributes != null)
                 {
-                    if (string.IsNullOrEmpty(size) && string.IsNullOrEmpty(color) &&
-                        !minPrice.HasValue && !maxPrice.HasValue)
+                    foreach (var attr in variantAttributes)
                     {
-                        return true;
+                        if (!availableAttributes.ContainsKey(attr.Key) ||
+                            !availableAttributes[attr.Key].Contains(attr.Value))
+                        {
+                            return false;
+                        }
                     }
-
-                    var variants = DeserializeVariants(p.Variants);
-                    return variants.Any(v =>
-                        (string.IsNullOrEmpty(size) || v.Size.Equals(size, StringComparison.OrdinalIgnoreCase)) &&
-                        (string.IsNullOrEmpty(color) || v.Color.Equals(color, StringComparison.OrdinalIgnoreCase)) &&
-                        (!minPrice.HasValue || v.Price >= minPrice.Value) &&
-                        (!maxPrice.HasValue || v.Price <= maxPrice.Value));
-                });
-
-                var paginatedProducts = filteredProducts
-                    .OrderByDescending(p => p.ProductId)
-                    .Skip((page - 1) * pageSize)
-                    .Take(pageSize)
-                    .ToList();
-
-                var dtos = new List<ProductsDto>();
-                foreach (var product in paginatedProducts)
-                {
-                    dtos.Add(await MapToDto(product));
                 }
-                return dtos;
             }
-            catch (Exception ex)
+
+            // Validate all variants have the same structure
+            var firstVariant = variantDTO.Variants.First();
+            foreach (var variantt in variantDTO.Variants.Skip(1))
             {
-                _logger.LogError(ex, "Error searching products");
-                throw;
+                if (!AreDictionariesEqual(firstVariant, variantt))
+                {
+                    return false;
+                }
             }
+
+            var variant = new ProductVariant
+            {
+                ProductId = variantDTO.ProductId,
+                Attributes = variantDTO.Attributes,
+                Variants = JsonSerializer.Serialize(variantDTO.Variants, _jsonOptions),
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+
+            return await _productRepository.AddProductVariantAsync(variant);
         }
 
-        public async Task<ProductsDto> UpdateProductAsync(ProductsDto productDto)
+        public async Task<bool> UpdateProductVariantAsync(ProductVariantDTO variantDTO)
         {
-            try
+            // Validate input
+            if (string.IsNullOrEmpty(variantDTO.Attributes) || variantDTO.Variants == null || !variantDTO.Variants.Any())
             {
-                var product = await _context.Products
-                    .Include(p => p.ProductCategory)
-                    .Include(p => p.ProductImages)
-                    .FirstOrDefaultAsync(p => p.ProductId == productDto.ProductId);
+                return false;
+            }
 
-                if (product == null)
+            // Check if product exists
+            var product = await _productRepository.GetProductByIdAsync(variantDTO.ProductId);
+            if (product == null)
+            {
+                return false;
+            }
+
+            // Validate variant structure against product's available attributes
+            var availableAttributes = JsonSerializer.Deserialize<Dictionary<string, List<string>>>(
+                product.AvailableAttributes, _jsonOptions);
+
+            if (availableAttributes != null)
+            {
+                var variantAttributes = JsonSerializer.Deserialize<Dictionary<string, string>>(
+                    variantDTO.Attributes, _jsonOptions);
+
+                if (variantAttributes != null)
                 {
-                    throw new KeyNotFoundException($"Product with ID {productDto.ProductId} not found");
+                    foreach (var attr in variantAttributes)
+                    {
+                        if (!availableAttributes.ContainsKey(attr.Key) ||
+                            !availableAttributes[attr.Key].Contains(attr.Value))
+                        {
+                            return false;
+                        }
+                    }
                 }
+            }
 
-                product.Variants = SerializeVariants(productDto.Variants);
-                await _context.SaveChangesAsync();
-                return await MapToDto(product);
-            }
-            catch (Exception ex)
+            // Validate all variants have the same structure
+            var firstVariant = variantDTO.Variants.First();
+            foreach (var variantt in variantDTO.Variants.Skip(1))
             {
-                _logger.LogError(ex, "Error updating product {Id}", productDto.ProductId);
-                throw;
+                if (!AreDictionariesEqual(firstVariant, variantt))
+                {
+                    return false;
+                }
             }
+
+            var variant = new ProductVariant
+            {
+                VariantId = variantDTO.VariantId,
+                ProductId = variantDTO.ProductId,
+                Attributes = variantDTO.Attributes,
+                Variants = JsonSerializer.Serialize(variantDTO.Variants, _jsonOptions),
+                UpdatedAt = DateTime.UtcNow
+            };
+
+            return await _productRepository.UpdateProductVariantAsync(variant);
         }
 
-        public async Task<List<ProductsDto>> LoadProductsAsync(int page = 1, int pageSize = 10)
+        public async Task<bool> DeleteProductVariantAsync(int variantId)
         {
-            try
-            {
-                var products = await _context.Products
-                    .Include(p => p.ProductCategory)
-                    .Include(p => p.ProductImages)
-                    .Where(p => p.IsDelete != true)
-                    .Where(p => p.Status == 1)
-                    .OrderByDescending(p => p.ProductId)
-                    .Skip((page - 1) * pageSize)
-                    .Take(pageSize)
-                    .ToListAsync();
-
-                var dtos = new List<ProductsDto>();
-                foreach (var product in products)
-                {
-                    dtos.Add(await MapToDto(product));
-                }
-                return dtos;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error loading products");
-                throw;
-            }
+            return await _productRepository.DeleteProductVariantAsync(variantId);
         }
 
-        public async Task<ProductVariant> AddVariantAsync(AddVariantDTO variant)
+        public async Task<bool> AddProductAttributeAsync(int productId, string attributeName, List<string> attributeValues)
         {
-            try
+            // Validate input
+            if (string.IsNullOrEmpty(attributeName) || attributeValues == null || !attributeValues.Any())
             {
-                var product = await _context.Products.FindAsync(variant.ProductId);
-                if (product == null)
-                {
-                    throw new KeyNotFoundException($"Product with ID {variant.ProductId} not found");
-                }
-
-                var variants = DeserializeVariants(product.Variants);
-                
-                // Check for duplicate variant
-                if (variants.Any(v => 
-                    v.Size.Equals(variant.Size, StringComparison.OrdinalIgnoreCase) && 
-                    v.Color.Equals(variant.Color, StringComparison.OrdinalIgnoreCase)))
-                {
-                    throw new InvalidOperationException($"Variant with size {variant.Size} and color {variant.Color} already exists");
-                }
-
-                var newVariant = new ProductVariant
-                {
-                    VariantId = $"{variant.Size}-{variant.Color}",
-                    Size = variant.Size,
-                    Color = variant.Color,
-                    Price = variant.Price,
-                    StockQuantity = variant.StockQuantity,
-                    CreatedAt = DateTime.UtcNow
-                };
-
-                variants.Add(newVariant);
-                product.Variants = SerializeVariants(variants);
-                await _context.SaveChangesAsync();
-
-                return newVariant;
+                return false;
             }
-            catch (Exception ex)
+
+            // Check if product exists
+            var product = await _productRepository.GetProductByIdAsync(productId);
+            if (product == null)
             {
-                _logger.LogError(ex, "Error adding variant to product {Id}", variant.ProductId);
-                throw;
+                return false;
             }
+
+            // Get current attributes
+            var currentAttributes = await _productRepository.GetProductAttributesAsync(productId);
+            if (currentAttributes.ContainsKey(attributeName))
+            {
+                return false; // Attribute already exists
+            }
+
+            return await _productRepository.AddProductAttributeAsync(productId, attributeName, attributeValues);
         }
 
-        public async Task<int> GetTotalProductCountAsync()
+        public async Task<bool> UpdateProductAttributeAsync(int productId, string attributeName, List<string> attributeValues)
         {
+            // Validate input
+            if (string.IsNullOrEmpty(attributeName) || attributeValues == null || !attributeValues.Any())
+            {
+                return false;
+            }
+
+            // Check if product exists
+            var product = await _productRepository.GetProductByIdAsync(productId);
+            if (product == null)
+            {
+                return false;
+            }
+
+            // Get current attributes
+            var currentAttributes = await _productRepository.GetProductAttributesAsync(productId);
+            if (!currentAttributes.ContainsKey(attributeName))
+            {
+                return false; // Attribute doesn't exist
+            }
+
+            return await _productRepository.UpdateProductAttributeAsync(productId, attributeName, attributeValues);
+        }
+
+        public async Task<bool> DeleteProductAttributeAsync(int productId, string attributeName)
+        {
+            // Validate input
+            if (string.IsNullOrEmpty(attributeName))
+            {
+                return false;
+            }
+
+            // Check if product exists
+            var product = await _productRepository.GetProductByIdAsync(productId);
+            if (product == null)
+            {
+                return false;
+            }
+
+            // Get current attributes
+            var currentAttributes = await _productRepository.GetProductAttributesAsync(productId);
+            if (!currentAttributes.ContainsKey(attributeName))
+            {
+                return false; // Attribute doesn't exist
+            }
+
+            return await _productRepository.DeleteProductAttributeAsync(productId, attributeName);
+        }
+
+        public async Task<Dictionary<string, List<string>>> GetProductAttributesAsync(int productId)
+        {
+            // Check if product exists
+            var product = await _productRepository.GetProductByIdAsync(productId);
+            if (product == null)
+            {
+                return new Dictionary<string, List<string>>();
+            }
+
+            return await _productRepository.GetProductAttributesAsync(productId);
+        }
+
+        public async Task<bool> AddVariantValueAsync(int variantId, Dictionary<string, string> variantValue)
+        {
+            // Validate input
+            if (variantValue == null || !variantValue.Any())
+            {
+                return false;
+            }
+
+            // Get variant to validate structure
+            var productVariant = await _productRepository.GetProductVariantByIdAsync(variantId);
+            if (productVariant == null)
+            {
+                return false;
+            }
+
+            // Validate variant structure
+            var attributes = JsonSerializer.Deserialize<Dictionary<string, string>>(
+                productVariant.Attributes, _jsonOptions) ?? new Dictionary<string, string>();
+
+            if (!AreDictionariesEqual(attributes, variantValue))
+            {
+                return false; // Structure doesn't match
+            }
+
+            return await _productRepository.AddVariantValueAsync(variantId, variantValue);
+        }
+
+        public async Task<bool> UpdateVariantValueAsync(int variantId, int valueIndex, Dictionary<string, string> variantValue)
+        {
+            // Validate input
+            if (variantValue == null || !variantValue.Any())
+            {
+                return false;
+            }
+
+            // Get variant to validate structure
+            var productVariant = await _productRepository.GetProductVariantByIdAsync(variantId);
+            if (productVariant == null)
+            {
+                return false;
+            }
+
+            // Validate variant structure
+            var attributes = JsonSerializer.Deserialize<Dictionary<string, string>>(
+                productVariant.Attributes, _jsonOptions) ?? new Dictionary<string, string>();
+
+            if (!AreDictionariesEqual(attributes, variantValue))
+            {
+                return false; // Structure doesn't match
+            }
+
+            return await _productRepository.UpdateVariantValueAsync(variantId, valueIndex, variantValue);
+        }
+
+        public async Task<bool> DeleteVariantValueAsync(int variantId, int valueIndex)
+        {
+            // Get variant to validate existence
+            var productVariant = await _productRepository.GetProductVariantByIdAsync(variantId);
+            if (productVariant == null)
+            {
+                return false;
+            }
+
+            return await _productRepository.DeleteVariantValueAsync(variantId, valueIndex);
+        }
+
+        public async Task<List<Dictionary<string, string>>> GetVariantValuesAsync(int variantId)
+        {
+            // Get variant to validate existence
+            var productVariant = await _productRepository.GetProductVariantByIdAsync(variantId);
+            if (productVariant == null)
+            {
+                return new List<Dictionary<string, string>>();
+            }
+
+            return await _productRepository.GetVariantValuesAsync(variantId);
+        }
+
+        public async Task<int> GetTotalProductsCountAsync(
+            string? name = null,
+            string? category = null,
+            decimal? minPrice = null,
+            decimal? maxPrice = null)
+        {
+            return await _productRepository.GetTotalProductsCountAsync(
+                name, category, minPrice, maxPrice);
+        }
+
+        private ProductDTO MapToDTO(Product product)
+        {
+            var variants = product.Variants?.Select(v => new ProductVariantDTO
+            {
+                VariantId = v.VariantId,
+                ProductId = v.ProductId,
+                Attributes = v.Attributes,
+                Variants = ParseVariantValues(v.Variants)
+            }).ToList() ?? new List<ProductVariantDTO>();
+
+            return new ProductDTO
+            {
+                ProductId = product.ProductId,
+                Name = product.Name,
+                Description = product.Description,
+                Brand = product.Brand,
+                BasePrice = product.BasePrice,
+                AvailableAttributes = product.AvailableAttributes,
+                CategoryName = product.ProductCategory?.ProductCategoryTitle,
+                Images = product.ProductImages?.Select(i => i.ImageUrl).ToList() ?? new List<string>(),
+                Variants = variants,
+                CreatedAt = product.CreatedAt,
+                UpdatedAt = product.UpdatedAt
+            };
+        }
+
+        private List<Dictionary<string, string>> ParseVariantValues(string variantsJson)
+        {
+            var result = new List<Dictionary<string, string>>();
+            if (string.IsNullOrEmpty(variantsJson)) return result;
             try
             {
-                return await _context.Products
-                    .Where(p => p.IsDelete != true)
-                    .CountAsync();
+                var list = JsonSerializer.Deserialize<List<Dictionary<string, JsonElement>>>(variantsJson, _jsonOptions);
+                if (list != null)
+                {
+                    foreach (var dict in list)
+                    {
+                        var newDict = new Dictionary<string, string>();
+                        foreach (var kv in dict)
+                        {
+                            if (kv.Value.ValueKind == JsonValueKind.String)
+                                newDict[kv.Key] = kv.Value.GetString();
+                            else if (kv.Value.ValueKind == JsonValueKind.Number)
+                                newDict[kv.Key] = kv.Value.GetRawText();
+                            else
+                                newDict[kv.Key] = kv.Value.ToString();
+                        }
+                        result.Add(newDict);
+                    }
+                }
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting total product count");
-                throw;
-            }
+            catch { }
+            return result;
+        }
+
+        private bool AreDictionariesEqual(Dictionary<string, string> dict1, Dictionary<string, string> dict2)
+        {
+            if (dict1.Count != dict2.Count)
+                return false;
+
+            return dict1.Keys.All(key => dict2.ContainsKey(key));
         }
     }
 }

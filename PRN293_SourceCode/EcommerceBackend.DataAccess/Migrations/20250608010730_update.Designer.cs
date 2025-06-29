@@ -4,6 +4,7 @@ using EcommerceBackend.DataAccess.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EcommerceBackend.DataAccess.Migrations
 {
     [DbContext(typeof(EcommerceDBContext))]
-    partial class EcommerceDBContextModelSnapshot : ModelSnapshot
+    [Migration("20250608010730_update")]
+    partial class update
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -428,13 +430,6 @@ namespace EcommerceBackend.DataAccess.Migrations
                         .HasColumnName("updated_at")
                         .HasDefaultValueSql("GETDATE()");
 
-                    b.Property<string>("Variants")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("nvarchar(max)")
-                        .HasDefaultValue("[]")
-                        .HasColumnName("variants");
-
                     b.HasKey("VariantId");
 
                     b.HasIndex("ProductId");
@@ -442,8 +437,6 @@ namespace EcommerceBackend.DataAccess.Migrations
                     b.ToTable("variants", (string)null);
 
                     b.HasCheckConstraint("chk_attributes", "ISJSON(attributes) = 1");
-
-                    b.HasCheckConstraint("chk_variants", "ISJSON(variants) = 1");
                 });
 
             modelBuilder.Entity("EcommerceBackend.DataAccess.Models.User", b =>
