@@ -35,5 +35,9 @@ namespace EcommerceBackend.BusinessObject.Services
         Task<bool> UpdateVariantValueAsync(int variantId, int valueIndex, Dictionary<string, string> variantValue);
         Task<bool> DeleteVariantValueAsync(int variantId, int valueIndex);
         Task<List<Dictionary<string, string>>> GetVariantValuesAsync(int variantId);
+
+        Task<bool> CreateProductAsync(ProductDTO product);
+        Task<bool> UpdateProductAsync(int productId, ProductDTO product);
+        Task<bool> DeleteProductAsync(int productId);
     }
 } 

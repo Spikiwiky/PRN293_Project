@@ -349,6 +349,46 @@ namespace EcommerceBackend.BusinessObject.Services
                 name, category, minPrice, maxPrice);
         }
 
+        public async Task<bool> CreateProductAsync(ProductDTO product)
+        {
+            // Map DTO to entity
+            var entity = new Product
+            {
+                Name = product.Name,
+                Description = product.Description,
+                Brand = product.Brand,
+                BasePrice = product.BasePrice,
+                AvailableAttributes = product.AvailableAttributes,
+                ProductCategoryId = product.CategoryId,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                IsDelete = false
+            };
+            return await _productRepository.CreateProductAsync(entity);
+        }
+
+        public async Task<bool> UpdateProductAsync(int productId, ProductDTO product)
+        {
+            // Map DTO to entity
+            var entity = new Product
+            {
+                ProductId = productId,
+                Name = product.Name,
+                Description = product.Description,
+                Brand = product.Brand,
+                BasePrice = product.BasePrice,
+                AvailableAttributes = product.AvailableAttributes,
+                ProductCategoryId = product.CategoryId,
+                UpdatedAt = DateTime.UtcNow
+            };
+            return await _productRepository.UpdateProductAsync(entity);
+        }
+
+        public async Task<bool> DeleteProductAsync(int productId)
+        {
+            return await _productRepository.DeleteProductAsync(productId);
+        }
+
         private ProductDTO MapToDTO(Product product)
         {
             var variants = product.Variants?.Select(v => new ProductVariantDTO

@@ -10,13 +10,15 @@ using EcommerceBackend.API.Configurations;
 using EcommerceBackend.API.Hubs;
 using EcommerceBackend.BusinessObject.Services;
 
-using EcommerceBackend.BusinessObject.Services.AdminService;
+
 using EcommerceBackend.DataAccess.Abstract.BlogAbstract;
 using EcommerceBackend.DataAccess.Repository.BlogRepository;
 
 
 using EcommerceBackend.BusinessObject.Services.UserService;
 using EcommerceBackend.DataAccess.Repository.UserRepository;
+using EcommerceBackend.DataAccess.Repository;
+using EcommerceBackend.DataAccess.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,6 +30,12 @@ builder.Services.AddScoped<IBlogRepository, BlogRepository>();
 builder.Services.AddScoped<BlogService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
+
+//thanhvv
+builder.Services.AddDbContext<EcommerceDBContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IProductService, ProductService>();
 
 // Config Authentication Jwt
 JwtConfig.ConfigureJwtAuthentication(builder.Services, builder.Configuration);
