@@ -43,7 +43,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 //thanhvv
 builder.Services.AddDbContext<EcommerceDBContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<EcommerceBackend.DataAccess.Repository.IProductRepository, EcommerceBackend.DataAccess.Repository.ProductRepository>();
 builder.Services.AddScoped<IProductService, ProductService>();
 
 
