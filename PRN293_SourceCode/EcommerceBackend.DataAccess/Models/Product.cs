@@ -22,7 +22,7 @@ namespace EcommerceBackend.DataAccess.Models
         [Column("description")]
         public string Description { get; set; }
 
-        [Column("product_category_id")]
+        [Column("Product_category_id")]
         public int? ProductCategoryId { get; set; }
 
         [Column("brand")]
