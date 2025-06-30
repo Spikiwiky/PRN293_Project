@@ -203,7 +203,7 @@ namespace EcommerceBackend.DataAccess.Repository
             }
         }
 
-        public async Task<bool> UpdateProductVariantAsync(ProductVariant variant)
+        public async Task<bool> UpdateProductVariantAsync(ProductVariant variant, bool skipValidation = false)
         {
             try
             {
@@ -213,23 +213,26 @@ namespace EcommerceBackend.DataAccess.Repository
 
                 if (existingVariant == null) return false;
 
-                // Validate variant attributes against product's available attributes
-                var availableAttributes = JsonSerializer.Deserialize<Dictionary<string, List<string>>>(
-                    existingVariant.Product.AvailableAttributes, _jsonOptions);
-
-                if (availableAttributes != null)
+                if (!skipValidation)
                 {
-                    var variantAttributes = JsonSerializer.Deserialize<Dictionary<string, string>>(
-                        variant.Attributes, _jsonOptions);
+                    // Validate variant attributes against product's available attributes
+                    var availableAttributes = JsonSerializer.Deserialize<Dictionary<string, List<string>>>(
+                        existingVariant.Product.AvailableAttributes, _jsonOptions);
 
-                    if (variantAttributes != null)
+                    if (availableAttributes != null)
                     {
-                        foreach (var attr in variantAttributes)
+                        var variantAttributes = JsonSerializer.Deserialize<Dictionary<string, string>>(
+                            variant.Attributes, _jsonOptions);
+
+                        if (variantAttributes != null)
                         {
-                            if (!availableAttributes.ContainsKey(attr.Key) ||
-                                !availableAttributes[attr.Key].Contains(attr.Value))
+                            foreach (var attr in variantAttributes)
                             {
-                                return false;
+                                if (!availableAttributes.ContainsKey(attr.Key) ||
+                                    !availableAttributes[attr.Key].Contains(attr.Value))
+                                {
+                                    return false;
+                                }
                             }
                         }
                     }
@@ -583,6 +586,18 @@ namespace EcommerceBackend.DataAccess.Repository
             {
                 return false;
             }
+        }
+
+        public async Task<List<ProductVariant>> GetVariantsByProductIdAsync(int productId)
+        {
+            return await _context.ProductVariants
+                .Where(v => v.ProductId == productId)
+                .ToListAsync();
+        }
+
+        public async Task<bool> UpdateProductVariantAsync(ProductVariant variant)
+        {
+            return await UpdateProductVariantAsync(variant, false);
         }
     }
 }

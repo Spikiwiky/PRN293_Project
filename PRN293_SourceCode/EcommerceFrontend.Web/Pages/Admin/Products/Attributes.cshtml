@@ -1,0 +1,49 @@
+@page "{id:int}"
+@model Admin.Products.AttributesModel
+@{
+    ViewData["Title"] = "Quản lý thuộc tính sản phẩm";
+}
+<h2>Quản lý thuộc tính sản phẩm: @Model.Product?.Name</h2>
+@if (!string.IsNullOrEmpty(Model.Message))
+{
+    <div class="alert alert-info">@Model.Message</div>
+}
+<form method="post" asp-page-handler="AddOrUpdate">
+    <input type="hidden" asp-for="Product.ProductId" />
+    <div class="form-group">
+        <label>Tên thuộc tính</label>
+        <input asp-for="AttributeName" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label>Giá trị (cách nhau bởi dấu phẩy)</label>
+        <input name="AttributeValues" value="@string.Join(",", Model.AttributeValues)" class="form-control" />
+    </div>
+    <button type="submit" class="btn btn-success">Thêm/Cập nhật thuộc tính</button>
+</form>
+@if (Model.Attributes != null && Model.Attributes.Any())
+{
+    <h4>Danh sách thuộc tính hiện tại</h4>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Tên thuộc tính</th>
+                <th>Giá trị</th>
+                <th>Hành động</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var attr in Model.Attributes)
+        {
+            <tr>
+                <td>@attr.Key</td>
+                <td>@string.Join(", ", attr.Value)</td>
+                <td>
+                    <form method="post" asp-page-handler="Delete" asp-route-attributeName="@attr.Key">
+                        <button type="submit" class="btn btn-danger btn-sm">Xóa</button>
+                    </form>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+} 

@@ -2,17 +2,20 @@ using EcommerceBackend.BusinessObject.DTOs;
 using EcommerceBackend.DataAccess.Models;
 using EcommerceBackend.DataAccess.Repository;
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
 
 namespace EcommerceBackend.BusinessObject.Services
 {
     public class ProductService : IProductService
     {
         private readonly IProductRepository _productRepository;
+        private readonly ILogger<ProductService> _logger;
         private readonly JsonSerializerOptions _jsonOptions;
 
-        public ProductService(IProductRepository productRepository)
+        public ProductService(IProductRepository productRepository, ILogger<ProductService> logger)
         {
             _productRepository = productRepository;
+            _logger = logger;
             _jsonOptions = new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true,
@@ -196,7 +199,27 @@ namespace EcommerceBackend.BusinessObject.Services
                 return false; // Attribute already exists
             }
 
-            return await _productRepository.AddProductAttributeAsync(productId, attributeName, attributeValues);
+            var result = await _productRepository.AddProductAttributeAsync(productId, attributeName, attributeValues);
+
+            // Đồng bộ lại attributes của các variant: copy y nguyên available_attributes
+            var productAfter = await _productRepository.GetProductByIdAsync(productId);
+            var availableAttrsJson = productAfter?.AvailableAttributes ?? "{}";
+            var variants = await _productRepository.GetVariantsByProductIdAsync(productId);
+            foreach (var variant in variants)
+            {
+                try
+                {
+                    variant.Attributes = availableAttrsJson;
+                    await _productRepository.UpdateProductVariantAsync(variant, skipValidation: true);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Lỗi khi đồng bộ attributes cho variantId={VariantId} của productId={ProductId}. Dữ liệu cũ: {OldAttributes}", variant.VariantId, productId, variant.Attributes);
+                    throw;
+                }
+            }
+
+            return result;
         }
 
         public async Task<bool> UpdateProductAttributeAsync(int productId, string attributeName, List<string> attributeValues)
@@ -221,7 +244,27 @@ namespace EcommerceBackend.BusinessObject.Services
                 return false; // Attribute doesn't exist
             }
 
-            return await _productRepository.UpdateProductAttributeAsync(productId, attributeName, attributeValues);
+            var result = await _productRepository.UpdateProductAttributeAsync(productId, attributeName, attributeValues);
+
+            // Đồng bộ lại attributes của các variant: copy y nguyên available_attributes
+            var productAfter = await _productRepository.GetProductByIdAsync(productId);
+            var availableAttrsJson = productAfter?.AvailableAttributes ?? "{}";
+            var variants = await _productRepository.GetVariantsByProductIdAsync(productId);
+            foreach (var variant in variants)
+            {
+                try
+                {
+                    variant.Attributes = availableAttrsJson;
+                    await _productRepository.UpdateProductVariantAsync(variant, skipValidation: true);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Lỗi khi đồng bộ attributes cho variantId={VariantId} của productId={ProductId}. Dữ liệu cũ: {OldAttributes}", variant.VariantId, productId, variant.Attributes);
+                    throw;
+                }
+            }
+
+            return result;
         }
 
         public async Task<bool> DeleteProductAttributeAsync(int productId, string attributeName)
@@ -369,19 +412,83 @@ namespace EcommerceBackend.BusinessObject.Services
 
         public async Task<bool> UpdateProductAsync(int productId, ProductDTO product)
         {
-            // Map DTO to entity
-            var entity = new Product
+            try
             {
-                ProductId = productId,
-                Name = product.Name,
-                Description = product.Description,
-                Brand = product.Brand,
-                BasePrice = product.BasePrice,
-                AvailableAttributes = product.AvailableAttributes,
-                ProductCategoryId = product.CategoryId,
-                UpdatedAt = DateTime.UtcNow
-            };
-            return await _productRepository.UpdateProductAsync(entity);
+                // Nếu available_attributes null/rỗng, giữ nguyên giá trị cũ trong DB
+                if (string.IsNullOrWhiteSpace(product.AvailableAttributes))
+                {
+                    var oldProduct = await _productRepository.GetProductByIdAsync(productId);
+                    if (oldProduct != null && !string.IsNullOrWhiteSpace(oldProduct.AvailableAttributes))
+                    {
+                        product.AvailableAttributes = oldProduct.AvailableAttributes;
+                    }
+                    else
+                    {
+                        product.AvailableAttributes = "{}";
+                    }
+                }
+
+                // Map DTO to entity
+                var entity = new Product
+                {
+                    ProductId = productId,
+                    Name = product.Name,
+                    Description = product.Description,
+                    Brand = product.Brand,
+                    BasePrice = product.BasePrice,
+                    AvailableAttributes = product.AvailableAttributes,
+                    ProductCategoryId = product.CategoryId,
+                    UpdatedAt = DateTime.UtcNow
+                };
+
+                var result = await _productRepository.UpdateProductAsync(entity);
+
+                // Sau khi cập nhật thành công, nếu available_attributes thay đổi thì đồng bộ lại variant
+                var oldProductCheck = await _productRepository.GetProductByIdAsync(productId);
+                if (oldProductCheck != null && oldProductCheck.AvailableAttributes != product.AvailableAttributes)
+                {
+                    var availableAttrs = await _productRepository.GetProductAttributesAsync(productId);
+                    var variants = await _productRepository.GetVariantsByProductIdAsync(productId);
+                    foreach (var variant in variants)
+                    {
+                        try
+                        {
+                            var variantAttrs = string.IsNullOrWhiteSpace(variant.Attributes)
+                                ? new Dictionary<string, List<string>>()
+                                : JsonSerializer.Deserialize<Dictionary<string, List<string>>>(variant.Attributes, _jsonOptions) ?? new Dictionary<string, List<string>>();
+
+                            foreach (var key in availableAttrs.Keys)
+                            {
+                                if (!variantAttrs.ContainsKey(key))
+                                    variantAttrs[key] = new List<string>();
+                            }
+                            var keysToRemove = variantAttrs.Keys.Except(availableAttrs.Keys).ToList();
+                            foreach (var key in keysToRemove)
+                                variantAttrs.Remove(key);
+
+                            variant.Attributes = JsonSerializer.Serialize(variantAttrs, _jsonOptions);
+                            await _productRepository.UpdateProductVariantAsync(variant, skipValidation: true);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "Lỗi khi đồng bộ attributes cho variantId={VariantId} của productId={ProductId}. Dữ liệu cũ: {OldAttributes}", variant.VariantId, productId, variant.Attributes);
+                            throw;
+                        }
+                    }
+                }
+
+                if (!result)
+                {
+                    _logger.LogWarning("UpdateProductAsync failed for ProductId={ProductId}, CategoryId={CategoryId}", productId, product.CategoryId);
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception in UpdateProductAsync for ProductId={ProductId}, CategoryId={CategoryId}", productId, product.CategoryId);
+                throw;
+            }
         }
 
         public async Task<bool> DeleteProductAsync(int productId)
@@ -407,6 +514,7 @@ namespace EcommerceBackend.BusinessObject.Services
                 Brand = product.Brand,
                 BasePrice = product.BasePrice,
                 AvailableAttributes = product.AvailableAttributes,
+                CategoryId = (int)product.ProductCategoryId,
                 CategoryName = product.ProductCategory?.ProductCategoryTitle,
                 Images = product.ProductImages?.Select(i => i.ImageUrl).ToList() ?? new List<string>(),
                 Variants = variants,
