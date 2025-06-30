@@ -1,0 +1,43 @@
+@page "{id:int}"
+@model Admin.Products.EditModel
+@{
+    ViewData["Title"] = "Sửa sản phẩm";
+}
+<h2>Sửa sản phẩm</h2>
+<form method="post">
+    <div asp-validation-summary="All" class="text-danger"></div>
+    <div class="form-group">
+        <label>Tên sản phẩm</label>
+        <input asp-for="Product.Name" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label>Thương hiệu</label>
+        <input asp-for="Product.Brand" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label>Giá</label>
+        <input asp-for="Product.BasePrice" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label>Danh mục</label>
+        <select asp-for="Product.CategoryId" class="form-control">
+            <option value="1">Men Clothing</option>
+            <option value="2">Women Clothing</option>
+            <option value="3">Kids Clothing</option>
+            <option value="4">Sportswear</option>
+            <option value="5">Accessories</option>
+            <option value="6">Footwear</option>
+            <option value="7">Outerwear</option>
+            <option value="8">Underwear</option>
+            <option value="9">Swimwear</option>
+            <option value="10">Formal Wear</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label>Mô tả</label>
+        <textarea asp-for="Product.Description" class="form-control"></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">Lưu</button>
+    <a asp-page="Index" class="btn btn-secondary">Quay lại</a>
+    <a asp-page="Attributes" asp-route-id="@Model.Product.ProductId" class="btn btn-info ml-2">Quản lý thuộc tính</a>
+</form> 

@@ -10,6 +10,7 @@ namespace EcommerceFrontend.Web.Models
         public string Brand { get; set; } = string.Empty;
         public decimal BasePrice { get; set; }
         public string AvailableAttributes { get; set; } = string.Empty;
+        public int CategoryId { get; set; }
         public string? CategoryName { get; set; }
         public List<string> Images { get; set; } = new List<string>();
         public List<ProductVariantDTO> Variants { get; set; } = new List<ProductVariantDTO>();
