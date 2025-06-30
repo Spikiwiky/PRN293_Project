@@ -6,6 +6,8 @@ using EcommerceFrontend.Web.Services.Sale;
 using EcommerceFrontend.Web.Models; // Đảm bảo namespace này tồn tại
 using Microsoft.Extensions.Options;
 using EcommerceFrontend.Web.Models.Sale;
+using EcommerceFrontend.Web.Services.AI;
+using EcommerceFrontend.Web.Service.AI;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +26,12 @@ builder.Services.AddHttpClient("MyAPI", client =>
     client.BaseAddress = new Uri(apiBaseUrl);
     Console.WriteLine($"Configured BaseAddress for MyAPI: {apiBaseUrl}"); // Debug log
 });
+
+//Tri
+builder.Services.AddHttpClient<GeminiService>();
+
+builder.Services.Configure<GeminiSettings>(
+    builder.Configuration.GetSection("Gemini"));
 
 // Register ApiSettings
 builder.Services.Configure<ApiSettings>(builder.Configuration.GetSection("ApiSettings"));
