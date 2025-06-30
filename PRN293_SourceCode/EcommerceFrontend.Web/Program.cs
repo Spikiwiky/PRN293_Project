@@ -42,12 +42,7 @@ builder.Services.AddScoped<ISaleProductService, SaleProductService>();
 builder.Services.AddScoped<IAdminBlogService, AdminBlogService>();
 
 builder.Services.AddScoped<IUserService, UserService>();
-//builder.Services.AddHttpClient<IAdminBlogService, AdminBlogService>();
-//builder.Services.AddHttpClient<BlogService>();
-//builder.Services.AddHttpClient<IAdminBlogService, AdminBlogService>(client =>
-//{
-//    client.BaseAddress = new Uri("https://localhost:7107/"); // Adjust accordingly
-//});
+
 
 builder.Services.AddScoped<IBlogService, BlogService>();
 
