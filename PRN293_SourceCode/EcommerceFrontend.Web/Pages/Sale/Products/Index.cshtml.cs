@@ -10,7 +10,7 @@ namespace EcommerceFrontend.Web.Pages.Sale.Products
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly ApiSettings _apiSettings;
 
-        public List<ProductModel> Products { get; set; } = new List<ProductModel>();  
+        public List<ProductModel> Products { get; set; } = new List<ProductModel>();
 
         public IndexModel(IHttpClientFactory httpClientFactory, IOptions<ApiSettings> apiSettings)
         {
@@ -20,12 +20,34 @@ namespace EcommerceFrontend.Web.Pages.Sale.Products
 
         public async Task<IActionResult> OnGetAsync()
         {
+            await LoadProductsAsync();
+            return Page();
+        }
+
+        public async Task<IActionResult> OnPostDeleteAsync(int id)
+        {
+            var client = _httpClientFactory.CreateClient("MyAPI");
+            var response = await client.DeleteAsync($"{_apiSettings.BaseUrl}/api/sale/products/{id}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                // Xóa thành công, reload danh sách
+                return RedirectToPage();
+            }
+            else
+            {
+                ModelState.AddModelError(string.Empty, $"Failed to delete product. Status code: {response.StatusCode}");
+                await LoadProductsAsync();
+                return Page();
+            }
+        }
+
+        private async Task LoadProductsAsync()
+        {
             try
             {
                 var client = _httpClientFactory.CreateClient("MyAPI");
-                var fullUrl = $"{_apiSettings.BaseUrl}/api/sale/products";
-                Console.WriteLine($"Requesting: {fullUrl}"); 
-                var response = await client.GetAsync(fullUrl);
+                var response = await client.GetAsync($"{_apiSettings.BaseUrl}/api/sale/products");
                 if (response.IsSuccessStatusCode)
                 {
                     Products = await response.Content.ReadFromJsonAsync<List<ProductModel>>() ?? new List<ProductModel>();
@@ -33,15 +55,14 @@ namespace EcommerceFrontend.Web.Pages.Sale.Products
                 else
                 {
                     ModelState.AddModelError(string.Empty, $"Failed to fetch products. Status code: {response.StatusCode}");
-                    Products = new List<ProductModel>(); // Đảm bảo khởi tạo lại
+                    Products = new List<ProductModel>();
                 }
             }
             catch (Exception ex)
             {
                 ModelState.AddModelError(string.Empty, $"Error fetching products: {ex.Message}");
-                Products = new List<ProductModel>(); // Đảm bảo khởi tạo lại
+                Products = new List<ProductModel>();
             }
-            return Page();
         }
     }
 }

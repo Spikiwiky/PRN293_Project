@@ -6,11 +6,20 @@
 <form method="post">
     <div class="form-group">
         <label asp-for="Category.ProductCategoryTitle"></label>
-        <input asp-for="Category.ProductCategoryTitle" class="form-control" />
+        <input asp-for="Category.ProductCategoryTitle" class="form-control" required />
+        <span asp-validation-for="Category.ProductCategoryTitle" class="text-danger"></span>
     </div>
-    <div class="form-group">
-        <label asp-for="Category.IsDelete"></label>
-        <input asp-for="Category.IsDelete" class="form-control" />
+
+    <div class="form-group form-check">
+        <input asp-for="Category.IsDelete" class="form-check-input" />
+        <label asp-for="Category.IsDelete" class="form-check-label">Mark as Deleted</label>
+        <span asp-validation-for="Category.IsDelete" class="text-danger"></span>
     </div>
+
     <button type="submit" class="btn btn-primary">Create</button>
+    <a asp-page="Index" class="btn btn-secondary">Back</a>
 </form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

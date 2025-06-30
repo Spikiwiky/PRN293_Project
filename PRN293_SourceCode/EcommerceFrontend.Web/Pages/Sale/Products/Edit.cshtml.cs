@@ -21,7 +21,7 @@ namespace EcommerceFrontend.Web.Pages.Sale.Products
             _apiSettings = apiSettings.Value ?? throw new ArgumentNullException(nameof(apiSettings), "ApiSettings is not configured.");
         }
 
-        public async Task<IActionResult> OnGetAsync(int id)
+        public async Task<IActionResult> OnGetAsync([FromQuery] int id)
         {
             var client = _httpClientFactory.CreateClient("MyAPI");
             var response = await client.GetAsync($"{_apiSettings.BaseUrl}/api/sale/products/{id}");
@@ -30,18 +30,29 @@ namespace EcommerceFrontend.Web.Pages.Sale.Products
                 Product = await response.Content.ReadFromJsonAsync<ProductModel>() ?? new ProductModel();
                 if (Product.ProductId != id)
                 {
-                    Product.ProductId = id;
+                    Product.ProductId = id;  
                 }
                 return Page();
             }
             return NotFound();
         }
 
-        public async Task<IActionResult> OnPostAsync()
+
+        public async Task<IActionResult> OnPost()
         {
-            if (Product?.ProductId == 0)
+            Console.WriteLine("OnPost method called.");
+            Console.WriteLine($"ProductId: {Product?.ProductId}");
+
+            if (!ModelState.IsValid) // Kiểm tra validation
+            {
+                Console.WriteLine("ModelState is invalid.");
+                return Page();
+            }
+
+            if (Product?.ProductId <= 0) // Sử dụng <= 0 để chắc chắn
             {
                 ModelState.AddModelError(string.Empty, "Invalid Product ID.");
+                Console.WriteLine("Product ID is invalid.");
                 return Page();
             }
 
@@ -62,7 +73,7 @@ namespace EcommerceFrontend.Web.Pages.Sale.Products
                     Variants = Product.Variants
                 };
                 var content = new StringContent(JsonSerializer.Serialize(updateDto), Encoding.UTF8, "application/json");
-                var fullUrl = $"{_apiSettings.BaseUrl}/api/sale/products/update/{Product.ProductId}";
+                var fullUrl = $"{_apiSettings.BaseUrl}/api/sale/products/{Product.ProductId}";
                 Console.WriteLine($"Sending PUT to {fullUrl} with data: {await content.ReadAsStringAsync()}");
                 var response = await client.PutAsync(fullUrl, content);
 
@@ -86,5 +97,6 @@ namespace EcommerceFrontend.Web.Pages.Sale.Products
                 return Page();
             }
         }
+
     }
 }

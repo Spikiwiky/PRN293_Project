@@ -48,19 +48,19 @@ namespace EcommerceBackend.BusinessObject.dtos.SaleDto
     public class CreateProductCategoryDto
     {
         public string ProductCategoryTitle { get; set; }
-        public bool? IsDelete { get; set; } = false;
+        public bool IsDelete { get; set; } = false;
     }
 
     public class UpdateProductCategoryDto
     {
         public string ProductCategoryTitle { get; set; }
-        public bool? IsDelete { get; set; }
+        public bool IsDelete { get; set; }
     }
 
     public class ProductCategoryResponseDto
     {
         public int ProductCategoryId { get; set; }
         public string ProductCategoryTitle { get; set; }
-        public bool? IsDelete { get; set; }
+        public bool IsDelete { get; set; }
     }
 }
