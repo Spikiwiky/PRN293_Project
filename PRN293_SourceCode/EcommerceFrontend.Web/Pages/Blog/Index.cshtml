@@ -1,4 +1,25 @@
 ﻿@page
 @model EcommerceFrontend.Web.Pages.Blog.IndexModel
 @{
+    ViewData["Title"] = "Blog List";
+    Layout = "_Layout"; // or your custom layout
 }
+
+<div class="container mt-4">
+    <h2 class="mb-4">Blog Posts</h2>
+    <div class="row row-cols-1 row-cols-md-2 g-4">
+        @foreach (var blog in Model.Blogs)
+        {
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">@blog.BlogTittle</h5>
+                        <p class="card-text text-truncate" style="max-height: 4.5em;">@blog.BlogContent</p>
+                        <a asp-page="Details" asp-route-id="@blog.BlogId" class="btn btn-outline-primary btn-sm">Read More</a>
+
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

@@ -1,4 +1,15 @@
-﻿@page
+﻿@page "{id:int}"
 @model EcommerceFrontend.Web.Pages.Blog.DetailsModel
 @{
+    ViewData["Title"] = Model.Blog?.BlogTittle ?? "Blog Detail";
+    Layout = "_Layout";
 }
+
+<div class="container mt-4">
+    <div class="card shadow p-4">
+        <h2>@Model.Blog?.BlogTittle</h2>
+        <hr />
+        <p>@Model.Blog?.BlogContent</p>
+        <a asp-page="./Index" class="btn btn-outline-secondary mt-3">Back to Blog List</a>
+    </div>
+</div>
