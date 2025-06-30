@@ -1,0 +1,44 @@
+﻿@page
+@model EcommerceFrontend.Web.Pages.Sale.Products.IndexModel
+@{
+    ViewData["Title"] = "Product List";
+}
+
+<h1>Product List</h1>
+
+
+<a asp-page="Create" class="btn btn-primary">Create New Product</a>
+
+@if (Model.Products == null || !Model.Products.Any())
+{
+    <p>No products found.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Brand</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var product in Model.Products)
+            {
+                <tr>
+                    <td>@product.ProductId</td>
+                    <td>@product.Name</td>
+                    <td>@product.Brand</td>
+                    <td>
+                        <a asp-page="Edit" asp-route-id="@product.ProductId" class="btn btn-warning">Edit</a>
+                        <form method="post" asp-page-handler="Delete" asp-route-id="@product.ProductId" style="display:inline;">
+                            <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

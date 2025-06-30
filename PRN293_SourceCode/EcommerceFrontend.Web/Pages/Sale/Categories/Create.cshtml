@@ -1,0 +1,16 @@
+﻿@page
+@model EcommerceFrontend.Web.Pages.Sale.Categories.CreateModel
+
+<h1>Create Category</h1>
+
+<form method="post">
+    <div class="form-group">
+        <label asp-for="Category.ProductCategoryTitle"></label>
+        <input asp-for="Category.ProductCategoryTitle" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="Category.IsDelete"></label>
+        <input asp-for="Category.IsDelete" class="form-control" />
+    </div>
+    <button type="submit" class="btn btn-primary">Create</button>
+</form>

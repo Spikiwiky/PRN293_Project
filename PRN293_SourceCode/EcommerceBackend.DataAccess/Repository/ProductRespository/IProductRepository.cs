@@ -26,6 +26,7 @@ namespace EcommerceBackend.DataAccess.Repository
         Task<bool> UpdateProductAttributesAsync(int productId, string availableAttributes);
         Task<bool> AddProductVariantAsync(ProductVariant variant);
         Task<bool> UpdateProductVariantAsync(ProductVariant variant);
+        Task<bool> UpdateProductVariantAsync(ProductVariant variant, bool skipValidation = false);
         Task<bool> DeleteProductVariantAsync(int variantId);
 
         // New methods for managing product attributes
@@ -39,5 +40,11 @@ namespace EcommerceBackend.DataAccess.Repository
         Task<bool> UpdateVariantValueAsync(int variantId, int valueIndex, Dictionary<string, string> variantValue);
         Task<bool> DeleteVariantValueAsync(int variantId, int valueIndex);
         Task<List<Dictionary<string, string>>> GetVariantValuesAsync(int variantId);
+
+        Task<bool> CreateProductAsync(Product product);
+        Task<bool> UpdateProductAsync(Product product);
+        Task<bool> DeleteProductAsync(int productId);
+
+        Task<List<ProductVariant>> GetVariantsByProductIdAsync(int productId);
     }
 }

@@ -1,0 +1,33 @@
+@page
+@model Admin.Products.IndexModel
+@{
+    ViewData["Title"] = "Quản lý sản phẩm";
+}
+<h2>Quản lý sản phẩm</h2>
+<table class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Tên</th>
+            <th>Giá</th>
+            <th>Danh mục</th>
+            <th>Hành động</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var p in Model.Products)
+        {
+            <tr>
+                <td>@p.ProductId</td>
+                <td>@p.Name</td>
+                <td>@p.BasePrice.ToString("N0")</td>
+                <td>@p.CategoryName</td>
+                <td>
+                    <a asp-page="Edit" asp-route-id="@p.ProductId" class="btn btn-sm btn-warning">Sửa</a>
+                    <a asp-page="Details" asp-route-id="@p.ProductId" class="btn btn-sm btn-info">Chi tiết</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<!-- Table, search, pagination sẽ được bổ sung --> 

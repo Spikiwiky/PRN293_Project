@@ -24,6 +24,8 @@ namespace EcommerceFrontend.Web.Services
         Task<bool> AddVariantValueAsync(int variantId, Dictionary<string, string> variantValue);
         Task<bool> UpdateVariantValueAsync(int variantId, int valueIndex, Dictionary<string, string> variantValue);
         Task<bool> DeleteVariantValueAsync(int variantId, int valueIndex);
+        Task<bool> UpdateProductAsync(int id, ProductDTO product);
+        Task<bool> CreateProductAsync(ProductDTO product);
     }
 
     public class ProductService : IProductService
@@ -99,11 +101,9 @@ namespace EcommerceFrontend.Web.Services
                     try
                     {
                         if (string.IsNullOrEmpty(variant.Attributes)) return false;
-                        var variantAttributes = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(variant.Attributes);
+                        var variantAttributes = JsonSerializer.Deserialize<Dictionary<string, string>>(variant.Attributes);
                         return searchParams.Attributes.All(attr =>
-                            variantAttributes != null &&
-                            variantAttributes.TryGetValue(attr.Key, out var value) &&
-                            value == attr.Value);
+                            variantAttributes.TryGetValue(attr.Key, out var value) && value == attr.Value);
                     }
                     catch
                     {
@@ -245,6 +245,24 @@ namespace EcommerceFrontend.Web.Services
             response.EnsureSuccessStatusCode();
             var content = await response.Content.ReadAsStringAsync();
             return JsonSerializer.Deserialize<bool>(content, _jsonOptions);
+        }
+
+        public async Task<bool> UpdateProductAsync(int id, ProductDTO product)
+        {
+            var content = new StringContent(JsonSerializer.Serialize(product), Encoding.UTF8, "application/json");
+            var response = await _httpClient.PutAsync($"/api/admin/products/{id}", content);
+            response.EnsureSuccessStatusCode();
+            var responseContent = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<bool>(responseContent, _jsonOptions);
+        }
+
+        public async Task<bool> CreateProductAsync(ProductDTO product)
+        {
+            var content = new StringContent(JsonSerializer.Serialize(product), Encoding.UTF8, "application/json");
+            var response = await _httpClient.PostAsync($"/api/admin/products", content);
+            response.EnsureSuccessStatusCode();
+            var responseContent = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<bool>(responseContent, _jsonOptions);
         }
     }
 } 
