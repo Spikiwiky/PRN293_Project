@@ -1,120 +1,90 @@
+﻿using EcommerceFrontend.Web.Models.Sale;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using EcommerceFrontend.Web.Models.Sale;
-using EcommerceFrontend.Web.Services.Sale;
+using Microsoft.Extensions.Options;
+using System.Text.Json;
+using System.Text;
 
 namespace EcommerceFrontend.Web.Pages.Sale.Products
 {
     public class EditModel : PageModel
     {
-        private readonly ISaleProductService _saleProductService;
-        private readonly ILogger<EditModel> _logger;
+        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly ApiSettings _apiSettings;
 
-        public EditModel(ISaleProductService saleProductService, ILogger<EditModel> logger)
+        [BindProperty]
+        public ProductModel Product { get; set; }
+
+        public EditModel(IHttpClientFactory httpClientFactory, IOptions<ApiSettings> apiSettings)
         {
-            _saleProductService = saleProductService;
-            _logger = logger;
+            _httpClientFactory = httpClientFactory;
+            _apiSettings = apiSettings.Value ?? throw new ArgumentNullException(nameof(apiSettings), "ApiSettings is not configured.");
         }
-
-        [BindProperty]
-        public SaleProductUpdateDto Product { get; set; } = new();
-
-        [BindProperty]
-        public string? ImageUrlsInput { get; set; }
-
-        public List<SelectListItem> Categories { get; set; } = new();
 
         public async Task<IActionResult> OnGetAsync(int id)
         {
-            try
+            var client = _httpClientFactory.CreateClient("MyAPI");
+            var response = await client.GetAsync($"{_apiSettings.BaseUrl}/api/sale/products/{id}");
+            if (response.IsSuccessStatusCode)
             {
-                var product = await _saleProductService.GetProductByIdAsync(id);
-                if (product == null)
+                Product = await response.Content.ReadFromJsonAsync<ProductModel>() ?? new ProductModel();
+                if (Product.ProductId != id)
                 {
-                    return RedirectToPage("./Index");
+                    Product.ProductId = id;
                 }
-
-                // Get categories for dropdown
-                var categories = await _saleProductService.GetCategoriesAsync();
-                Categories = categories.Select(c => new SelectListItem
-                {
-                    Value = c.Id.ToString(),
-                    Text = c.Name
-                }).ToList();
-
-                // Map product data to form
-                Product = new SaleProductUpdateDto
-                {
-                    ProductId = product.ProductId,
-                    ProductName = product.ProductName,
-                    Description = product.Description,
-                    ProductCategoryId = product.ProductCategoryId,
-                    Status = product.Status,
-                    Variants = product.Variants,
-                    ImageUrls = product.ImageUrls,
-                    UpdatedBy = "admin" // Set a default value or get from user session
-                };
-
-                // Set image URLs input
-                ImageUrlsInput = string.Join(Environment.NewLine, product.ImageUrls);
-
                 return Page();
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error loading product for edit");
-                TempData["Error"] = "Failed to load product. Please try again later.";
-                return RedirectToPage("./Index");
-            }
+            return NotFound();
         }
 
         public async Task<IActionResult> OnPostAsync()
         {
+            if (Product?.ProductId == 0)
+            {
+                ModelState.AddModelError(string.Empty, "Invalid Product ID.");
+                return Page();
+            }
+
             try
             {
-                if (!ModelState.IsValid)
+                var client = _httpClientFactory.CreateClient("MyAPI");
+                var updateDto = new
                 {
-                    var categories = await _saleProductService.GetCategoriesAsync();
-                    Categories = categories.Select(c => new SelectListItem
-                    {
-                        Value = c.Id.ToString(),
-                        Text = c.Name
-                    }).ToList();
+                    Name = Product.Name,
+                    Description = Product.Description,
+                    ProductCategoryId = Product.ProductCategoryId,
+                    Brand = Product.Brand,
+                    BasePrice = Product.BasePrice,
+                    AvailableAttributes = Product.AvailableAttributes,
+                    Status = Product.Status,
+                    IsDelete = Product.IsDelete,
+                    ProductImages = Product.ProductImages,
+                    Variants = Product.Variants
+                };
+                var content = new StringContent(JsonSerializer.Serialize(updateDto), Encoding.UTF8, "application/json");
+                var fullUrl = $"{_apiSettings.BaseUrl}/api/sale/products/update/{Product.ProductId}";
+                Console.WriteLine($"Sending PUT to {fullUrl} with data: {await content.ReadAsStringAsync()}");
+                var response = await client.PutAsync(fullUrl, content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine("Update successful, redirecting to Index.");
+                    return RedirectToPage("/Sale/Products/Index");
+                }
+                else
+                {
+                    var error = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"Update failed. Status: {response.StatusCode}, Error: {error}");
+                    ModelState.AddModelError(string.Empty, $"Failed to update product. Status code: {response.StatusCode}. Error: {error}");
                     return Page();
                 }
-
-                // Handle image URLs
-                if (!string.IsNullOrEmpty(ImageUrlsInput))
-                {
-                    Product.ImageUrls = ImageUrlsInput
-                        .Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries)
-                        .Select(url => url.Trim())
-                        .ToList();
-                }
-
-                // Set UpdatedBy if not already set
-                if (string.IsNullOrEmpty(Product.UpdatedBy))
-                {
-                    Product.UpdatedBy = "admin"; // Set a default value or get from user session
-                }
-
-                await _saleProductService.UpdateProductAsync(Product);
-                TempData["Success"] = "Product updated successfully";
-                return RedirectToPage("./Index");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating product");
-                ModelState.AddModelError("", "Error updating product. Please try again.");
-                var categories = await _saleProductService.GetCategoriesAsync();
-                Categories = categories.Select(c => new SelectListItem
-                {
-                    Value = c.Id.ToString(),
-                    Text = c.Name
-                }).ToList();
+                Console.WriteLine($"Exception during update: {ex.Message}");
+                ModelState.AddModelError(string.Empty, $"Error updating product: {ex.Message}");
                 return Page();
             }
         }
     }
-} 
+}

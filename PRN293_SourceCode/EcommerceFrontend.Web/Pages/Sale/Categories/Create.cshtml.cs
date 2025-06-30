@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Text.Json;
 using System.Text;
 
-namespace EcommerceFrontend.Web.Pages.Sale.Products
+namespace EcommerceFrontend.Web.Pages.Sale.Categories
 {
     public class CreateModel : PageModel
     {
@@ -12,13 +12,13 @@ namespace EcommerceFrontend.Web.Pages.Sale.Products
         private readonly ApiSettings _apiSettings;
 
         [BindProperty]
-        public ProductModel Product { get; set; }
+        public CategoryModel Category { get; set; }
 
         public CreateModel(IHttpClientFactory httpClientFactory, IConfiguration configuration)
         {
             _httpClientFactory = httpClientFactory;
             _apiSettings = configuration.GetSection("ApiSettings").Get<ApiSettings>();
-            Product = new ProductModel();
+            Category = new CategoryModel();
         }
 
         public IActionResult OnGet()
@@ -34,8 +34,8 @@ namespace EcommerceFrontend.Web.Pages.Sale.Products
             }
 
             var client = _httpClientFactory.CreateClient();
-            var content = new StringContent(JsonSerializer.Serialize(Product), Encoding.UTF8, "application/json");
-            var response = await client.PostAsync($"{_apiSettings.BaseUrl}/products", content);
+            var content = new StringContent(JsonSerializer.Serialize(Category), Encoding.UTF8, "application/json");
+            var response = await client.PostAsync($"{_apiSettings.BaseUrl}/categories", content);
 
             if (response.IsSuccessStatusCode)
             {

@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
 
-namespace EcommerceFrontend.Web.Pages.Sale.Products
+namespace EcommerceFrontend.Web.Pages.Sale.Categories
 {
     public class DeleteModel : PageModel
     {
@@ -11,7 +11,7 @@ namespace EcommerceFrontend.Web.Pages.Sale.Products
         private readonly ApiSettings _apiSettings;
 
         [BindProperty]
-        public ProductModel Product { get; set; }
+        public CategoryModel Category { get; set; }
 
         public DeleteModel(IHttpClientFactory httpClientFactory, IOptions<ApiSettings> apiSettings)
         {
@@ -22,10 +22,10 @@ namespace EcommerceFrontend.Web.Pages.Sale.Products
         public async Task<IActionResult> OnGetAsync(int id)
         {
             var client = _httpClientFactory.CreateClient();
-            var response = await client.GetAsync($"{_apiSettings.BaseUrl}/products/{id}");
+            var response = await client.GetAsync($"{_apiSettings.BaseUrl}/categories/{id}");
             if (response.IsSuccessStatusCode)
             {
-                Product = await response.Content.ReadFromJsonAsync<ProductModel>();
+                Category = await response.Content.ReadFromJsonAsync<CategoryModel>();
                 return Page();
             }
             return NotFound();
@@ -34,7 +34,7 @@ namespace EcommerceFrontend.Web.Pages.Sale.Products
         public async Task<IActionResult> OnPostDeleteAsync(int id)
         {
             var client = _httpClientFactory.CreateClient();
-            var response = await client.DeleteAsync($"{_apiSettings.BaseUrl}/products/{id}");
+            var response = await client.DeleteAsync($"{_apiSettings.BaseUrl}/categories/{id}");
 
             if (response.IsSuccessStatusCode)
             {

@@ -1,358 +1,341 @@
-﻿using EcommerceBackend.BusinessObject.dtos.SaleDto;
+﻿using EcommerceBackend.API.Dtos;
+using EcommerceBackend.BusinessObject.dtos.SaleDto;
+using EcommerceBackend.BusinessObject.Services;
 using EcommerceBackend.BusinessObject.Services.SaleService;
+using EcommerceBackend.DataAccess.Models;
+using EcommerceBackend.DataAccess.Repository;
+using EcommerceBackend.DataAccess.Repository.SaleRepository;
+
 using Microsoft.AspNetCore.Mvc;
 
 namespace EcommerceBackend.API.Controllers.SaleController
 {
-    [Route("api/sale/products")]
+    [Route("api/sale")]
     [ApiController]
     public class SaleProductController : ControllerBase
     {
-        private readonly ISaleProductService _saleProductService;
-        private readonly ILogger<SaleProductController> _logger;
-
-        // Predefined valid sizes
-        private static readonly HashSet<string> ValidSizes = new(StringComparer.OrdinalIgnoreCase)
-        {
-            "XS", "S", "M", "L", "XL", "XXL"
-        };
-
-        // Predefined valid colors
-        private static readonly HashSet<string> ValidColors = new(StringComparer.OrdinalIgnoreCase)
-        {
-            "Red", "Blue", "Green", "Black", "White",
-            "Yellow", "Purple", "Orange", "Pink",
-            "Brown", "Gray", "Navy"
-        };
+        private readonly DataAccess.Repository.SaleRepository.IProductRepository _productRepository;
+        private readonly ISaleService _saleService;
+        private readonly ICategoryRepository _categoryRepository;
+        private readonly ICategoryService _categoryService;
 
         public SaleProductController(
-            ISaleProductService adminProductService,
-            ILogger<SaleProductController> logger)
+            DataAccess.Repository.SaleRepository.IProductRepository productRepository,
+            ISaleService saleService,
+            ICategoryRepository categoryRepository,
+            ICategoryService categoryService)
         {
-            _saleProductService = adminProductService;
-            _logger = logger;
+            _productRepository = productRepository;
+            _saleService = saleService;
+            _categoryRepository = categoryRepository;
+            _categoryService = categoryService;
         }
 
-        private ActionResult ValidateProductVariant(SaleProductCreateDto createDto)
+        [HttpGet("products")]
+        public async Task<IActionResult> GetAllProducts()
         {
-            if (createDto.Variants?.Any() != true)
+            var products = await _saleService.GetAllProductsAsync();
+            var responseDtos = products.Select(p => new EcommerceBackend.API.Dtos.ProductResponseDto
             {
-                return BadRequest("At least one variant is required");
-            }
+                ProductId = p.ProductId,
+                Name = p.Name,
+                Description = p.Description,
+                ProductCategoryId = p.ProductCategoryId,
+                Brand = p.Brand,
+                BasePrice = p.BasePrice,
+                AvailableAttributes = p.AvailableAttributes,
+                Status = p.Status,
+                IsDelete = p.IsDelete,
+                CreatedAt = p.CreatedAt,
+                UpdatedAt = p.UpdatedAt
+            }).ToList();
 
-            foreach (var variant in createDto.Variants)
-            {
-                if (string.IsNullOrEmpty(variant.Size) || string.IsNullOrEmpty(variant.Color))
-                {
-                    return BadRequest("Each variant must have both size and color");
-                }
-
-                if (!ValidSizes.Contains(variant.Size))
-                {
-                    return BadRequest($"Invalid size '{variant.Size}'. Valid sizes are: {string.Join(", ", ValidSizes)}");
-                }
-
-                if (!ValidColors.Contains(variant.Color))
-                {
-                    return BadRequest($"Invalid color '{variant.Color}'. Valid colors are: {string.Join(", ", ValidColors)}");
-                }
-
-                if (variant.Price <= 0)
-                {
-                    return BadRequest("Price must be greater than 0 for all variants");
-                }
-            }
-
-            return Ok();
+            return Ok(responseDtos);
         }
 
-        private ActionResult ValidateProductVariant(SaleProductUpdateDto updateDto)
+        [HttpPost("products")]
+        public async Task<IActionResult> CreateProduct([FromBody] CreateProductDto productDto)
         {
-            // If using legacy fields, validate them
-            if (!string.IsNullOrEmpty(updateDto.Size) || !string.IsNullOrEmpty(updateDto.Color))
+            if (productDto == null)
             {
-                if (string.IsNullOrEmpty(updateDto.Size) || string.IsNullOrEmpty(updateDto.Color))
-                {
-                    return BadRequest("Both size and color must be provided together");
-                }
-
-                if (!ValidSizes.Contains(updateDto.Size))
-                {
-                    return BadRequest($"Invalid size. Valid sizes are: {string.Join(", ", ValidSizes)}");
-                }
-
-                if (!ValidColors.Contains(updateDto.Color))
-                {
-                    return BadRequest($"Invalid color. Valid colors are: {string.Join(", ", ValidColors)}");
-                }
+                return BadRequest("Dữ liệu sản phẩm không được để trống.");
             }
 
-            // If using new variants array, validate each variant
-            if (updateDto.Variants?.Any() == true)
+            var product = new Product
             {
-                foreach (var variant in updateDto.Variants)
-                {
-                    if (string.IsNullOrEmpty(variant.Size) || string.IsNullOrEmpty(variant.Color))
-                    {
-                        return BadRequest("Each variant must have both size and color");
-                    }
+                Name = productDto.Name,
+                Description = productDto.Description,
+                ProductCategoryId = productDto.ProductCategoryId,
+                Brand = productDto.Brand,
+                BasePrice = productDto.BasePrice,
+                AvailableAttributes = productDto.AvailableAttributes,
+                Status = productDto.Status,
+                IsDelete = productDto.IsDelete,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
 
-                    if (!ValidSizes.Contains(variant.Size))
-                    {
-                        return BadRequest($"Invalid size '{variant.Size}'. Valid sizes are: {string.Join(", ", ValidSizes)}");
-                    }
-
-                    if (!ValidColors.Contains(variant.Color))
-                    {
-                        return BadRequest($"Invalid color '{variant.Color}'. Valid colors are: {string.Join(", ", ValidColors)}");
-                    }
-                }
+            if (product.ProductCategoryId.HasValue && product.ProductCategoryId.Value != 0)
+            {
+                var category = await _categoryRepository.GetCategoryByIdAsync(product.ProductCategoryId.Value);
+                if (category == null) return NotFound("Danh mục không tồn tại.");
+                product.ProductCategory = category;
             }
 
-            return Ok();
+            await _saleService.CreateProductAsync(product);
+
+            if (productDto.ProductImages != null)
+            {
+                product.ProductImages = productDto.ProductImages.Select(img => new ProductImage
+                {
+                    ProductId = product.ProductId,
+                    ImageUrl = img.ImageUrl
+                }).ToList();
+            }
+
+            if (productDto.Variants != null)
+            {
+                product.Variants = productDto.Variants.Select(v => new ProductVariant
+                {
+                    ProductId = product.ProductId,
+                    Attributes = v.Attributes,
+                    Variants = v.Variants,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                }).ToList();
+            }
+
+            await _productRepository.SaveChangesAsync();
+
+            var responseDto = new EcommerceBackend.API.Dtos.ProductResponseDto
+            {
+                ProductId = product.ProductId,
+                Name = product.Name,
+                Description = product.Description,
+                ProductCategoryId = product.ProductCategoryId,
+                Brand = product.Brand,
+                BasePrice = product.BasePrice,
+                AvailableAttributes = product.AvailableAttributes,
+                Status = product.Status,
+                IsDelete = product.IsDelete,
+                CreatedAt = product.CreatedAt,
+                UpdatedAt = product.UpdatedAt
+            };
+
+            return CreatedAtAction(nameof(GetProduct), new { id = product.ProductId }, responseDto);
         }
 
-        [HttpGet]
-        public async Task<ActionResult<List<SaleProductDto>>> GetProducts(
-            [FromQuery] string? name = null,
-            [FromQuery] string? category = null,
-            [FromQuery] string? size = null,
-            [FromQuery] string? color = null,
-            [FromQuery] decimal? minPrice = null,
-            [FromQuery] decimal? maxPrice = null,
-            [FromQuery] DateTime? startDate = null,
-            [FromQuery] DateTime? endDate = null,
-            [FromQuery] bool? isFeatured = null,
-            [FromQuery] int page = 1,
-            [FromQuery] int pageSize = 10)
+        [HttpPut("products/update/{id}")]
+        public async Task<IActionResult> UpdateProduct(int id, [FromBody] UpdateProductDto productDto)
         {
-            try
+            if (productDto == null)
             {
-                var products = await _saleProductService.SearchProductsAsync(
-                    name, category, size, color, minPrice, maxPrice,
-                    startDate, endDate, isFeatured, page, pageSize);
+                return BadRequest("Dữ liệu sản phẩm không được để trống.");
+            }
 
-                var totalCount = await _saleProductService.GetTotalProductCountAsync();
+            var product = await _productRepository.GetProductByIdAsync(id);
+            if (product == null)
+            {
+                return NotFound("Sản phẩm không tồn tại.");
+            }
 
-                return Ok(new
+            product.Name = productDto.Name;
+            product.Description = productDto.Description;
+            product.ProductCategoryId = productDto.ProductCategoryId;
+            product.Brand = productDto.Brand;
+            product.BasePrice = productDto.BasePrice;
+            product.AvailableAttributes = productDto.AvailableAttributes;
+            product.Status = productDto.Status;
+            product.IsDelete = productDto.IsDelete;
+            product.UpdatedAt = DateTime.UtcNow;
+
+            if (product.ProductCategoryId.HasValue && product.ProductCategoryId.Value != 0)
+            {
+                var category = await _categoryRepository.GetCategoryByIdAsync(product.ProductCategoryId.Value);
+                if (category == null) return NotFound("Danh mục không tồn tại.");
+                product.ProductCategory = category;
+            }
+
+            await _saleService.UpdateProductAsync(product);
+
+            if (productDto.ProductImages != null)
+            {
+                var images = productDto.ProductImages.Select(img => new ProductImage
                 {
-                    Products = products,
-                    TotalCount = totalCount,
-                    Page = page,
-                    PageSize = pageSize,
-                    TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
-                });
+                    ProductId = product.ProductId,
+                    ImageUrl = img.ImageUrl
+                }).ToList();
+                _productRepository.UpdateProductImages(product, images);
             }
-            catch (Exception ex)
+
+            if (productDto.Variants != null)
             {
-                _logger.LogError(ex, "Error getting products");
-                return StatusCode(500, "Internal server error");
+                var variants = productDto.Variants.Select(v => new ProductVariant
+                {
+                    ProductId = product.ProductId,
+                    Attributes = v.Attributes,
+                    Variants = v.Variants,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                }).ToList();
+                _productRepository.UpdateProductVariants(product, variants);
             }
+
+            await _productRepository.SaveChangesAsync();
+
+            var responseDto = new EcommerceBackend.API.Dtos.ProductResponseDto
+            {
+                ProductId = product.ProductId,
+                Name = product.Name,
+                Description = product.Description,
+                ProductCategoryId = product.ProductCategoryId,
+                Brand = product.Brand,
+                BasePrice = product.BasePrice,
+                AvailableAttributes = product.AvailableAttributes,
+                Status = product.Status,
+                IsDelete = product.IsDelete,
+                CreatedAt = product.CreatedAt,
+                UpdatedAt = product.UpdatedAt
+            };
+
+            return Ok(responseDto);
         }
 
-        [HttpGet("{id}")]
-        public async Task<ActionResult<SaleProductDto>> GetProduct(int id)
-        {
-            try
-            {
-                var product = await _saleProductService.GetProductByIdAsync(id);
-                if (product == null)
-                {
-                    return NotFound($"Product with ID {id} not found");
-                }
-                return Ok(product);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting product with ID {Id}", id);
-                return StatusCode(500, "An error occurred while retrieving the product");
-            }
-        }
-
-        [HttpPost]
-        public async Task<ActionResult<SaleProductDto>> CreateProduct([FromBody] SaleProductCreateDto createDto)
-        {
-            try
-            {
-                var validationResult = ValidateProductVariant(createDto);
-                if (validationResult is BadRequestObjectResult)
-                {
-                    return validationResult;
-                }
-
-                if (string.IsNullOrEmpty(createDto.ProductName))
-                {
-                    return BadRequest("Product name is required");
-                }
-
-                var product = await _saleProductService.CreateProductAsync(createDto);
-                return CreatedAtAction(nameof(GetProduct), new { id = product.ProductId }, product);
-            }
-            catch (InvalidOperationException ex) when (ex.Message.Contains("variant"))
-            {
-                return Conflict(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error creating product");
-                return StatusCode(500, "An error occurred while creating the product");
-            }
-        }
-
-        [HttpPut("{id}")]
-        public async Task<ActionResult<SaleProductDto>> UpdateProduct(
-            int id,
-            [FromBody] SaleProductUpdateDto updateDto)
-        {
-            try
-            {
-                if (id != updateDto.ProductId)
-                {
-                    return BadRequest("ID mismatch");
-                }
-
-                var validationResult = ValidateProductVariant(updateDto);
-                if (validationResult is BadRequestObjectResult)
-                {
-                    return validationResult;
-                }
-
-                // Check price in variants or legacy field
-                if (updateDto.Variants?.Any() == true)
-                {
-                    if (updateDto.Variants.Any(v => v.Price <= 0))
-                    {
-                        return BadRequest("Price must be greater than 0 for all variants");
-                    }
-                }
-                else if (updateDto.Price.HasValue && updateDto.Price <= 0)
-                {
-                    return BadRequest("Price must be greater than 0");
-                }
-
-                var product = await _saleProductService.UpdateProductAsync(updateDto);
-                return Ok(product);
-            }
-            catch (InvalidOperationException ex) when (ex.Message.Contains("variant"))
-            {
-                return Conflict(new { message = ex.Message });
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error updating product with ID {Id}", id);
-                return StatusCode(500, "An error occurred while updating the product");
-            }
-        }
-
-        [HttpDelete("{id}")]
+        [HttpDelete("products/{id}")]
         public async Task<IActionResult> DeleteProduct(int id)
         {
-            try
+            var product = await _productRepository.GetProductByIdAsync(id);
+            if (product == null)
             {
-                var result = await _saleProductService.DeleteProductAsync(id);
-                if (!result)
-                {
-                    return NotFound($"Product with ID {id} not found");
-                }
-                return NoContent();
+                return NotFound("Sản phẩm không tồn tại.");
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error deleting product with ID {Id}", id);
-                return StatusCode(500, "An error occurred while deleting the product");
-            }
-        }
 
-        [HttpGet("search")]
-        public async Task<ActionResult<List<SaleProductDto>>> SearchProducts(
-            [FromQuery] string? name = null,
-            [FromQuery] string? category = null,
-            [FromQuery] string? size = null,
-            [FromQuery] string? color = null,
-            [FromQuery] decimal? minPrice = null,
-            [FromQuery] decimal? maxPrice = null,
-            [FromQuery] DateTime? startDate = null,
-            [FromQuery] DateTime? endDate = null,
-            [FromQuery] bool? isFeatured = null,
-            [FromQuery] int page = 1,
-            [FromQuery] int pageSize = 10)
-        {
-            try
-            {
-                var validationResult = ValidateProductVariant(new SaleProductUpdateDto { Size = size, Color = color });
-                if (validationResult is BadRequestObjectResult)
-                {
-                    return validationResult;
-                }
+            await _saleService.DeleteProductAsync(id);
+            await _productRepository.SaveChangesAsync();
 
-                var products = await _saleProductService.SearchProductsAsync(
-                    name, category, size, color, minPrice, maxPrice,
-                    startDate, endDate, isFeatured, page, pageSize);
-                return Ok(products);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error searching products");
-                return StatusCode(500, "An error occurred while searching products");
-            }
-        }
-
-        [HttpGet("count")]
-        public async Task<ActionResult<int>> GetTotalProductCount()
-        {
-            try
-            {
-                var count = await _saleProductService.GetTotalProductCountAsync();
-                return Ok(count);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting total product count");
-                return StatusCode(500, "An error occurred while getting total product count");
-            }
-        }
-
-        [HttpPatch("{id}/status")]
-        public async Task<IActionResult> UpdateProductStatus(int id, [FromBody] int status)
-        {
-            try
-            {
-                if (status < 0)
-                {
-                    return BadRequest("Status cannot be negative");
-                }
-
-                var result = await _saleProductService.UpdateProductStatusAsync(id, status);
-                if (!result)
-                {
-                    return NotFound($"Product with ID {id} not found");
-                }
-                return NoContent();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error updating status for product with ID {Id}", id);
-                return StatusCode(500, "An error occurred while updating the product status");
-            }
+            return NoContent();
         }
 
         [HttpGet("categories")]
-        public async Task<ActionResult<List<BusinessObject.dtos.AdminDto.CategoryDto>>> GetCategories()
+        public async Task<IActionResult> GetAllCategories() // Thêm endpoint này
         {
-            try
+            var categories = await _categoryService.GetAllCategoriesAsync();
+            var responseDtos = categories.Select(c => new ProductCategoryResponseDto
             {
-                var categories = await _saleProductService.GetCategoriesAsync();
-                return Ok(categories);
-            }
-            catch (Exception ex)
+                ProductCategoryId = c.ProductCategoryId,
+                ProductCategoryTitle = c.ProductCategoryTitle,
+                IsDelete = c.IsDelete
+            }).ToList();
+
+            return Ok(responseDtos);
+        }
+
+        [HttpPost("categories")]
+        public async Task<IActionResult> CreateCategory([FromBody] CreateProductCategoryDto categoryDto)
+        {
+            if (categoryDto == null)
             {
-                _logger.LogError(ex, "Error getting categories");
-                return StatusCode(500, "An error occurred while getting categories");
+                return BadRequest("Dữ liệu danh mục không được để trống.");
             }
+
+            var category = new ProductCategory
+            {
+                ProductCategoryTitle = categoryDto.ProductCategoryTitle,
+                IsDelete = categoryDto.IsDelete
+            };
+
+            await _categoryService.CreateCategoryAsync(category);
+            await _categoryRepository.SaveChangesAsync();
+
+            var responseDto = new ProductCategoryResponseDto
+            {
+                ProductCategoryId = category.ProductCategoryId,
+                ProductCategoryTitle = category.ProductCategoryTitle,
+                IsDelete = category.IsDelete
+            };
+
+            return CreatedAtAction(nameof(GetCategory), new { id = category.ProductCategoryId }, responseDto);
+        }
+
+        [HttpPut("categories/{id}")]
+        public async Task<IActionResult> UpdateCategory(int id, [FromBody] UpdateProductCategoryDto categoryDto)
+        {
+            if (categoryDto == null)
+            {
+                return BadRequest("Dữ liệu danh mục không được để trống.");
+            }
+
+            var category = await _categoryRepository.GetCategoryByIdAsync(id);
+            if (category == null)
+            {
+                return NotFound("Danh mục không tồn tại.");
+            }
+
+            category.ProductCategoryTitle = categoryDto.ProductCategoryTitle;
+            category.IsDelete = categoryDto.IsDelete;
+
+            await _categoryService.UpdateCategoryAsync(category);
+            await _categoryRepository.SaveChangesAsync();
+
+            var responseDto = new ProductCategoryResponseDto
+            {
+                ProductCategoryId = category.ProductCategoryId,
+                ProductCategoryTitle = category.ProductCategoryTitle,
+                IsDelete = category.IsDelete
+            };
+
+            return Ok(responseDto);
+        }
+
+        [HttpDelete("categories/{id}")]
+        public async Task<IActionResult> DeleteCategory(int id)
+        {
+            var category = await _categoryRepository.GetCategoryByIdAsync(id);
+            if (category == null)
+            {
+                return NotFound("Danh mục không tồn tại.");
+            }
+
+            await _categoryService.DeleteCategoryAsync(id);
+            await _categoryRepository.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        [HttpGet("products/{id}")]
+        public async Task<IActionResult> GetProduct(int id)
+        {
+            var product = await _productRepository.GetProductByIdAsync(id);
+            if (product == null) return NotFound();
+            var responseDto = new EcommerceBackend.API.Dtos.ProductResponseDto
+            {
+                ProductId = product.ProductId,
+                Name = product.Name,
+                Description = product.Description,
+                ProductCategoryId = product.ProductCategoryId,
+                Brand = product.Brand,
+                BasePrice = product.BasePrice,
+                AvailableAttributes = product.AvailableAttributes,
+                Status = product.Status,
+                IsDelete = product.IsDelete,
+                CreatedAt = product.CreatedAt,
+                UpdatedAt = product.UpdatedAt
+            };
+            return Ok(responseDto);
+        }
+
+        [HttpGet("categories/{id}")]
+        public async Task<IActionResult> GetCategory(int id)
+        {
+            var category = await _categoryRepository.GetCategoryByIdAsync(id);
+            if (category == null) return NotFound();
+            var responseDto = new ProductCategoryResponseDto
+            {
+                ProductCategoryId = category.ProductCategoryId,
+                ProductCategoryTitle = category.ProductCategoryTitle,
+                IsDelete = category.IsDelete
+            };
+            return Ok(responseDto);
         }
     }
 }

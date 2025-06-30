@@ -1,16 +1,21 @@
 ﻿using EcommerceFrontend.Web.Models.Sale;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.Extensions.Options;
 
-namespace EcommerceFrontend.Web.Pages.Sale.Products
+namespace EcommerceFrontend.Web.Pages.Sale.Categories
 {
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.RazorPages;
+    using System.Net.Http.Json;
+    using EcommerceFrontend.Web.Models;
+    using Microsoft.Extensions.Options;
+
     public class IndexModel : PageModel
     {
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly ApiSettings _apiSettings;
 
-        public List<ProductModel> Products { get; set; } = new List<ProductModel>();  
+        public List<CategoryModel> Categories { get; set; } = new List<CategoryModel>();
 
         public IndexModel(IHttpClientFactory httpClientFactory, IOptions<ApiSettings> apiSettings)
         {
@@ -23,23 +28,20 @@ namespace EcommerceFrontend.Web.Pages.Sale.Products
             try
             {
                 var client = _httpClientFactory.CreateClient("MyAPI");
-                var fullUrl = $"{_apiSettings.BaseUrl}/api/sale/products";
-                Console.WriteLine($"Requesting: {fullUrl}"); 
+                var fullUrl = $"{_apiSettings.BaseUrl}/categories";  
                 var response = await client.GetAsync(fullUrl);
                 if (response.IsSuccessStatusCode)
                 {
-                    Products = await response.Content.ReadFromJsonAsync<List<ProductModel>>() ?? new List<ProductModel>();
+                    Categories = await response.Content.ReadFromJsonAsync<List<CategoryModel>>() ?? new List<CategoryModel>();
                 }
                 else
                 {
-                    ModelState.AddModelError(string.Empty, $"Failed to fetch products. Status code: {response.StatusCode}");
-                    Products = new List<ProductModel>(); // Đảm bảo khởi tạo lại
+                    ModelState.AddModelError(string.Empty, $"Failed to fetch categories. Status code: {response.StatusCode}");
                 }
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError(string.Empty, $"Error fetching products: {ex.Message}");
-                Products = new List<ProductModel>(); // Đảm bảo khởi tạo lại
+                ModelState.AddModelError(string.Empty, $"Error fetching categories: {ex.Message}");
             }
             return Page();
         }

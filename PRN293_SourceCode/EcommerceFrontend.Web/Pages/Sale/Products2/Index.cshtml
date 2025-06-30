@@ -1,0 +1,234 @@
+@page
+@using EcommerceFrontend.Web.Models.Sale
+@model EcommerceFrontend.Web.Pages.Sale.Products2.IndexModel
+@{
+
+    ViewData["Title"] = "Products";
+
+}
+
+<div class="container-fluid">
+    <h2>Products</h2>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["Warning"] != null)
+    {
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            @TempData["Warning"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="mb-3">
+        <a asp-page="./Create" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Create New Product
+        </a>
+    </div>
+
+    <!-- Search Filters -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="mb-3">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Product Name</label>
+                        <input type="text" class="form-control" placeholder="Search by name" 
+                               asp-for="SearchFilters.Name">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Category</label>
+                        <input type="text" class="form-control" placeholder="Search by category" 
+                               asp-for="SearchFilters.Category">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Size</label>
+                        <select class="form-select" asp-for="SearchFilters.Size">
+                            <option value="">All Sizes</option>
+                            @foreach (var size in ProductConstants.ValidSizes)
+                            {
+                                <option value="@size">@size</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Color</label>
+                        <select class="form-select" asp-for="SearchFilters.Color">
+                            <option value="">All Colors</option>
+                            @foreach (var color in ProductConstants.ValidColors)
+                            {
+                                <option value="@color" style="background-color: @ProductConstants.ColorHexCodes[color]">@color</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Min Price</label>
+                        <input type="number" class="form-control" placeholder="Min price" 
+                               asp-for="SearchFilters.MinPrice" min="0" step="0.01">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Max Price</label>
+                        <input type="number" class="form-control" placeholder="Max price" 
+                               asp-for="SearchFilters.MaxPrice" min="0" step="0.01">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Status</label>
+                        <select class="form-select" asp-for="SearchFilters.Status">
+                            <option value="">All Status</option>
+                            <option value="1">Active</option>
+                            <option value="0">Inactive</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Featured</label>
+                        <select class="form-select" asp-for="SearchFilters.IsFeatured">
+                            <option value="">All</option>
+                            <option value="true">Featured</option>
+                            <option value="false">Not Featured</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Created From</label>
+                        <input type="date" class="form-control" 
+                               asp-for="SearchFilters.StartDate">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Created To</label>
+                        <input type="date" class="form-control" 
+                               asp-for="SearchFilters.EndDate">
+                    </div>
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                        <a asp-page="./Index" class="btn btn-secondary">
+                            <i class="fas fa-undo"></i> Reset
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Products Table -->
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Description</th>
+                    <th>Status</th>
+                    <th>Created At</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var product in Model.Products)
+                {
+                    <tr>
+                        <td>@product.ProductName</td>
+                        <td>@product.ProductCategoryTitle</td>
+                        <td>@product.Description</td>
+                        <td>
+                            @if (product.Status == 1)
+                            {
+                                <span class="badge bg-success">Active</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-warning">Inactive</span>
+                            }
+                        </td>
+                        <td>@(product.CreatedAt?.ToString("dd/MM/yyyy") ?? "N/A")</td>
+                        <td>
+                            <a asp-page="./Variants" asp-route-ProductId="@product.ProductId" class="btn btn-sm btn-info">
+                                <i class="fas fa-list"></i> Variants
+                            </a>
+                            <a asp-page="./Edit" asp-route-id="@product.ProductId" class="btn btn-sm btn-primary">
+                                <i class="fas fa-edit"></i> Edit
+                            </a>
+                            <a asp-page="./Delete" asp-route-id="@product.ProductId" class="btn btn-sm btn-danger">
+                                <i class="fas fa-trash"></i> Delete
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    @if (Model.TotalPages > 1)
+    {
+        <nav>
+            <ul class="pagination justify-content-center">
+                @if (Model.CurrentPage > 1)
+                {
+                    <li class="page-item">
+                        <a class="page-link" asp-page="./Index" 
+                           asp-all-route-data="Model.GetPageRouteData(Model.CurrentPage - 1)">Previous</a>
+                    </li>
+                }
+
+                @for (int i = 1; i <= Model.TotalPages; i++)
+                {
+                    <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                        <a class="page-link" asp-page="./Index" 
+                           asp-all-route-data="Model.GetPageRouteData(i)">@i</a>
+                    </li>
+                }
+
+                @if (Model.CurrentPage < Model.TotalPages)
+                {
+                    <li class="page-item">
+                        <a class="page-link" asp-page="./Index" 
+                           asp-all-route-data="Model.GetPageRouteData(Model.CurrentPage + 1)">Next</a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        // Add color preview to color dropdown options
+        document.addEventListener('DOMContentLoaded', function() {
+            const colorSelect = document.querySelector('select[name="SearchFilters.Color"]');
+            const colorHexCodes = @Html.Raw(Json.Serialize(ProductConstants.ColorHexCodes));
+            
+            if (colorSelect) {
+                Array.from(colorSelect.options).forEach(option => {
+                    if (option.value) {
+                        const hexColor = colorHexCodes[option.value];
+                        option.style.backgroundColor = hexColor;
+                        option.style.color = isLightColor(hexColor) ? 'black' : 'white';
+                    }
+                });
+            }
+        });
+
+        function isLightColor(hexColor) {
+            const r = parseInt(hexColor.slice(1, 3), 16);
+            const g = parseInt(hexColor.slice(3, 5), 16);
+            const b = parseInt(hexColor.slice(5, 7), 16);
+            const brightness = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+            return brightness > 128;
+        }
+    </script>
+} 
