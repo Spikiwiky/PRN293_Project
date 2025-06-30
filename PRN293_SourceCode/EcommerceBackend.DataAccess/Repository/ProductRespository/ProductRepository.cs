@@ -137,6 +137,7 @@ namespace EcommerceBackend.DataAccess.Repository
             }
         }
 
+
         public async Task<bool> UpdateProductAttributesAsync(int productId, string availableAttributes)
         {
             try
@@ -529,6 +530,59 @@ namespace EcommerceBackend.DataAccess.Repository
                 query = query.Where(p => p.BasePrice <= maxPrice.Value);
 
             return await query.CountAsync();
+        }
+
+        public async Task<bool> CreateProductAsync(Product product)
+        {
+            try
+            {
+                await _context.Products.AddAsync(product);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> UpdateProductAsync(Product product)
+        {
+            try
+            {
+                var existing = await _context.Products.FindAsync(product.ProductId);
+                if (existing == null) return false;
+                existing.Name = product.Name;
+                existing.Description = product.Description;
+                existing.Brand = product.Brand;
+                existing.BasePrice = product.BasePrice;
+                existing.AvailableAttributes = product.AvailableAttributes;
+                existing.ProductCategoryId = product.ProductCategoryId;
+                existing.UpdatedAt = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> DeleteProductAsync(int productId)
+        {
+            try
+            {
+                var existing = await _context.Products.FindAsync(productId);
+                if (existing == null) return false;
+                existing.IsDelete = true;
+                existing.UpdatedAt = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }

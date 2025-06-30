@@ -99,11 +99,9 @@ namespace EcommerceFrontend.Web.Services
                     try
                     {
                         if (string.IsNullOrEmpty(variant.Attributes)) return false;
-                        var variantAttributes = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(variant.Attributes);
+                        var variantAttributes = JsonSerializer.Deserialize<Dictionary<string, string>>(variant.Attributes);
                         return searchParams.Attributes.All(attr =>
-                            variantAttributes != null &&
-                            variantAttributes.TryGetValue(attr.Key, out var value) &&
-                            value == attr.Value);
+                            variantAttributes.TryGetValue(attr.Key, out var value) && value == attr.Value);
                     }
                     catch
                     {
