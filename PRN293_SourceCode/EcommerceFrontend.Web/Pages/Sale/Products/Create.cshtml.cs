@@ -44,7 +44,6 @@ namespace EcommerceFrontend.Web.Pages.Sale.Products
             if (!ModelState.IsValid)
                 return Page();
 
-            // Tạo AvailableAttributes JSON string
             var availableAttributesObj = new Dictionary<string, List<string>>
     {
         {
@@ -65,8 +64,7 @@ namespace EcommerceFrontend.Web.Pages.Sale.Products
         }
     };
             var availableAttributesJson = JsonSerializer.Serialize(availableAttributesObj);
-
-            // Tạo danh sách variants JSON string
+             
             var variantsList = Product.Variants.Select(v => new Dictionary<string, object>
     {
         { "size", v.Size },
@@ -99,14 +97,11 @@ namespace EcommerceFrontend.Web.Pages.Sale.Products
     }
             };
 
-
-            // Serialize DTO
             var json = JsonSerializer.Serialize(dto);
-            Console.WriteLine("====== JSON SENT TO API ======");
-            Console.WriteLine(json);
-            Console.WriteLine("==============================");
+            //Console.WriteLine("====== JSON SENT TO API ======");
+            //Console.WriteLine(json);
+            //Console.WriteLine("==============================");
 
-            // Gửi request
             var client = _httpClientFactory.CreateClient();
             var content = new StringContent(json, Encoding.UTF8, "application/json");
             var response = await client.PostAsync($"{_apiSettings.BaseUrl}/api/sale/products", content);
