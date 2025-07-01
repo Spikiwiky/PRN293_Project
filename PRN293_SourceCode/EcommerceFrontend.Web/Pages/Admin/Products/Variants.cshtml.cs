@@ -126,7 +126,6 @@ namespace EcommerceFrontend.Web.Pages.Admin.Products
                 var newVariant = new ProductVariantDTO
                 {
                     ProductId = Id,
-                    Attributes = System.Text.Json.JsonSerializer.Serialize(attrDict),
                     Variants = new List<Dictionary<string, object>> { newValue }
                 };
                 var result = await _productService.AddProductVariantAsync(newVariant);
