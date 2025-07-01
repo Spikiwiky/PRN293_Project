@@ -23,7 +23,7 @@ namespace EcommerceFrontend.Web.Models
         public int? VariantId { get; set; }
         public int ProductId { get; set; }
         public string Attributes { get; set; } = string.Empty;
-        public List<Dictionary<string, string>> Variants { get; set; } = new List<Dictionary<string, string>>();
+        public List<Dictionary<string, object>> Variants { get; set; } = new List<Dictionary<string, object>>();
     }
 
     public class ProductSearchParams

@@ -31,12 +31,13 @@ namespace EcommerceFrontend.Web.Pages.Admin.Products
 
         public async Task<IActionResult> OnPostAddOrUpdateAsync(int id)
         {
-            if (AttributeValues == null || !AttributeValues.Any())
-            {
-                var values = Request.Form["AttributeValues"].ToString();
-                if (!string.IsNullOrWhiteSpace(values))
-                    AttributeValues = values.Split(',').Select(x => x.Trim()).Where(x => !string.IsNullOrEmpty(x)).ToList();
-            }
+            // Luôn tách giá trị thuộc tính từ textarea thành list
+            var values = Request.Form["AttributeValues"].ToString();
+            AttributeValues = values
+                .Split(new[] { ',', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(x => x.Trim())
+                .Where(x => !string.IsNullOrEmpty(x))
+                .ToList();
 
             if (string.IsNullOrWhiteSpace(AttributeName) || AttributeValues == null || !AttributeValues.Any())
             {
