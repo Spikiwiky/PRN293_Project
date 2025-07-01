@@ -430,7 +430,9 @@ namespace EcommerceBackend.BusinessObject.Services
                 Images = product.ProductImages?.Select(i => i.ImageUrl).ToList() ?? new List<string>(),
                 Variants = variants,
                 CreatedAt = product.CreatedAt,
-                UpdatedAt = product.UpdatedAt
+                UpdatedAt = product.UpdatedAt,
+                Status = product.Status ?? 1,
+                IsDelete = product.IsDelete
             };
         }
 

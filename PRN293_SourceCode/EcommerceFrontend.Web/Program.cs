@@ -38,6 +38,10 @@ builder.Services.AddHttpClient<IAdminBlogService, AdminBlogService>(client =>
     client.BaseAddress = new Uri("https://localhost:7107/");
 });
 builder.Services.AddScoped<ISaleProductService, SaleProductService>();
+builder.Services.AddHttpClient<IOrderService, OrderService>(client =>
+{
+    client.BaseAddress = new Uri(apiBaseUrl);
+});
 
 var app = builder.Build();
 
