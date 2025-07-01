@@ -105,8 +105,9 @@ namespace EcommerceFrontend.Web.Pages.Sale.Products
 
         public async Task<IActionResult> OnPost()
         {
-            if (!ModelState.IsValid)
-                return Page();
+            Console.WriteLine($"[OnPost] Submitting update for ProductId = {Product?.ProductId}");
+
+            
 
             // Serialize AvailableAttributes
             var attributesDict = new Dictionary<string, List<string>>
@@ -134,13 +135,16 @@ namespace EcommerceFrontend.Web.Pages.Sale.Products
             // Serialize Variants
             var variantsList = VariantDisplays.Select(v => new Dictionary<string, object>
             {
-                { "Size", v.Size },
-                { "Color", v.Color },
-                { "Price", v.Price },
-                { "Stock", v.Stock }
+                { "size", v.Size },
+                { "color", v.Color },
+                { "price", v.Price },
+                { "stock", v.Stock }
             }).ToList();
 
             var client = _httpClientFactory.CreateClient("MyAPI");
+
+            // Prepare DTO
+            var variantsJson = JsonSerializer.Serialize(variantsList);
 
             // Prepare DTO
             var updateDto = new
@@ -157,7 +161,14 @@ namespace EcommerceFrontend.Web.Pages.Sale.Products
                 ProductImages = string.IsNullOrEmpty(ImageUrl)
                     ? new List<object>()
                     : new List<object> { new { ImageUrl } },
-                Variants = new List<object> { new { Variants = JsonSerializer.Serialize(variantsList) } }
+                Variants = new List<object>
+    {
+        new
+        {
+            Attributes = availableAttributesJson, // Gửi thêm attributes
+            Variants = variantsJson
+        }
+    }
             };
 
             var jsonContent = JsonSerializer.Serialize(updateDto);

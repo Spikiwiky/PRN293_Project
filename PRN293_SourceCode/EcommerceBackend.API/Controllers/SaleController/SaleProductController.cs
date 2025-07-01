@@ -7,6 +7,8 @@ using EcommerceBackend.DataAccess.Repository;
 using EcommerceBackend.DataAccess.Repository.SaleRepository;
 
 using Microsoft.AspNetCore.Mvc;
+using ProductImageDto = EcommerceBackend.API.Dtos.ProductImageDto;
+using ProductVariantDto = EcommerceBackend.API.Dtos.ProductVariantDto;
 
 namespace EcommerceBackend.API.Controllers.SaleController
 {
@@ -155,6 +157,76 @@ namespace EcommerceBackend.API.Controllers.SaleController
             return Ok(responseDtos);
         }
 
+        [HttpPut("products/{id}")]
+        public async Task<IActionResult> UpdateProduct(int id, [FromBody] UpdateProductDto productDto)
+        {
+
+            if (productDto == null)
+            {
+                return BadRequest("Dữ liệu sản phẩm không được để trống.");
+            }
+
+            var product = await _productRepository.GetProductByIdAsync(id);
+            if (product == null)
+            {
+                return NotFound("Sản phẩm không tồn tại.");
+            }
+
+            // Cập nhật trường cơ bản
+            product.Name = productDto.Name;
+            product.Description = productDto.Description;
+            product.ProductCategoryId = productDto.ProductCategoryId;
+            product.Brand = productDto.Brand;
+            product.BasePrice = productDto.BasePrice;
+            product.AvailableAttributes = productDto.AvailableAttributes;
+            product.Status = productDto.Status;
+            product.IsDelete = productDto.IsDelete;
+            product.UpdatedAt = DateTime.UtcNow;
+
+            //// Xóa tất cả Variant cũ nếu có
+            //if (product.Variants != null && product.Variants.Any())
+            //{
+            //    product.Variants.Clear();
+            //}
+
+            // Thêm Variant mới (nếu có)
+            if (productDto.Variants != null)
+            {
+                product.Variants = productDto.Variants.Select(v => new ProductVariant
+                {
+                    Attributes = v.Attributes,
+                    Variants = v.Variants,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                }).ToList();
+            }
+
+            //// (Optional) Xóa và thêm lại hình ảnh
+            //if (product.ProductImages != null && product.ProductImages.Any())
+            //{
+            //    product.ProductImages.Clear();
+            //}
+
+            if (productDto.ProductImages != null)
+            {
+                product.ProductImages = productDto.ProductImages.Select(img => new ProductImage
+                {
+                    ProductId = product.ProductId,
+                    ImageUrl = img.ImageUrl
+                }).ToList();
+            }
+
+            await _saleService.UpdateProductAsync(product);
+            await _productRepository.SaveChangesAsync();
+
+            return Ok(new
+            {
+                Message = "Cập nhật sản phẩm thành công."
+            });
+        }
+
+
+
         [HttpPost("categories")]
         public async Task<IActionResult> CreateCategory([FromBody] CreateProductCategoryDto categoryDto)
         {
@@ -231,8 +303,10 @@ namespace EcommerceBackend.API.Controllers.SaleController
         public async Task<IActionResult> GetProduct(int id)
         {
             var product = await _productRepository.GetProductByIdAsync(id);
-            if (product == null) return NotFound();
-            var responseDto = new EcommerceBackend.API.Dtos.ProductResponseDto
+            if (product == null)
+                return NotFound();
+
+            var responseDto = new ProductDetailResponseDto
             {
                 ProductId = product.ProductId,
                 Name = product.Name,
@@ -244,10 +318,22 @@ namespace EcommerceBackend.API.Controllers.SaleController
                 Status = product.Status,
                 IsDelete = product.IsDelete,
                 CreatedAt = product.CreatedAt,
-                UpdatedAt = product.UpdatedAt
+                UpdatedAt = product.UpdatedAt,
+                ProductImages = product.ProductImages?.Select(img => new ProductImageDto
+                {
+                    ImageUrl = img.ImageUrl
+                }).ToList() ?? new List<ProductImageDto>(),
+
+                Variants = product.Variants?.Select(v => new ProductVariantDto
+                {
+                    Attributes = v.Attributes,
+                    Variants = v.Variants
+                }).ToList() ?? new List<ProductVariantDto>()
             };
+
             return Ok(responseDto);
         }
+
 
         [HttpGet("categories/{id}")]
         public async Task<IActionResult> GetCategory(int id)
