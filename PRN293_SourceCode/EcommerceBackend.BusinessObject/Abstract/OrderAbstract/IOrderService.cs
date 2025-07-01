@@ -9,7 +9,7 @@ namespace EcommerceBackend.BusinessObject.Abstract.OrderAbstract
 {
     public interface IOrderService
     {
-        Task<OrderDto> GetOrderDetailsAsync(int orderId);
+        //Task<OrderDto> GetOrderDetailsAsync(int orderId);
         Task IncreaseQuantityAsync(int orderId, int productId, string? variantId);
         Task DecreaseQuantityAsync(int orderId, int productId, string? variantId);
     }

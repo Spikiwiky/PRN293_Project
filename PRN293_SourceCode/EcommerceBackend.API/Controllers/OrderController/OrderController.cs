@@ -15,30 +15,30 @@ namespace EcommerceBackend.API.Controllers.OrderController
             _orderService = orderService;
         }
 
-        [HttpGet("{orderId}")]
-        public async Task<IActionResult> GetOrderDetails(int orderId)
-        {
-            if (orderId <= 0)
-            {
-                return BadRequest("Invalid order ID.");
-            }
+        //[HttpGet("{orderId}")]
+        //public async Task<IActionResult> GetOrderDetails(int orderId)
+        //{
+        //    if (orderId <= 0)
+        //    {
+        //        return BadRequest("Invalid order ID.");
+        //    }
 
-            try
-            {
-                var order = await _orderService.GetOrderDetailsAsync(orderId);
+        //    try
+        //    {
+        //        //var order = await _orderService.GetOrderDetailsAsync(orderId);
 
-                // (Optional) Map entity to DTO if you don't want to expose full EF models
-                return Ok(order);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "An unexpected error occurred.");
-            }
-        }
+        //        // (Optional) Map entity to DTO if you don't want to expose full EF models
+        //        return Ok(order);
+        //    }
+        //    catch (KeyNotFoundException ex)
+        //    {
+        //        return NotFound(new { message = ex.Message });
+        //    }
+        //    catch (Exception)
+        //    {
+        //        return StatusCode(500, "An unexpected error occurred.");
+        //    }
+        //}
 
         [HttpPost("{orderId}/increase")]
         public async Task<IActionResult> IncreaseQuantity(

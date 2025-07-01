@@ -46,8 +46,8 @@ namespace EcommerceBackend.API.Configurations
             services.AddScoped<IAuthRepository, AuthRepository>();
 
             //Register for order
-            services.AddScoped<IOrderService, OrderService>();
-            services.AddScoped<IOrderRepository, OrderRepository>();
+            //services.AddScoped<IOrderService, OrderService>();
+            //services.AddScoped<IOrderRepository, OrderRepository>();
 
 
 

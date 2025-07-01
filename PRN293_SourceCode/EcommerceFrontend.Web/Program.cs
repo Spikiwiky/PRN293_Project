@@ -3,7 +3,7 @@ using EcommerceFrontend.Web.Services.User;
 using EcommerceFrontend.Web.Services.Admin.Blog;
 using EcommerceFrontend.Web.Services.Blog;
 using EcommerceFrontend.Web.Services.Sale;
-using EcommerceFrontend.Web.Models; // Đảm bảo namespace này tồn tại
+using EcommerceFrontend.Web.Models; 
 using Microsoft.Extensions.Options;
 using EcommerceFrontend.Web.Models.Sale;
 using EcommerceFrontend.Web.Services.AI;
@@ -42,7 +42,7 @@ builder.Services.Configure<ApiSettings>(builder.Configuration.GetSection("ApiSet
 builder.Services.AddScoped<IHttpClientService, HttpClientService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IOrderService, OrderService>();
+//builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddHttpClient<BlogService>();
 builder.Services.AddHttpClient<IAdminBlogService, AdminBlogService>(client =>
 {
@@ -50,10 +50,10 @@ builder.Services.AddHttpClient<IAdminBlogService, AdminBlogService>(client =>
 });
 builder.Services.AddScoped<ISaleProductService, SaleProductService>();
 
-builder.Services.AddHttpClient<IOrderService, OrderService>(client =>
-{
-    client.BaseAddress = new Uri(apiBaseUrl);
-});
+//builder.Services.AddHttpClient<IOrderService, OrderService>(client =>
+//{
+//    client.BaseAddress = new Uri(apiBaseUrl);
+//});
 
 builder.Services.AddScoped<IAdminBlogService, AdminBlogService>();
 
