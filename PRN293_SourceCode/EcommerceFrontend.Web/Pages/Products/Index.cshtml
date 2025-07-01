@@ -1,273 +1,1086 @@
-@page
+﻿@page
 @model EcommerceFrontend.Web.Pages.Products.IndexModel
 @{
     ViewData["Title"] = "Products";
 }
 
-<div class="container mt-4">
-    <h1 class="mb-4">Products</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Product</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!--===============================================================================================-->
+    <link rel="icon" type="image/png" href="images/icons/favicon.png" />
+    <!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css" href="vendor/bootstrap/css/bootstrap.min.css">
+    <!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css" href="fonts/font-awesome-4.7.0/css/font-awesome.min.css">
+    <!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css" href="fonts/iconic/css/material-design-iconic-font.min.css">
+    <!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css" href="fonts/linearicons-v1.0.0/icon-font.min.css">
+    <!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css" href="vendor/animate/animate.css">
+    <!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css" href="vendor/css-hamburgers/hamburgers.min.css">
+    <!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css" href="vendor/animsition/css/animsition.min.css">
+    <!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css" href="vendor/select2/select2.min.css">
+    <!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css" href="vendor/daterangepicker/daterangepicker.css">
+    <!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css" href="vendor/slick/slick.css">
+    <!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css" href="vendor/MagnificPopup/magnific-popup.css">
+    <!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css" href="vendor/perfect-scrollbar/perfect-scrollbar.css">
+    <!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css" href="css/util.css">
+    <link rel="stylesheet" type="text/css" href="css/main.css">
+    <!--===============================================================================================-->
+</head>
+<body class="animsition">
 
-    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
-    {
-        <div class="alert alert-danger" role="alert">
-            @Model.ErrorMessage
+    <!-- Header -->
+    <header class="header-v4">
+        <!-- Header desktop -->
+        <div class="container-menu-desktop">
+            <!-- Topbar -->
+            <div class="top-bar">
+                <div class="content-topbar flex-sb-m h-full container">
+                    <div class="left-top-bar">
+                        Miễn phí vận chuyển cho đơn từ 1tr vnđ
+                    </div>
+
+                    <div class="right-top-bar flex-w h-full">
+                        <a href="#" class="flex-c-m trans-04 p-lr-25">
+                            Trợ giúp
+                        </a>
+
+                        <a href="#" class="flex-c-m trans-04 p-lr-25">
+                            Tài khoản của tôi
+                        </a>
+
+                        <a href="#" class="flex-c-m trans-04 p-lr-25">
+                            VN
+                        </a>
+
+                        <a href="#" class="flex-c-m trans-04 p-lr-25">
+                            VND
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="wrap-menu-desktop">
+                <nav class="limiter-menu-desktop container">
+
+                    <!-- Logo desktop -->
+                    <a href="#" class="logo">
+                        <img src="images/icons/logo-01.png" alt="IMG-LOGO">
+                    </a>
+
+                    <!-- Menu desktop -->
+                    <div class="menu-desktop">
+                        <ul class="main-menu">
+                            <li>
+                                <a href="index.html">Trang chủ</a>
+                                <ul class="sub-menu">
+                                    <li><a href="index.html">Trang chủ 1</a></li>
+                                    <li><a href="home-02.html">Trang chủ 2</a></li>
+                                    <li><a href="home-03.html">Trang chủ 3</a></li>
+                                </ul>
+                            </li>
+
+                            <li class="active-menu">
+                                <a href="product.html">Cửa hàng</a>
+                            </li>
+
+                            <li class="label1">
+                                <a href="shoping-cart.html">Thanh toán</a>
+                            </li>
+
+                            <li>
+                                <a href="blog.html">Bài viết</a>
+                            </li>
+
+                            <li>
+                                <a href="about.html">Về tôi</a>
+                            </li>
+
+                            <li>
+                                <a href="contact.html">Liên hệ</a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Icon header -->
+                    <div class="wrap-icon-header flex-w flex-r-m">
+                        <div class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 js-show-modal-search">
+                            <i class="zmdi zmdi-search"></i>
+                        </div>
+
+                        <div class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 icon-header-noti js-show-cart" data-notify="2">
+                            <i class="zmdi zmdi-shopping-cart"></i>
+                        </div>
+
+                        <a href="#" class="dis-block icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 icon-header-noti" data-notify="0">
+                            <i class="zmdi zmdi-favorite-outline"></i>
+                        </a>
+                    </div>
+                </nav>
+            </div>
         </div>
-    }
 
-    <!-- Search Form -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <form method="get" class="row g-3">
-                <div class="col-md-4">
-                    <label for="name" class="form-label">Product Name</label>
-                    <input type="text" class="form-control" id="name" name="name" value="@Model.SearchParams.Name">
+        <!-- Header Mobile -->
+        <div class="wrap-header-mobile">
+            <!-- Logo moblie -->
+            <div class="logo-mobile">
+                <a href="index.html"><img src="images/icons/logo-01.png" alt="IMG-LOGO"></a>
+            </div>
+
+            <!-- Icon header -->
+            <div class="wrap-icon-header flex-w flex-r-m m-r-15">
+                <div class="icon-header-item cl2 hov-cl1 trans-04 p-r-11 js-show-modal-search">
+                    <i class="zmdi zmdi-search"></i>
                 </div>
-                <div class="col-md-4">
-                    <label for="category" class="form-label">Category</label>
-                    <input type="text" class="form-control" id="category" name="category" value="@Model.SearchParams.Category">
+
+                <div class="icon-header-item cl2 hov-cl1 trans-04 p-r-11 p-l-10 icon-header-noti js-show-cart" data-notify="2">
+                    <i class="zmdi zmdi-shopping-cart"></i>
                 </div>
-                <div class="col-md-2">
-                    <label for="minPrice" class="form-label">Min Price</label>
-                    <input type="number" class="form-control" id="minPrice" name="minPrice" value="@Model.SearchParams.MinPrice">
+
+                <a href="#" class="dis-block icon-header-item cl2 hov-cl1 trans-04 p-r-11 p-l-10 icon-header-noti" data-notify="0">
+                    <i class="zmdi zmdi-favorite-outline"></i>
+                </a>
+            </div>
+
+            <!-- Button show menu -->
+            <div class="btn-show-menu-mobile hamburger hamburger--squeeze">
+                <span class="hamburger-box">
+                    <span class="hamburger-inner"></span>
+                </span>
+            </div>
+        </div>
+
+
+        <!-- Menu Mobile -->
+        <div class="menu-mobile">
+            <ul class="topbar-mobile">
+                <li>
+                    <div class="left-top-bar">
+                        Miễn phí vận chuyển cho đơn từ 1tr vnđ
+                    </div>
+                </li>
+
+                <li>
+                    <div class="right-top-bar flex-w h-full">
+                        <a href="#" class="flex-c-m p-lr-10 trans-04">
+                            Trợ giúp
+                        </a>
+
+                        <a href="#" class="flex-c-m p-lr-10 trans-04">
+                            Tài khoản của tôi
+                        </a>
+
+                        <a href="#" class="flex-c-m p-lr-10 trans-04">
+                            VN
+                        </a>
+
+                        <a href="#" class="flex-c-m p-lr-10 trans-04">
+                            VND
+                        </a>
+                    </div>
+                </li>
+            </ul>
+
+            <ul class="main-menu-m">
+                <li>
+                    <a href="index.html">Trang chủ</a>
+                    <ul class="sub-menu-m">
+                        <li><a href="index.html">Trang chủ 1</a></li>
+                        <li><a href="home-02.html">Trang chủ 2</a></li>
+                        <li><a href="home-03.html">Trang chủ 3</a></li>
+                    </ul>
+                    <span class="arrow-main-menu-m">
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </span>
+                </li>
+
+                <li>
+                    <a href="product.html" class="label1 rs1">Cửa hàng</a>
+                </li>
+
+                <li>
+                    <a href="shoping-cart.html">Thanh toán</a>
+                </li>
+
+                <li>
+                    <a href="blog.html">Bài viết</a>
+                </li>
+
+                <li>
+                    <a href="about.html">Về chúng tôi</a>
+                </li>
+
+                <li>
+                    <a href="contact.html">Liên hệ</a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Modal Search -->
+        <div class="modal-search-header flex-c-m trans-04 js-hide-modal-search">
+            <div class="container-search-header">
+                <button class="flex-c-m btn-hide-modal-search trans-04 js-hide-modal-search">
+                    <img src="images/icons/icon-close2.png" alt="CLOSE">
+                </button>
+
+                <form class="wrap-search-header flex-w p-l-15">
+                    <button class="flex-c-m trans-04">
+                        <i class="zmdi zmdi-search"></i>
+                    </button>
+                    <input class="plh3" type="text" name="search" placeholder="Tìm kiếm...">
+                </form>
+            </div>
+        </div>
+    </header>
+
+    <!-- Cart -->
+    <div class="wrap-header-cart js-panel-cart">
+        <div class="s-full js-hide-cart"></div>
+
+        <div class="header-cart flex-col-l p-l-65 p-r-25">
+            <div class="header-cart-title flex-w flex-sb-m p-b-8">
+                <span class="mtext-103 cl2">
+                    Your Cart
+                </span>
+
+                <div class="fs-35 lh-10 cl2 p-lr-5 pointer hov-cl1 trans-04 js-hide-cart">
+                    <i class="zmdi zmdi-close"></i>
                 </div>
-                <div class="col-md-2">
-                    <label for="maxPrice" class="form-label">Max Price</label>
-                    <input type="number" class="form-control" id="maxPrice" name="maxPrice" value="@Model.SearchParams.MaxPrice">
+            </div>
+
+            <div class="header-cart-content flex-w js-pscroll">
+                <ul class="header-cart-wrapitem w-full">
+                    <li class="header-cart-item flex-w flex-t m-b-12">
+                        <div class="header-cart-item-img">
+                            <img src="images/item-cart-01.jpg" alt="IMG">
+                        </div>
+
+                        <div class="header-cart-item-txt p-t-8">
+                            <a href="#" class="header-cart-item-name m-b-18 hov-cl1 trans-04">
+                                Áo thun trắng
+                            </a>
+
+                            <span class="header-cart-item-info">
+                                1 x 19.00 VND
+                            </span>
+                        </div>
+                    </li>
+
+                    <li class="header-cart-item flex-w flex-t m-b-12">
+                        <div class="header-cart-item-img">
+                            <img src="images/item-cart-02.jpg" alt="IMG">
+                        </div>
+
+                        <div class="header-cart-item-txt p-t-8">
+                            <a href="#" class="header-cart-item-name m-b-18 hov-cl1 trans-04">
+                                Giày Converse
+                            </a>
+
+                            <span class="header-cart-item-info">
+                                1 x 29.00 VND
+                            </span>
+                        </div>
+                    </li>
+
+                    <li class="header-cart-item flex-w flex-t m-b-12">
+                        <div class="header-cart-item-img">
+                            <img src="images/item-cart-03.jpg" alt="IMG">
+                        </div>
+
+                        <div class="header-cart-item-txt p-t-8">
+                            <a href="#" class="header-cart-item-name m-b-18 hov-cl1 trans-04">
+                                Đồng hồ
+                            </a>
+
+                            <span class="header-cart-item-info">
+                                1 x 39.00 VND
+                            </span>
+                        </div>
+                    </li>
+                </ul>
+
+                <div class="w-full">
+                    <div class="header-cart-total w-full p-tb-40">
+                        Tổng tiền: 77.00 VND
+                    </div>
+
+                    <div class="header-cart-buttons flex-w w-full">
+                        <a href="shoping-cart.html" class="flex-c-m stext-101 cl0 size-107 bg3 bor2 hov-btn3 p-lr-15 trans-04 m-r-8 m-b-10">
+                            Xem giỏ hàng
+                        </a>
+
+                        <a href="shoping-cart.html" class="flex-c-m stext-101 cl0 size-107 bg3 bor2 hov-btn3 p-lr-15 trans-04 m-b-10">
+                            Thanh toán
+                        </a>
+                    </div>
                 </div>
-                <div class="col-12">
-                    <button type="submit" class="btn btn-primary">Search</button>
-                    <a asp-page="./Index" class="btn btn-secondary">Clear</a>
-                </div>
-            </form>
+            </div>
         </div>
     </div>
 
-    <!-- Products Grid -->
-    <div class="row row-cols-1 row-cols-md-3 g-4">
-        @foreach (var product in Model.Products)
-        {
-            <div class="col">
-                <div class="card h-100">
-                    @if (product.Images.Any())
-                    {
-                        <img src="@product.Images.First()" class="card-img-top" alt="@product.Name" style="height: 200px; object-fit: cover;">
-                    }
+    <!-- Product Section -->
+    <section class="bg0 p-t-23 p-b-140">
+        <div class="container">
+            <div class="p-b-10">
+                <h3 class="ltext-103 cl5">
+                    Sản phẩm
+                </h3>
+            </div>
+
+            <div class="flex-w flex-sb-m p-b-52">
+                <div class="flex-w flex-l-m filter-tope-group m-tb-10">
+                    <button class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5 how-active1" data-filter="*">
+                        Tất cả sản phẩm
+                    </button>
+
+                    <button class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5" data-filter=".women">
+                        Nam
+                    </button>
+
+                    <button class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5" data-filter=".men">
+                        Nữ
+                    </button>
+
+                    <button class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5" data-filter=".bag">
+                        Túi
+                    </button>
+
+                    <button class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5" data-filter=".shoes">
+                        Giày
+                    </button>
+
+                    <button class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5" data-filter=".watches">
+                        Đồng hồ
+                    </button>
+                </div>
+
+                <div class="flex-w flex-c-m m-tb-10">
+                    <div class="flex-c-m stext-106 cl6 size-104 bor4 pointer hov-btn3 trans-04 m-r-8 m-tb-4 js-show-filter">
+                        <i class="icon-filter cl2 m-r-6 fs-15 trans-04 zmdi zmdi-filter-list"></i>
+                        <i class="icon-close-filter cl2 m-r-6 fs-15 trans-04 zmdi zmdi-close dis-none"></i>
+                        Lọc
+                    </div>
+
+                    <div class="flex-c-m stext-106 cl6 size-105 bor4 pointer hov-btn3 trans-04 m-tb-4 js-show-search">
+                        <i class="icon-search cl2 m-r-6 fs-15 trans-04 zmdi zmdi-search"></i>
+                        <i class="icon-close-search cl2 m-r-6 fs-15 trans-04 zmdi zmdi-close dis-none"></i>
+                        Tìm kiếm
+                    </div>
+                </div>
+
+                <!-- Search product -->
+                <div class="dis-none panel-search w-full p-t-10 p-b-15">
+                    <div class="bor8 dis-flex p-l-15">
+                        <button class="size-113 flex-c-m fs-16 cl2 hov-cl1 trans-04">
+                            <i class="zmdi zmdi-search"></i>
+                        </button>
+
+                        <input class="mtext-107 cl2 size-114 plh2 p-r-15" type="text" name="search-product" placeholder="Search">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="container mt-4">
+                @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                {
+                    <div class="alert alert-danger" role="alert">
+                        @Model.ErrorMessage
+                    </div>
+                }
+
+                <!-- Search Form -->
+                <div class="card mb-4">
                     <div class="card-body">
-                        <h5 class="card-title">@product.Name</h5>
-                        <p class="card-text">@product.Description</p>
-                        <p class="card-text">
-                            <small class="text-muted">Brand: @product.Brand</small><br>
-                            <small class="text-muted">Category: @product.CategoryName</small>
-                        </p>
-                        
-                        @if (product.Variants.Any())
-                        {
-                            <div class="variant-selection mb-3">
-                                @{
-                                    var firstVariant = product.Variants.First();
-                                    var attributes = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, List<string>>>(firstVariant.Attributes);
-                                    var attributeNames = attributes?.Keys.ToList() ?? new List<string>();
-                                    
-                                
-                                    var variantData = product.Variants.Select(v => new {
-                                        Attributes = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, List<string>>>(v.Attributes),
-                                        Variants = v.Variants
-                                    }).ToList();
-                                }
-                                
-                                @for (int i = 0; i < attributeNames.Count; i++)
+                        <form method="get" class="row g-3">
+                            <div class="col-md-4">
+                                <label for="name" class="form-label">Product Name</label>
+                                <input type="text" class="form-control" id="name" name="name" value="@Model.SearchParams.Name">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="category" class="form-label">Category</label>
+                                <input type="text" class="form-control" id="category" name="category" value="@Model.SearchParams.Category">
+                            </div>
+                            <div class="col-md-2">
+                                <label for="minPrice" class="form-label">Min Price</label>
+                                <input type="number" class="form-control" id="minPrice" name="minPrice" value="@Model.SearchParams.MinPrice">
+                            </div>
+                            <div class="col-md-2">
+                                <label for="maxPrice" class="form-label">Max Price</label>
+                                <input type="number" class="form-control" id="maxPrice" name="maxPrice" value="@Model.SearchParams.MaxPrice">
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary">Search</button>
+                                <a asp-page="./Index" class="btn btn-secondary">Clear</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Products Grid -->
+                <div class="row row-cols-1 row-cols-md-3 g-4">
+                    @foreach (var product in Model.Products)
+                    {
+                        <div class="col">
+                            <div class="card h-100">
+                                @if (product.Images.Any())
                                 {
-                                    var attrName = attributeNames[i];
-                                    <div class="mb-2 variant-option" 
-                                         data-product-id="@product.ProductId"
-                                         data-attribute="@attrName"
-                                         style="display: @(i == 0 ? "block" : "none")">
-                                        <label class="form-label">@attrName:</label>
-                                        <select class="form-select variant-select" 
-                                                data-product-id="@product.ProductId"
-                                                data-attribute="@attrName"
-                                                data-index="@i">
-                                            <option value="">Select @attrName</option>
-                                            @foreach (var value in attributes[attrName].Distinct())
-                                            {
-                                                <option value="@value">@value</option>
-                                            }
-                                        </select>
-                                    </div>
+                                    <img src="@product.Images.First()" class="card-img-top" alt="@product.Name" style="height: 200px; object-fit: cover;">
                                 }
-                                
-                                <div class="selected-price" id="selected-price-@product.ProductId">
-                                    <strong>Base Price: $@product.BasePrice.ToString("N2")</strong>
+                                <div class="card-body">
+                                    <h5 class="card-title">@product.Name</h5>
+                                    <p class="card-text">@product.Description</p>
+                                    <p class="card-text">
+                                        <small class="text-muted">Brand: @product.Brand</small><br>
+                                        <small class="text-muted">Category: @product.CategoryName</small>
+                                    </p>
+                                    <p class="card-text">
+                                        <strong>Price: $@product.BasePrice.ToString("N2")</strong>
+                                    </p>
                                 </div>
-                                
-                                <div class="variant-details mt-2" id="variant-details-@product.ProductId" style="display: none;">
-                                    <small class="text-muted">
-                                        <span class="supplier-info"></span><br>
-                                        <span class="material-info"></span>
-                                    </small>
+                                <div class="card-footer">
+                                    <div class="btn-group w-100">
+                                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#variantModal-@product.ProductId">View Details</button>
+                                        <a asp-page="./Edit" asp-route-id="@product.ProductId" class="btn btn-secondary">Edit</a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Variant Selection Modal -->
+                            <div class="modal fade" id="variantModal-@product.ProductId" tabindex="-1" aria-labelledby="variantModalLabel-@product.ProductId" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="variantModalLabel-@product.ProductId">@product.Name - Select Variants</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            @if (product.Variants.Any())
+                                            {
+                                                var firstVariant = product.Variants.First();
+                                                var attributes = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, List<string>>>(firstVariant.Attributes);
+                                                var attributeNames = attributes?.Keys.ToList() ?? new List<string>();
+                                                var variantData = product.Variants.Select(v => new
+                                                {
+                                                    Attributes = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, List<string>>>(v.Attributes),
+                                                    Variants = v.Variants
+                                                }).ToList();
+
+                                                <div class="variant-selection">
+                                                    @for (int i = 0; i < attributeNames.Count; i++)
+                                                    {
+                                                        var attrName = attributeNames[i];
+                                                        <div class="mb-2 variant-option"
+                                                             data-product-id="@product.ProductId"
+                                                             data-attribute="@attrName"
+                                                             style="display: @(i == 0 ? "block" : "none")">
+                                                            <label class="form-label">@attrName:</label>
+                                                            <select class="form-select variant-select"
+                                                                    data-product-id="@product.ProductId"
+                                                                    data-attribute="@attrName"
+                                                                    data-index="@i">
+                                                                <option value="">Select @attrName</option>
+                                                                @foreach (var value in attributes[attrName].Distinct())
+                                                                {
+                                                                    <option value="@value">@value</option>
+                                                                }
+                                                            </select>
+                                                        </div>
+                                                    }
+
+                                                    <div class="selected-price mt-3" id="selected-price-@product.ProductId" data-base-price="@product.BasePrice.ToString("N2")">
+                                                        <strong>Base Price: $@product.BasePrice.ToString("N2")</strong>
+                                                    </div>
+
+                                                    <div class="variant-details mt-2" id="variant-details-@product.ProductId" style="display: none;">
+                                                        <small class="text-muted">
+                                                            <span class="supplier-info"></span><br>
+                                                            <span class="material-info"></span>
+                                                        </small>
+                                                    </div>
+
+                                                    <script type="application/json" id="variant-data-@product.ProductId">
+                                                        @Html.Raw(System.Text.Json.JsonSerializer.Serialize(variantData, new System.Text.Json.JsonSerializerOptions
+                                                        {
+                                                                WriteIndented = false,
+                                                                                                        PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase
+                                                                                                }))
+                                            </script>
+                                        </div>
+                                                                                }
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                            <a asp-page="./Details" asp-route-id="@product.ProductId" class="btn btn-primary">Go to Details</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <!-- Pagination -->
+                @if (Model.TotalPages > 1)
+                {
+                    <nav aria-label="Page navigation" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            @for (int i = 1; i <= Model.TotalPages; i++)
+                            {
+                                <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                                    <a asp-page="./Index"
+                                       asp-route-page="@i"
+                                       asp-route-name="@Model.SearchParams.Name"
+                                       asp-route-category="@Model.SearchParams.Category"
+                                       asp-route-minPrice="@Model.SearchParams.MinPrice"
+                                       asp-route-maxPrice="@Model.SearchParams.MaxPrice"
+                                       class="page-link">@i</a>
+                                </li>
+                            }
+                        </ul>
+                    </nav>
+                }
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg3 p-t-75 p-b-32">
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-6 col-lg-3 p-b-50">
+                    <h4 class="stext-301 cl0 p-b-30">
+                        Thể loại
+                    </h4>
+
+                    <ul>
+                        <li class="p-b-10">
+                            <a href="#" class="stext-107 cl7 hov-cl1 trans-04">
+                                Nữ
+                            </a>
+                        </li>
+
+                        <li class="p-b-10">
+                            <a href="#" class="stext-107 cl7 hov-cl1 trans-04">
+                                Nam
+                            </a>
+                        </li>
+
+                        <li class="p-b-10">
+                            <a href="#" class="stext-107 cl7 hov-cl1 trans-04">
+                                Giày
+                            </a>
+                        </li>
+
+                        <li class="p-b-10">
+                            <a href="#" class="stext-107 cl7 hov-cl1 trans-04">
+                                Đồng hồ
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="col-sm-6 col-lg-3 p-b-50">
+                    <h4 class="stext-301 cl0 p-b-30">
+                        Trợ giúp
+                    </h4>
+
+                    <ul>
+                        <li class="p-b-10">
+                            <a href="#" class="stext-107 cl7 hov-cl1 trans-04">
+                                Đặt hàng
+                            </a>
+                        </li>
+
+                        <li class="p-b-10">
+                            <a href="#" class="stext-107 cl7 hov-cl1 trans-04">
+                                Phản hồi
+                            </a>
+                        </li>
+
+                        <li class="p-b-10">
+                            <a href="#" class="stext-107 cl7 hov-cl1 trans-04">
+                                Giao hàng
+                            </a>
+                        </li>
+
+                        <li class="p-b-10">
+                            <a href="#" class="stext-107 cl7 hov-cl1 trans-04">
+                                Câu hỏi
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="col-sm-6 col-lg-3 p-b-50">
+                    <h4 class="stext-301 cl0 p-b-30">
+                        Liên lạc
+                    </h4>
+
+                    <p class="stext-107 cl7 size-201">
+                        Bạn có câu hỏi nào cho của hàng không? Nếu cần sự trợ giúp vui lòng liên hệ 0388888888
+                    </p>
+
+                    <div class="p-t-27">
+                        <a href="#" class="fs-18 cl7 hov-cl1 trans-04 m-r-16">
+                            <i class="fa fa-facebook"></i>
+                        </a>
+
+                        <a href="#" class="fs-18 cl7 hov-cl1 trans-04 m-r-16">
+                            <i class="fa fa-instagram"></i>
+                        </a>
+
+                        <a href="#" class="fs-18 cl7 hov-cl1 trans-04 m-r-16">
+                            <i class="fa fa-pinterest-p"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 col-lg-3 p-b-50">
+                    <h4 class="stext-301 cl0 p-b-30">
+                        Bản tin
+                    </h4>
+
+                    <form>
+                        <div class="wrap-input1 w-full p-b-4">
+                            <input class="input1 bg-none plh1 stext-107 cl7" type="text" name="email" placeholder="email@example.com">
+                            <div class="focus-input1 trans-04"></div>
+                        </div>
+
+                        <div class="p-t-18">
+                            <button class="flex-c-m stext-101 cl0 size-103 bg1 bor1 hov-btn2 p-lr-15 trans-04">
+                                Đặt mua
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="p-t-40">
+                <div class="flex-c-m flex-w p-b-18">
+                    <a href="#" class="m-all-1">
+                        <img src="images/icons/icon-pay-01.png" alt="ICON-PAY">
+                    </a>
+
+                    <a href="#" class="m-all-1">
+                        <img src="images/icons/icon-pay-02.png" alt="ICON-PAY">
+                    </a>
+
+                    <a href="#" class="m-all-1">
+                        <img src="images/icons/icon-pay-03.png" alt="ICON-PAY">
+                    </a>
+
+                    <a href="#" class="m-all-1">
+                        <img src="images/icons/icon-pay-04.png" alt="ICON-PAY">
+                    </a>
+
+                    <a href="#" class="m-all-1">
+                        <img src="images/icons/icon-pay-05.png" alt="ICON-PAY">
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Back to top -->
+    <div class="btn-back-to-top" id="myBtn">
+        <span class="symbol-btn-back-to-top">
+            <i class="zmdi zmdi-chevron-up"></i>
+        </span>
+    </div>
+
+    <!-- Modal1 -->
+    <div class="wrap-modal1 js-modal1 p-t-60 p-b-20">
+        <div class="overlay-modal1 js-hide-modal1"></div>
+
+        <div class="container">
+            <div class="bg0 p-t-60 p-b-30 p-lr-15-lg how-pos3-parent">
+                <button class="how-pos3 hov3 trans-04 js-hide-modal1">
+                    <img src="images/icons/icon-close.png" alt="CLOSE">
+                </button>
+
+                <div class="row">
+                    <div class="col-md-6 col-lg-7 p-b-30">
+                        <div class="p-l-25 p-r-30 p-lr-0-lg">
+                            <div class="wrap-slick3 flex-sb flex-w">
+                                <div class="wrap-slick3-dots"></div>
+                                <div class="wrap-slick3-arrows flex-sb-m flex-w"></div>
+
+                                <div class="slick3 gallery-lb">
+                                    <div class="item-slick3" data-thumb="images/product-detail-01.jpg">
+                                        <div class="wrap-pic-w pos-relative">
+                                            <img src="images/product-detail-01.jpg" alt="IMG-PRODUCT">
+
+                                            <a class="flex-c-m size-108 how-pos1 bor0 fs-16 cl10 bg0 hov-btn3 trans-04" href="images/product-detail-01.jpg">
+                                                <i class="fa fa-expand"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+
+                                    <div class="item-slick3" data-thumb="images/product-detail-02.jpg">
+                                        <div class="wrap-pic-w pos-relative">
+                                            <img src="images/product-detail-02.jpg" alt="IMG-PRODUCT">
+
+                                            <a class="flex-c-m size-108 how-pos1 bor0 fs-16 cl10 bg0 hov-btn3 trans-04" href="images/product-detail-02.jpg">
+                                                <i class="fa fa-expand"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+
+                                    <div class="item-slick3" data-thumb="images/product-detail-03.jpg">
+                                        <div class="wrap-pic-w pos-relative">
+                                            <img src="images/product-detail-03.jpg" alt="IMG-PRODUCT">
+
+                                            <a class="flex-c-m size-108 how-pos1 bor0 fs-16 cl10 bg0 hov-btn3 trans-04" href="images/product-detail-03.jpg">
+                                                <i class="fa fa-expand"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 col-lg-5 p-b-30">
+                        <div class="p-r-50 p-t-5 p-lr-0-lg">
+                            <h4 class="mtext-105 cl2 js-name-detail p-b-14">
+                                Áo khoác bò hàn quốc
+                            </h4>
+
+                            <span class="mtext-106 cl2">
+                                58.79 VND
+                            </span>
+
+                            <p class="stext-102 cl3 p-t-23">
+                                Sản phẩm thời trang hiện đại trẻ trung nam tính hàn quốc
+                            </p>
+
+                            <!--  -->
+                            <div class="p-t-33">
+                                <div class="flex-w flex-r-m p-b-10">
+                                    <div class="size-203 flex-c-m respon6">
+                                        Size
+                                    </div>
+
+                                    <div class="size-204 respon6-next">
+                                        <div class="rs1-select2 bor8 bg0">
+                                            <select class="js-select2" name="time">
+                                                <option>Chọn size</option>
+                                                <option> S</option>
+                                                <option> M</option>
+                                                <option> L</option>
+                                                <option> XL</option>
+                                            </select>
+                                            <div class="dropDownSelect2"></div>
+                                        </div>
+                                    </div>
                                 </div>
 
-                                <script type="application/json" id="variant-data-@product.ProductId">
-                                    @Html.Raw(System.Text.Json.JsonSerializer.Serialize(variantData, new System.Text.Json.JsonSerializerOptions 
-                                    { 
-                                        WriteIndented = false,
-                                        PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase
-                                    }))
-                                </script>
+                                <div class="flex-w flex-r-m p-b-10">
+                                    <div class="size-203 flex-c-m respon6">
+                                        Màu sắc
+                                    </div>
+
+                                    <div class="size-204 respon6-next">
+                                        <div class="rs1-select2 bor8 bg0">
+                                            <select class="js-select2" name="time">
+                                                <option>Chọn màu</option>
+                                                <option>Xanh</option>
+                                                <option>Đỏ</option>
+                                                <option>Trắng</option>
+                                                <option>Xám</option>
+                                            </select>
+                                            <div class="dropDownSelect2"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="flex-w flex-r-m p-b-10">
+                                    <div class="size-204 flex-w flex-m respon6-next">
+                                        <div class="wrap-num-product flex-w m-r-20 m-tb-10">
+                                            <div class="btn-num-product-down cl8 hov-btn3 trans-04 flex-c-m">
+                                                <i class="fs-16 zmdi zmdi-minus"></i>
+                                            </div>
+
+                                            <input class="mtext-104 cl3 txt-center num-product" type="number" name="num-product" value="1">
+
+                                            <div class="btn-num-product-up cl8 hov-btn3 trans-04 flex-c-m">
+                                                <i class="fs-16 zmdi zmdi-plus"></i>
+                                            </div>
+                                        </div>
+
+                                        <button class="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04 js-addcart-detail">
+                                            Thêm vào giỏ hàng
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
-                        }
-                        else
-                        {
-                            <p class="card-text">
-                                <strong>Price: $@product.BasePrice.ToString("N2")</strong>
-                            </p>
-                        }
-                    </div>
-                    <div class="card-footer">
-                        <div class="btn-group w-100">
-                            <a asp-page="./Details" asp-route-id="@product.ProductId" class="btn btn-primary">View Details</a>
-                            <a asp-page="./Edit" asp-route-id="@product.ProductId" class="btn btn-secondary">Edit</a>
+
+                            <!--  -->
+                            <div class="flex-w flex-m p-l-100 p-t-40 respon7">
+                                <div class="flex-m bor9 p-r-10 m-r-11">
+                                    <a href="#" class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 js-addwish-detail tooltip100" data-tooltip="Add to Wishlist">
+                                        <i class="zmdi zmdi-favorite"></i>
+                                    </a>
+                                </div>
+
+                                <a href="#" class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 m-r-8 tooltip100" data-tooltip="Facebook">
+                                    <i class="fa fa-facebook"></i>
+                                </a>
+
+                                <a href="#" class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 m-r-8 tooltip100" data-tooltip="Twitter">
+                                    <i class="fa fa-twitter"></i>
+                                </a>
+
+                                <a href="#" class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 m-r-8 tooltip100" data-tooltip="Google Plus">
+                                    <i class="fa fa-google-plus"></i>
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        }
+        </div>
     </div>
 
-    <!-- Pagination -->
-    @if (Model.TotalPages > 1)
-    {
-        <nav aria-label="Page navigation" class="mt-4">
-            <ul class="pagination justify-content-center">
-                @for (int i = 1; i <= Model.TotalPages; i++)
-                {
-                    <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
-                        <a asp-page="./Index" 
-                           asp-route-page="@i"
-                           asp-route-name="@Model.SearchParams.Name"
-                           asp-route-category="@Model.SearchParams.Category"
-                           asp-route-minPrice="@Model.SearchParams.MinPrice"
-                           asp-route-maxPrice="@Model.SearchParams.MaxPrice"
-                           class="page-link">@i</a>
-                    </li>
-                }
-            </ul>
-        </nav>
-    }
-</div>
-
-@section Scripts {
+    <!--===============================================================================================-->
+    <script src="vendor/jquery/jquery-3.2.1.min.js"></script>
+    <!--===============================================================================================-->
+    <script src="vendor/animsition/js/animsition.min.js"></script>
+    <!--===============================================================================================-->
+    <script src="vendor/bootstrap/js/popper.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.min.js"></script>
+    <!--===============================================================================================-->
+    <script src="vendor/select2/select2.min.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Handle variant selection
-            document.querySelectorAll('.variant-select').forEach(select => {
-                select.addEventListener('change', function() {
-                    const productId = this.dataset.productId;
-                    const attributeName = this.dataset.attribute;
-                    const selectedValue = this.value;
-                    const currentIndex = parseInt(this.dataset.index);
-                    const priceElement = document.getElementById(`selected-price-${productId}`);
-                    const detailsElement = document.getElementById(`variant-details-${productId}`);
-                    
-                    // Get variant data
-                    const variantData = JSON.parse(document.getElementById(`variant-data-${productId}`).textContent);
-                    
-                    // Get all variant options for this product
-                    const allOptions = document.querySelectorAll(`.variant-option[data-product-id="${productId}"]`);
-                    const allSelects = document.querySelectorAll(`.variant-select[data-product-id="${productId}"]`);
-                    
-                    if (!selectedValue) {
-                       
-                        const basePrice = this.closest('.card').querySelector('.selected-price').dataset.basePrice;
-                        priceElement.innerHTML = `<strong>Base Price: $${basePrice}</strong>`;
-                        detailsElement.style.display = 'none';
-                        
-                       
-                        allOptions.forEach((option, index) => {
-                            if (index > currentIndex) {
-                                option.style.display = 'none';
-                                option.querySelector('select').value = '';
-                            }
-                        });
-                        return;
-                    }
-                    
-                   
-                    const selectedAttributes = {};
-                    for (let i = 0; i <= currentIndex; i++) {
-                        const select = allSelects[i];
-                        const attrName = select.dataset.attribute;
-                        const value = select.value;
-                        if (value) {
-                            selectedAttributes[attrName] = value;
-                        }
-                    }
-                    
-                  
-                    const matchingVariant = variantData.find(v => {
-                        return v.variants.some(variant => 
-                            Object.entries(selectedAttributes).every(([key, value]) => 
-                                variant[key] === value
-                            )
-                        );
-                    });
-                    
-                    if (matchingVariant) {
-                        const matchingVariantInfo = matchingVariant.variants.find(variant => 
-                            Object.entries(selectedAttributes).every(([key, value]) => 
-                                variant[key] === value
-                            )
-                        );
-                        
-                        if (matchingVariantInfo) {
-                            // Update price display
-                            priceElement.innerHTML = `<strong>Price: $${parseFloat(matchingVariantInfo.price).toFixed(2)}</strong>`;
-                            
-                            // Update variant details
-                            if (matchingVariantInfo.supplier || matchingVariantInfo.material) {
-                                detailsElement.style.display = 'block';
-                                detailsElement.querySelector('.supplier-info').textContent = 
-                                    matchingVariantInfo.supplier ? `Supplier: ${matchingVariantInfo.supplier}` : '';
-                                detailsElement.querySelector('.material-info').textContent = 
-                                    matchingVariantInfo.material ? `Material: ${matchingVariantInfo.material}` : '';
-                            } else {
-                                detailsElement.style.display = 'none';
-                            }
-                        }
-                    }
-                    
-                 
-                    if (currentIndex < allOptions.length - 1) {
-                        const nextOption = allOptions[currentIndex + 1];
-                        nextOption.style.display = 'block';
-                        
-                      
-                        const nextSelect = nextOption.querySelector('select');
-                        const nextAttrName = nextSelect.dataset.attribute;
-                        
-                        
-                        const availableValues = new Set();
-                        variantData.forEach(v => {
-                            v.variants.forEach(variant => {
-                                if (Object.entries(selectedAttributes).every(([key, value]) => 
-                                    variant[key] === value
-                                )) {
-                                    availableValues.add(variant[nextAttrName]);
-                                }
-                            });
-                        });
-                        
-                       
-                        Array.from(nextSelect.options).forEach(option => {
-                            if (option.value === "") return; 
-                            option.disabled = !availableValues.has(option.value);
-                        });
-                        
-                       
-                        nextSelect.value = '';
-                    }
-                });
+        $(".js-select2").each(function(){
+            $(this).select2({
+                minimumResultsForSearch: 20,
+                dropdownParent: $(this).next('.dropDownSelect2')
+            });
+        })
+    </script>
+    <!--===============================================================================================-->
+    <script src="vendor/daterangepicker/moment.min.js"></script>
+    <script src="vendor/daterangepicker/daterangepicker.js"></script>
+    <!--===============================================================================================-->
+    <script src="vendor/slick/slick.min.js"></script>
+    <script src="js/slick-custom.js"></script>
+    <!--===============================================================================================-->
+    <script src="vendor/parallax100/parallax100.js"></script>
+    <script>
+        $('.parallax100').parallax100();
+    </script>
+    <!--===============================================================================================-->
+    <script src="vendor/MagnificPopup/jquery.magnific-popup.min.js"></script>
+    <script>
+        $('.gallery-lb').each(function() { // the containers for all your galleries
+            $(this).magnificPopup({
+                delegate: 'a', // the selector for gallery item
+                type: 'image',
+                gallery: {
+                    enabled:true
+                },
+                mainClass: 'mfp-fade'
             });
         });
     </script>
-}
+    <!--===============================================================================================-->
+    <script src="vendor/isotope/isotope.pkgd.min.js"></script>
+    <!--===============================================================================================-->
+    <script src="vendor/sweetalert/sweetalert.min.js"></script>
+    <script>
+        $('.js-addwish-b2, .js-addwish-detail').on('click', function(e){
+            e.preventDefault();
+        });
+
+        $('.js-addwish-b2').each(function(){
+            var nameProduct = $(this).parent().parent().find('.js-name-b2').html();
+            $(this).on('click', function(){
+                swal(nameProduct, "is added to wishlist !", "success");
+
+                $(this).addClass('js-addedwish-b2');
+                $(this).off('click');
+            });
+        });
+
+        $('.js-addwish-detail').each(function(){
+            var nameProduct = $(this).parent().parent().parent().find('.js-name-detail').html();
+
+            $(this).on('click', function(){
+                swal(nameProduct, "is added to wishlist !", "success");
+
+                $(this).addClass('js-addedwish-detail');
+                $(this).off('click');
+            });
+        });
+
+        /*---------------------------------------------*/
+
+        $('.js-addcart-detail').each(function(){
+            var nameProduct = $(this).parent().parent().parent().parent().find('.js-name-detail').html();
+            $(this).on('click', function(){
+                swal(nameProduct, "is added to cart !", "success");
+            });
+        });
+    </script>
+    <!--===============================================================================================-->
+    <script src="vendor/perfect-scrollbar/perfect-scrollbar.min.js"></script>
+    <script>
+        $('.js-pscroll').each(function(){
+            $(this).css('position','relative');
+            $(this).css('overflow','hidden');
+            var ps = new PerfectScrollbar(this, {
+                wheelSpeed: 1,
+                scrollingThreshold: 1000,
+                wheelPropagation: false,
+            });
+
+            $(window).on('resize', function(){
+                ps.update();
+            })
+        });
+    </script>
+    <!--===============================================================================================-->
+    <script src="js/main.js"></script>
+
+    <!-- Your existing script section -->
+    @section Scripts {
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                document.querySelectorAll('.variant-select').forEach(select => {
+                    select.addEventListener('change', function() {
+                        const productId = this.dataset.productId;
+                        const currentIndex = parseInt(this.dataset.index);
+                        const priceElement = document.getElementById(`selected-price-${productId}`);
+                        const detailsElement = document.getElementById(`variant-details-${productId}`);
+                        const basePrice = priceElement.dataset.basePrice;
+                        const variantData = JSON.parse(document.getElementById(`variant-data-${productId}`).textContent);
+
+                        // Get all variant options and selects for this product
+                        const allOptions = document.querySelectorAll(`.variant-option[data-product-id="${productId}"]`);
+                        const allSelects = document.querySelectorAll(`.variant-select[data-product-id="${productId}"]`);
+
+                        // Collect all selected attributes
+                        const selectedAttributes = {};
+                        let allAttributesSelected = true;
+                        for (let i = 0; i < allSelects.length; i++) {
+                            const select = allSelects[i];
+                            const attrName = select.dataset.attribute;
+                            const value = select.value;
+                            if (value) {
+                                selectedAttributes[attrName] = value;
+                            } else {
+                                allAttributesSelected = false;
+                            }
+                        }
+
+                        // Reset and enable all options for selects after the current one
+                        for (let i = currentIndex + 1; i < allSelects.length; i++) {
+                            const select = allSelects[i];
+                            select.value = '';
+                            Array.from(select.options).forEach(option => {
+                                if (option.value !== '') option.disabled = false;
+                            });
+                            allOptions[i].style.display = 'none';
+                        }
+
+                        // Show next attribute select if available
+                        if (currentIndex < allOptions.length - 1 && this.value) {
+                            const nextOption = allOptions[currentIndex + 1];
+                            nextOption.style.display = 'block';
+                            const nextSelect = nextOption.querySelector('select');
+                            const nextAttrName = nextSelect.dataset.attribute;
+
+                            // Tìm các giá trị hợp lệ cho dropdown tiếp theo dựa trên các thuộc tính đã chọn trước đó
+                            const availableValues = new Set();
+                            variantData.forEach(v => {
+                                v.variants.forEach(variant => {
+                                    let match = true;
+                                    for (let j = 0; j <= currentIndex; j++) {
+                                        const prevAttr = allSelects[j].dataset.attribute;
+                                        const prevValue = allSelects[j].value;
+                                        if (prevValue && variant[prevAttr] !== prevValue) {
+                                            match = false;
+                                            break;
+                                        }
+                                    }
+                                    if (match) {
+                                        availableValues.add(variant[nextAttrName]);
+                                    }
+                                });
+                            });
+
+                            Array.from(nextSelect.options).forEach(option => {
+                                if (option.value === '') return;
+                                option.disabled = !availableValues.has(option.value);
+                            });
+                        }
+
+                        // Nếu chưa chọn đủ thuộc tính, luôn hiển thị giá gốc
+                        if (!allAttributesSelected) {
+                            priceElement.innerHTML = `<strong>Base Price: $${basePrice}</strong>`;
+                            detailsElement.style.display = 'none';
+                            return;
+                        }
+
+                        // Find matching variant when all attributes are selected
+                        const matchingVariant = variantData.find(v => {
+                            return v.variants.some(variant =>
+                                Object.entries(selectedAttributes).every(([key, value]) =>
+                                    variant[key] === value
+                                )
+                            );
+                        });
+
+                        if (matchingVariant) {
+                            const matchingVariantInfo = matchingVariant.variants.find(variant =>
+                                Object.entries(selectedAttributes).every(([key, value]) =>
+                                    variant[key] === value
+                                )
+                            );
+
+                            if (matchingVariantInfo) {
+                                priceElement.innerHTML = `<strong>Price: $${parseFloat(matchingVariantInfo.price).toFixed(2)}</strong>`;
+
+                                if (matchingVariantInfo.supplier || matchingVariantInfo.material) {
+                                    detailsElement.style.display = 'block';
+                                    detailsElement.querySelector('.supplier-info').textContent =
+                                        matchingVariantInfo.supplier ? `Supplier: ${matchingVariantInfo.supplier}` : '';
+                                    detailsElement.querySelector('.material-info').textContent =
+                                        matchingVariantInfo.material ? `Material: ${matchingVariantInfo.material}` : '';
+                                } else {
+                                    detailsElement.style.display = 'none';
+                                }
+                            }
+                        }
+                    });
+                });
+
+                // Khởi tạo trạng thái ban đầu cho từng modal sản phẩm
+                document.querySelectorAll('[id^="variantModal-"]').forEach(modal => {
+                    const productId = modal.id.replace('variantModal-', '');
+                    const options = modal.querySelectorAll('.variant-option[data-product-id="' + productId + '"]');
+                    options.forEach((option, idx) => {
+                        option.style.display = idx === 0 ? 'block' : 'none';
+                    });
+                });
+            });
+        </script>
+    }
+</body>
+</html>

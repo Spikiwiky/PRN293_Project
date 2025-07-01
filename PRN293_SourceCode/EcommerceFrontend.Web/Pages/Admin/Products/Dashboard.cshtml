@@ -1,0 +1,61 @@
+@page
+@model dynamic
+@{
+    ViewData["Title"] = "Dashboard Quản lý Sản phẩm";
+}
+<h2>Dashboard Quản lý Sản phẩm</h2>
+<p>Chào mừng đến với trang quản trị sản phẩm. Chọn chức năng bạn muốn thao tác:</p>
+<table class="table table-bordered table-hover mt-4">
+    <thead class="table-light">
+        <tr>
+            <th>Chức năng</th>
+            <th>Mô tả</th>
+            <th>Đường dẫn</th>
+            <th>Thao tác</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Danh sách sản phẩm</td>
+            <td>Xem tất cả sản phẩm hiện có trong hệ thống.</td>
+            <td><code>/Admin/Products/Index</code></td>
+            <td><a class="btn btn-primary" href="/Admin/Products/Index">Đi tới</a></td>
+        </tr>
+        <tr>
+            <td>Thêm sản phẩm mới</td>
+            <td>Thêm một sản phẩm mới vào hệ thống.</td>
+            <td><code>/Admin/Products/Create</code></td>
+            <td><a class="btn btn-success" href="/Admin/Products/Create">Đi tới</a></td>
+        </tr>
+        <tr>
+            <td>Sửa sản phẩm</td>
+            <td>Chỉnh sửa thông tin sản phẩm đã có.</td>
+            <td><code>/Admin/Products/Edit/{id}</code></td>
+            <td><a class="btn btn-warning" href="/Admin/Products/Index">Chọn sản phẩm</a></td>
+        </tr>
+        <tr>
+            <td>Xem chi tiết sản phẩm</td>
+            <td>Xem thông tin chi tiết của một sản phẩm.</td>
+            <td><code>/Admin/Products/Details/{id}</code></td>
+            <td><a class="btn btn-info" href="/Admin/Products/Index">Chọn sản phẩm</a></td>
+        </tr>
+        <tr>
+            <td>Quản lý thuộc tính sản phẩm</td>
+            <td>Thêm, sửa, xóa thuộc tính cho sản phẩm.</td>
+            <td><code>/Admin/Products/Attributes/{id}</code></td>
+            <td><a class="btn btn-secondary" href="/Admin/Products/Index">Chọn sản phẩm</a></td>
+        </tr>
+        <tr>
+            <td>Quản lý biến thể sản phẩm</td>
+            <td>Thêm, sửa, xóa biến thể cho sản phẩm.</td>
+            <td><code>/Admin/Products/Variants/{id}</code></td>
+            <td><a class="btn btn-secondary" href="/Admin/Products/Index">Chọn sản phẩm</a></td>
+        </tr>
+        <tr>
+            <td>Thống kê sản phẩm</td>
+            <td>Xem thống kê, biểu đồ về sản phẩm.</td>
+            <td><code>/Admin/Products/Analytics</code></td>
+            <td><a class="btn btn-dark" href="/Admin/Products/Analytics">Đi tới</a></td>
+        </tr>
+    </tbody>
+</table> 

@@ -6,12 +6,18 @@ using EcommerceBackend.BusinessObject.Abstract.AuthAbstract;
 using EcommerceBackend.BusinessObject.Services.AuthService;
 using EcommerceBackend.DataAccess.Abstract;
 using EcommerceBackend.DataAccess.Repository;
+
 //using EcommerceBackend.BusinessObject.Services.ProductService;
+
 
 using EcommerceBackend.DataAccess.Repository;
 using EcommerceBackend.BusinessObject.Services;
 
 using EcommerceBackend.DataAccess.Abstract;
+using EcommerceBackend.BusinessObject.Abstract.OrderAbstract;
+using EcommerceBackend.BusinessObject.Services.OrderService;
+using EcommerceBackend.DataAccess.Abstract.OrderAbstract;
+using EcommerceBackend.DataAccess.Repository.OrderRepository;
 
 
 namespace EcommerceBackend.API.Configurations
@@ -38,6 +44,14 @@ namespace EcommerceBackend.API.Configurations
             //Register for auth
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IAuthRepository, AuthRepository>();
+
+            //Register for order
+            services.AddScoped<IOrderService, OrderService>();
+            services.AddScoped<IOrderRepository, OrderRepository>();
+
+
+
+
 
             // Register other services as needed
             //services.AddScoped<IUserService, UserService>();

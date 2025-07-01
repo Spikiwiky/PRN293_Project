@@ -8,6 +8,8 @@ using Microsoft.Extensions.Options;
 using EcommerceFrontend.Web.Models.Sale;
 using EcommerceFrontend.Web.Services.AI;
 using EcommerceFrontend.Web.Service.AI;
+using EcommerceFrontend.Web.Services.Order;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,12 +42,22 @@ builder.Services.Configure<ApiSettings>(builder.Configuration.GetSection("ApiSet
 builder.Services.AddScoped<IHttpClientService, HttpClientService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddHttpClient<BlogService>();
 builder.Services.AddHttpClient<IAdminBlogService, AdminBlogService>(client =>
 {
     client.BaseAddress = new Uri("https://localhost:7107/");
 });
 builder.Services.AddScoped<ISaleProductService, SaleProductService>();
+builder.Services.AddScoped<IAdminBlogService, AdminBlogService>();
+
+builder.Services.AddScoped<IUserService, UserService>();
+
+
+builder.Services.AddScoped<IBlogService, BlogService>();
+
+// Register admin services
+builder.Services.AddScoped<IProductService, ProductService>();
 
 var app = builder.Build();
 

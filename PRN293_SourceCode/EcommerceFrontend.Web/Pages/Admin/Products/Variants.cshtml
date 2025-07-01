@@ -1,0 +1,128 @@
+@page "{id:int}"
+@model Admin.Products.VariantsModel
+@{
+    ViewData["Title"] = "Biến thể sản phẩm";
+
+    // Lấy tất cả các key xuất hiện trong mọi biến thể của tất cả variant
+    var allKeys = new List<string>();
+    if (Model.Variants != null && Model.Variants.Count > 0)
+    {
+        allKeys = Model.Variants
+            .SelectMany(v => v.Variants ?? new List<Dictionary<string, object>>())
+            .SelectMany(dict => dict.Keys)
+            .Distinct()
+            .ToList();
+    }
+}
+<h2>Biến thể sản phẩm cho: @Model.Product?.Name</h2>
+@if (!string.IsNullOrEmpty(Model.StatusMessage))
+{
+    <div class="alert alert-info">@Model.StatusMessage</div>
+}
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Attributes (JSON)</th>
+            <th>Danh sách biến thể (chi tiết)</th>
+            <th>Thao tác</th>
+        </tr>
+    </thead>
+    <tbody>
+    @if (Model.Variants != null && Model.Variants.Count > 0)
+    {
+        foreach (var variant in Model.Variants)
+        {
+            <tr>
+                <td>@variant.VariantId</td>
+                <td><pre>@variant.Attributes</pre></td>
+                <td>
+                    @if (variant.Variants != null && variant.Variants.Count > 0)
+                    {
+                        <table class="table table-sm table-bordered mb-0">
+                            <thead>
+                                <tr>
+                                    @foreach (var key in allKeys)
+                                    {
+                                        <th>@key</th>
+                                    }
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (int i = 0; i < variant.Variants.Count; i++)
+                                {
+                                    var value = variant.Variants[i];
+                                    <tr>
+                                        @foreach (var key in allKeys)
+                                        {
+                                            <td>@(value.ContainsKey(key) ? value[key] : "")</td>
+                                        }
+                                        <td>
+                                            <!-- Nút xóa giá trị biến thể -->
+                                            <form method="post" asp-page-handler="DeleteVariantValue" asp-route-variantId="@variant.VariantId" asp-route-valueIndex="@i" style="display:inline">
+                                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Xác nhận xóa giá trị này?')">Xóa</button>
+                                            </form>
+                                            <!-- Có thể bổ sung nút sửa ở đây -->
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <span>Chưa có giá trị biến thể nào.</span>
+                    }
+                </td>
+                <td>
+                    <form method="post" asp-page-handler="DeleteVariant" asp-route-variantId="@variant.VariantId" style="display:inline">
+                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Xác nhận xóa?')">Xóa</button>
+                    </form>
+                    <!-- Sửa: có thể mở modal hoặc chuyển sang form sửa -->
+                </td>
+            </tr>
+        }
+    }
+    else
+    {
+        <tr><td colspan="4">Chưa có biến thể nào.</td></tr>
+    }
+    </tbody>
+</table>
+<hr />
+<h4>Thêm biến thể mới</h4>
+<form method="post" asp-page-handler="AddVariant">
+    <input type="hidden" name="Id" value="@Model.Id" />
+    @foreach (var attr in Model.AttributeOptions.Keys)
+    {
+        <div class="mb-2">
+            <input type="checkbox" id="chk_@attr" name="SelectedAttributes" value="@attr" onchange="toggleAttrInput('@attr')" />
+            <label for="chk_@attr">@attr</label>
+            <select id="input_@attr" name="NewVariant_@attr" class="form-control" style="display:none;">
+                <option value="">--Chọn--</option>
+                @foreach (var val in Model.AttributeOptions[attr])
+                {
+                    <option value="@val">@val</option>
+                }
+            </select>
+        </div>
+    }
+    <div class="mb-2">
+        <label>Price:</label>
+        <input type="number" step="0.01" name="NewVariant_price" class="form-control" required />
+    </div>
+    <div class="mb-2">
+        <label>Stock:</label>
+        <input type="number" name="NewVariant_stock" class="form-control" required />
+    </div>
+    <button type="submit" class="btn btn-primary">Thêm biến thể</button>
+</form>
+<script>
+    function toggleAttrInput(attr) {
+        var cb = document.getElementById('chk_' + attr);
+        var input = document.getElementById('input_' + attr);
+        input.style.display = cb.checked ? '' : 'none';
+    }
+</script>
+<hr />

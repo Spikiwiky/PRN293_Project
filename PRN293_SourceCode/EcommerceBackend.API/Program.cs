@@ -10,16 +10,25 @@ using EcommerceBackend.API.Configurations;
 using EcommerceBackend.API.Hubs;
 using EcommerceBackend.BusinessObject.Services;
 
+
 using EcommerceBackend.DataAccess.Repository.SaleRepository;
+
 using EcommerceBackend.DataAccess.Abstract.BlogAbstract;
 using EcommerceBackend.DataAccess.Repository.BlogRepository;
 
 
 using EcommerceBackend.BusinessObject.Services.UserService;
 using EcommerceBackend.DataAccess.Repository.UserRepository;
+using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authentication.Cookies;
+
+using EcommerceBackend.DataAccess.Repository;
+using EcommerceBackend.DataAccess.Models;
+
 using EcommerceBackend.BusinessObject.Services.SaleService;
 using EcommerceBackend.DataAccess.Abstract;
 using EcommerceBackend.DataAccess.Repository;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,11 +40,21 @@ builder.Services.AddScoped<IBlogRepository, BlogRepository>();
 builder.Services.AddScoped<BlogService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
+
+
+//thanhvv
+builder.Services.AddDbContext<EcommerceDBContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddScoped<EcommerceBackend.DataAccess.Repository.IProductRepository, EcommerceBackend.DataAccess.Repository.ProductRepository>();
+builder.Services.AddScoped<IProductService, ProductService>();
+
+
 //builder.Services.AddScoped<ISaleProductService, SaleProductService>();
 builder.Services.AddScoped<ISaleService, SaleService>(); 
 builder.Services.AddScoped<EcommerceBackend.DataAccess.Repository.SaleRepository.IProductRepository, EcommerceBackend.DataAccess.Repository.SaleRepository.ProductRepository>();
 builder.Services.AddScoped<EcommerceBackend.BusinessObject.Services.SaleService.ICategoryService, EcommerceBackend.BusinessObject.Services.SaleService.CategoryService>();
 builder.Services.AddScoped<EcommerceBackend.DataAccess.Repository.SaleRepository.ICategoryRepository, EcommerceBackend.DataAccess.Repository.SaleRepository.CategoryRepository>();
+
 // Config Authentication Jwt
 JwtConfig.ConfigureJwtAuthentication(builder.Services, builder.Configuration);
 JwtConfig.ConfigureSwagger(builder.Services);
@@ -54,17 +73,28 @@ builder.Services.AddSession(options =>
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddHttpContextAccessor();
 
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
+})
+.AddCookie()
+.AddGoogle(GoogleDefaults.AuthenticationScheme, options =>
+{
+    options.ClientId = builder.Configuration["GoogleKeys:ClientId"];
+    options.ClientSecret = builder.Configuration["GoogleKeys:ClientSecret"];
+});
+
 builder.Services.AddAuthorization();
 
 //builder.Services.AddCorsPolicy(builder.Configuration);
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowFrontendApp", policy =>
+    options.AddPolicy("AllowAll", policy =>
     {
-        policy.WithOrigins("https://localhost:7107", "https://localhost:7257")
+        policy.AllowAnyOrigin()
               .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials();
+              .AllowAnyMethod();
     });
 });
 

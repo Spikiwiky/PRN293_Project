@@ -10,6 +10,7 @@ namespace EcommerceFrontend.Web.Models
         public string Brand { get; set; } = string.Empty;
         public decimal BasePrice { get; set; }
         public string AvailableAttributes { get; set; } = string.Empty;
+        public int CategoryId { get; set; }
         public string? CategoryName { get; set; }
         public List<string> Images { get; set; } = new List<string>();
         public List<ProductVariantDTO> Variants { get; set; } = new List<ProductVariantDTO>();
@@ -22,7 +23,7 @@ namespace EcommerceFrontend.Web.Models
         public int? VariantId { get; set; }
         public int ProductId { get; set; }
         public string Attributes { get; set; } = string.Empty;
-        public List<Dictionary<string, string>> Variants { get; set; } = new List<Dictionary<string, string>>();
+        public List<Dictionary<string, object>> Variants { get; set; } = new List<Dictionary<string, object>>();
     }
 
     public class ProductSearchParams
