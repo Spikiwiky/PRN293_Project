@@ -4,6 +4,6 @@
     {
         public int ProductCategoryId { get; set; }
         public string ProductCategoryTitle { get; set; }
-        public bool? IsDelete { get; set; }
+        public bool IsDelete { get; set; }
     }
 }

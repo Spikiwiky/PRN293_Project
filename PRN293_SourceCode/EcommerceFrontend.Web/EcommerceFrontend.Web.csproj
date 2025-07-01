@@ -10,4 +10,8 @@
     <Folder Include="wwwroot\CustomerSite\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\EcommerceBackend.BusinessObject\EcommerceBackend.BusinessObject.csproj" />
+  </ItemGroup>
+
 </Project>

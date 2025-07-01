@@ -30,7 +30,6 @@ namespace EcommerceBackend.DataAccess.Models
         [Column("updated_at")]
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
-        // Navigation property
         [ForeignKey("ProductId")]
         public virtual Product Product { get; set; } = null!;
     }

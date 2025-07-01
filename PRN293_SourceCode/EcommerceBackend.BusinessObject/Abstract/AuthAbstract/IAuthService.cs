@@ -14,5 +14,8 @@ namespace EcommerceBackend.BusinessObject.Abstract.AuthAbstract
         bool IsValidEmail(string email);
         UserDto? ValidateUser(LoginRequestDto loginRequest);
         UserDto RegisterUser(string email, string password, string userName, string? phone, DateTime? dateOfBirth, string? address);
+
+        UserDto RegisterUserByGoogle(string email, string password, string userName, string? phone, DateTime? dateOfBirth, string? address);
+
     }
 }
