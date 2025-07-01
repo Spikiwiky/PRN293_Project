@@ -134,10 +134,10 @@ namespace EcommerceFrontend.Web.Pages.Sale.Products
             // Serialize Variants
             var variantsList = VariantDisplays.Select(v => new Dictionary<string, object>
             {
-                { "size", v.Size },
-                { "color", v.Color },
-                { "price", v.Price },
-                { "stock", v.Stock }
+                { "Size", v.Size },
+                { "Color", v.Color },
+                { "Price", v.Price },
+                { "Stock", v.Stock }
             }).ToList();
 
             var client = _httpClientFactory.CreateClient("MyAPI");
