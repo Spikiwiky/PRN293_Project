@@ -97,7 +97,7 @@ namespace EcommerceBackend.API.Controllers
         }
 
         [HttpPut("{productId}/attributes/{attributeName}")]
-        public async Task<ActionResult<bool>> UpdateProductAttribute(
+        public async Task<ActionResult<bool>> UpdateProductAttributetgvb(
             int productId,
             string attributeName,
             [FromBody] List<string> attributeValues)

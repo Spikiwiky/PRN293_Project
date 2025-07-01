@@ -1,7 +1,8 @@
-﻿using EcommerceBackend.DataAccess.Models;
+﻿using DocumentFormat.OpenXml.InkML;
+using EcommerceBackend.DataAccess.Models;
 using Microsoft.EntityFrameworkCore;
-using System.Text.Json;
 using Microsoft.Extensions.Logging;
+using System.Text.Json;
 
 namespace EcommerceBackend.DataAccess.Repository
 {
@@ -161,45 +162,41 @@ namespace EcommerceBackend.DataAccess.Repository
         {
             try
             {
-                // Validate that the product exists
-                var product = await _context.Products
-                    .Include(p => p.Variants)
-                    .FirstOrDefaultAsync(p => p.ProductId == variant.ProductId && !p.IsDelete);
+                // Tìm variant đã có cho sản phẩm này
+                var existingVariant = await _context.ProductVariants
+                    .FirstOrDefaultAsync(v => v.ProductId == variant.ProductId);
 
-                if (product == null) return false;
-
-                // Validate variant attributes against product's available attributes
-                var availableAttributes = JsonSerializer.Deserialize<Dictionary<string, List<string>>>(
-                    product.AvailableAttributes, _jsonOptions);
-
-                if (availableAttributes != null)
+                if (existingVariant != null)
                 {
-                    var variantAttributes = JsonSerializer.Deserialize<Dictionary<string, string>>(
-                        variant.Attributes, _jsonOptions);
+                    // Deserialize list cũ
+                    var variantsList = System.Text.Json.JsonSerializer.Deserialize<List<Dictionary<string, object>>>(
+                        existingVariant.Variants ?? "[]", _jsonOptions) ?? new List<Dictionary<string, object>>();
 
-                    if (variantAttributes != null)
-                    {
-                        foreach (var attr in variantAttributes)
-                        {
-                            if (!availableAttributes.ContainsKey(attr.Key) ||
-                                !availableAttributes[attr.Key].Contains(attr.Value))
-                            {
-                                return false;
-                            }
-                        }
-                    }
+                    // Deserialize list mới (từ variant.Variants)
+                    var newList = System.Text.Json.JsonSerializer.Deserialize<List<Dictionary<string, object>>>(
+                        variant.Variants ?? "[]", _jsonOptions) ?? new List<Dictionary<string, object>>();
+
+                    // Append tất cả giá trị mới vào list cũ
+                    variantsList.AddRange(newList);
+
+                    // Serialize lại và update
+                    existingVariant.Variants = System.Text.Json.JsonSerializer.Serialize(variantsList, _jsonOptions);
+                    existingVariant.UpdatedAt = DateTime.UtcNow;
+                    await _context.SaveChangesAsync();
+                    return true;
                 }
-
-                variant.CreatedAt = DateTime.UtcNow;
-                variant.UpdatedAt = DateTime.UtcNow;
-
-                await _context.ProductVariants.AddAsync(variant);
-                await _context.SaveChangesAsync();
-                return true;
+                else
+                {
+                    // Chưa có, tạo mới
+                    _context.ProductVariants.Add(variant);
+                    await _context.SaveChangesAsync();
+                    return true;
+                }
             }
-            catch
+            catch (Exception ex)
             {
-                return false;
+                _logger.LogError(ex, "[AddProductVariantAsync] Error adding product variant. Input: {variant}", System.Text.Json.JsonSerializer.Serialize(variant));
+                throw;
             }
         }
 
@@ -213,33 +210,27 @@ namespace EcommerceBackend.DataAccess.Repository
 
                 if (existingVariant == null) return false;
 
-                if (!skipValidation)
+                // Merge list mới vào list cũ (append, không ghi đè)
+                var oldList = System.Text.Json.JsonSerializer.Deserialize<List<Dictionary<string, object>>>(
+                    existingVariant.Variants ?? "[]", _jsonOptions) ?? new List<Dictionary<string, object>>();
+                var newList = System.Text.Json.JsonSerializer.Deserialize<List<Dictionary<string, object>>>(
+                    variant.Variants ?? "[]", _jsonOptions) ?? new List<Dictionary<string, object>>();
+
+                // Chỉ append các giá trị mới chưa có trong list cũ
+                foreach (var newItem in newList)
                 {
-                    // Validate variant attributes against product's available attributes
-                    var availableAttributes = JsonSerializer.Deserialize<Dictionary<string, List<string>>>(
-                        existingVariant.Product.AvailableAttributes, _jsonOptions);
-
-                    if (availableAttributes != null)
-                    {
-                        var variantAttributes = JsonSerializer.Deserialize<Dictionary<string, string>>(
-                            variant.Attributes, _jsonOptions);
-
-                        if (variantAttributes != null)
-                        {
-                            foreach (var attr in variantAttributes)
-                            {
-                                if (!availableAttributes.ContainsKey(attr.Key) ||
-                                    !availableAttributes[attr.Key].Contains(attr.Value))
-                                {
-                                    return false;
-                                }
-                            }
-                        }
-                    }
+                    bool exists = oldList.Any(oldItem =>
+                        oldItem.Keys.All(k => newItem.ContainsKey(k) && oldItem[k]?.ToString() == newItem[k]?.ToString()) &&
+                        newItem.Keys.All(k => oldItem.ContainsKey(k) && oldItem[k]?.ToString() == newItem[k]?.ToString())
+                    );
+                    if (!exists)
+                        oldList.Add(newItem);
                 }
 
+                existingVariant.Variants = System.Text.Json.JsonSerializer.Serialize(oldList, _jsonOptions);
                 existingVariant.Attributes = variant.Attributes;
                 existingVariant.UpdatedAt = DateTime.UtcNow;
+                existingVariant.Product.UpdatedAt = DateTime.UtcNow;
 
                 await _context.SaveChangesAsync();
                 return true;
@@ -382,22 +373,13 @@ namespace EcommerceBackend.DataAccess.Repository
 
                 if (variant == null) return false;
 
-                // Get current variants
-                var variants = JsonSerializer.Deserialize<List<Dictionary<string, string>>>(
-                    variant.Variants, _jsonOptions) ?? new List<Dictionary<string, string>>();
-
-                // Validate variant structure
-                var attributes = JsonSerializer.Deserialize<Dictionary<string, string>>(
-                    variant.Attributes, _jsonOptions) ?? new Dictionary<string, string>();
-
-                if (!AreDictionariesEqual(attributes, variantValue))
-                {
-                    return false; // Structure doesn't match
-                }
+                // Get current variant values từ property string (Variants)
+                var variants = System.Text.Json.JsonSerializer.Deserialize<List<Dictionary<string, string>>>(
+                    variant.Variants ?? "[]", _jsonOptions) ?? new List<Dictionary<string, string>>();
 
                 // Add new variant value
                 variants.Add(variantValue);
-                variant.Variants = JsonSerializer.Serialize(variants, _jsonOptions);
+                variant.Variants = System.Text.Json.JsonSerializer.Serialize(variants, _jsonOptions);
                 variant.UpdatedAt = DateTime.UtcNow;
 
                 await _context.SaveChangesAsync();
@@ -419,27 +401,18 @@ namespace EcommerceBackend.DataAccess.Repository
 
                 if (variant == null) return false;
 
-                // Get current variants
-                var variants = JsonSerializer.Deserialize<List<Dictionary<string, string>>>(
-                    variant.Variants, _jsonOptions) ?? new List<Dictionary<string, string>>();
+                // Get current variant values từ property string (Variants)
+                var variants = System.Text.Json.JsonSerializer.Deserialize<List<Dictionary<string, string>>>(
+                    variant.Variants ?? "[]", _jsonOptions) ?? new List<Dictionary<string, string>>();
 
                 if (valueIndex < 0 || valueIndex >= variants.Count)
                 {
                     return false; // Invalid index
                 }
 
-                // Validate variant structure
-                var attributes = JsonSerializer.Deserialize<Dictionary<string, string>>(
-                    variant.Attributes, _jsonOptions) ?? new Dictionary<string, string>();
-
-                if (!AreDictionariesEqual(attributes, variantValue))
-                {
-                    return false; // Structure doesn't match
-                }
-
-                // Update variant value
+               
                 variants[valueIndex] = variantValue;
-                variant.Variants = JsonSerializer.Serialize(variants, _jsonOptions);
+                variant.Variants = System.Text.Json.JsonSerializer.Serialize(variants, _jsonOptions);
                 variant.UpdatedAt = DateTime.UtcNow;
 
                 await _context.SaveChangesAsync();
@@ -458,18 +431,17 @@ namespace EcommerceBackend.DataAccess.Repository
                 var variant = await _context.ProductVariants.FindAsync(variantId);
                 if (variant == null) return false;
 
-               
-                var variants = JsonSerializer.Deserialize<List<Dictionary<string, string>>>(
-                    variant.Variants, _jsonOptions) ?? new List<Dictionary<string, string>>();
+                // Sử dụng object thay vì string để đồng bộ với các thao tác thêm/append
+                var variants = System.Text.Json.JsonSerializer.Deserialize<List<Dictionary<string, object>>>(
+                    variant.Variants ?? "[]", _jsonOptions) ?? new List<Dictionary<string, object>>();
 
                 if (valueIndex < 0 || valueIndex >= variants.Count)
                 {
                     return false; // Invalid index
                 }
 
-                
                 variants.RemoveAt(valueIndex);
-                variant.Variants = JsonSerializer.Serialize(variants, _jsonOptions);
+                variant.Variants = System.Text.Json.JsonSerializer.Serialize(variants, _jsonOptions);
                 variant.UpdatedAt = DateTime.UtcNow;
 
                 await _context.SaveChangesAsync();
@@ -502,14 +474,6 @@ namespace EcommerceBackend.DataAccess.Repository
             return await _context.ProductVariants
                 .Include(v => v.Product)
                 .FirstOrDefaultAsync(v => v.VariantId == variantId);
-        }
-
-        private bool AreDictionariesEqual(Dictionary<string, string> dict1, Dictionary<string, string> dict2)
-        {
-            if (dict1.Count != dict2.Count)
-                return false;
-
-            return dict1.Keys.All(key => dict2.ContainsKey(key));
         }
 
         public async Task<int> GetTotalProductsCountAsync(
