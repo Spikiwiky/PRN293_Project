@@ -6,6 +6,7 @@ using EcommerceFrontend.Web.Services.Sale;
 using EcommerceFrontend.Web.Models; // Đảm bảo namespace này tồn tại
 using Microsoft.Extensions.Options;
 using EcommerceFrontend.Web.Models.Sale;
+using EcommerceFrontend.Web.Services.Order;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -33,6 +34,7 @@ builder.Services.Configure<ApiSettings>(builder.Configuration.GetSection("ApiSet
 builder.Services.AddScoped<IHttpClientService, HttpClientService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddHttpClient<BlogService>();
 builder.Services.AddHttpClient<IAdminBlogService, AdminBlogService>(client =>
 {

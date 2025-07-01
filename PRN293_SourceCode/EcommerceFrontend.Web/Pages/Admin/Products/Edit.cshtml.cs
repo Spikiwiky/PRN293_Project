@@ -36,7 +36,6 @@ namespace EcommerceFrontend.Web.Pages.Admin.Products
         {
             // Loại bỏ lỗi validation của các trường thuộc tính
             ModelState.Remove(nameof(AttributeName));
-            ModelState.Remove(nameof(AttributeValues));
 
             if (!ModelState.IsValid)
             {
@@ -53,24 +52,6 @@ namespace EcommerceFrontend.Web.Pages.Admin.Products
             {
                 Message = "Cập nhật sản phẩm thất bại!";
             }
-            Attributes = await _productService.GetProductAttributesAsync(id);
-            return Page();
-        }
-
-        public async Task<IActionResult> OnPostUpdateAttributeAsync(int id)
-        {
-            if (string.IsNullOrWhiteSpace(AttributeName) || AttributeValues == null || !AttributeValues.Any())
-            {
-                Message = "Tên thuộc tính và giá trị không được để trống.";
-                Attributes = await _productService.GetProductAttributesAsync(id);
-                return Page();
-            }
-            var result = await _productService.UpdateProductAttributeAsync(id, AttributeName, AttributeValues);
-            if (result)
-                Message = "Cập nhật thuộc tính thành công!";
-            else
-                Message = "Cập nhật thuộc tính thất bại!";
-            Product = await _productService.GetProductByIdAsync(id);
             Attributes = await _productService.GetProductAttributesAsync(id);
             return Page();
         }

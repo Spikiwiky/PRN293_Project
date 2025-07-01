@@ -90,12 +90,11 @@ builder.Services.AddAuthorization();
 //builder.Services.AddCorsPolicy(builder.Configuration);
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowFrontendApp", policy =>
+    options.AddPolicy("AllowAll", policy =>
     {
-        policy.WithOrigins("https://localhost:7107", "https://localhost:7257")
+        policy.AllowAnyOrigin()
               .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials();
+              .AllowAnyMethod();
     });
 });
 
