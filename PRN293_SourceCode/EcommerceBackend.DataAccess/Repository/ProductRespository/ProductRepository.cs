@@ -158,45 +158,58 @@ namespace EcommerceBackend.DataAccess.Repository
             }
         }
 
+        // So sánh toàn bộ key-value giữa hai biến thể
+        private bool IsDuplicateVariant(Dictionary<string, object> a, Dictionary<string, object> b)
+        {
+            if (a.Count != b.Count) return false;
+            foreach (var key in a.Keys)
+            {
+                if (!b.ContainsKey(key) || (a[key]?.ToString() ?? "") != (b[key]?.ToString() ?? ""))
+                    return false;
+            }
+            return true;
+        }
+
         public async Task<bool> AddProductVariantAsync(ProductVariant variant)
         {
             try
             {
-                // Tìm variant đã có cho sản phẩm này
-                var existingVariant = await _context.ProductVariants
-                    .FirstOrDefaultAsync(v => v.ProductId == variant.ProductId);
+                var product = await _context.Products
+                    .Include(p => p.Variants)
+                    .FirstOrDefaultAsync(p => p.ProductId == variant.ProductId && !p.IsDelete);
 
-                if (existingVariant != null)
+                if (product == null) return false;
+
+                // Get current variants
+                var variants = product.Variants?.ToList() ?? new List<ProductVariant>();
+
+                // Deserialize biến thể mới
+                var newVariantDict = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(variant.Attributes ?? "{}", _jsonOptions) ?? new();
+
+                // Check duplicate: so sánh toàn bộ key-value
+                bool isDuplicate = variants.Any(existing =>
                 {
-                    // Deserialize list cũ
-                    var variantsList = System.Text.Json.JsonSerializer.Deserialize<List<Dictionary<string, object>>>(
-                        existingVariant.Variants ?? "[]", _jsonOptions) ?? new List<Dictionary<string, object>>();
-
-                    // Deserialize list mới (từ variant.Variants)
-                    var newList = System.Text.Json.JsonSerializer.Deserialize<List<Dictionary<string, object>>>(
-                        variant.Variants ?? "[]", _jsonOptions) ?? new List<Dictionary<string, object>>();
-
-                    // Append tất cả giá trị mới vào list cũ
-                    variantsList.AddRange(newList);
-
-                    // Serialize lại và update
-                    existingVariant.Variants = System.Text.Json.JsonSerializer.Serialize(variantsList, _jsonOptions);
-                    existingVariant.UpdatedAt = DateTime.UtcNow;
-                    await _context.SaveChangesAsync();
-                    return true;
-                }
-                else
+                    var existingDict = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(existing.Attributes ?? "{}", _jsonOptions) ?? new();
+                    return IsDuplicateVariant(existingDict, newVariantDict);
+                });
+                if (isDuplicate)
                 {
-                    // Chưa có, tạo mới
-                    _context.ProductVariants.Add(variant);
-                    await _context.SaveChangesAsync();
-                    return true;
+                    _logger.LogWarning("Duplicate variant detected: {Attributes}", variant.Attributes);
+                    return false;
                 }
+
+                // Thêm biến thể mới
+                variants.Add(variant);
+                product.Variants = variants; // Gán lại list ProductVariant
+                product.UpdatedAt = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
+
+                return true;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "[AddProductVariantAsync] Error adding product variant. Input: {variant}", System.Text.Json.JsonSerializer.Serialize(variant));
-                throw;
+                _logger.LogError(ex, "Error adding product variant");
+                return false;
             }
         }
 

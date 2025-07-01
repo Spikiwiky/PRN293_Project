@@ -15,8 +15,8 @@
         <input asp-for="AttributeName" class="form-control" />
     </div>
     <div class="form-group">
-        <label>Giá trị (cách nhau bởi dấu phẩy)</label>
-        <input name="AttributeValues" value="@string.Join(",", Model.AttributeValues)" class="form-control" />
+        <label>Giá trị (mỗi giá trị một dòng hoặc cách nhau bởi dấu phẩy)</label>
+        <textarea name="AttributeValues" class="form-control">@string.Join("\n", Model.AttributeValues)</textarea>
     </div>
     <button type="submit" class="btn btn-success">Thêm/Cập nhật thuộc tính</button>
 </form>

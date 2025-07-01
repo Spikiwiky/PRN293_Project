@@ -2,6 +2,17 @@
 @model Admin.Products.VariantsModel
 @{
     ViewData["Title"] = "Biến thể sản phẩm";
+
+    // Lấy tất cả các key xuất hiện trong mọi biến thể của tất cả variant
+    var allKeys = new List<string>();
+    if (Model.Variants != null && Model.Variants.Count > 0)
+    {
+        allKeys = Model.Variants
+            .SelectMany(v => v.Variants ?? new List<Dictionary<string, object>>())
+            .SelectMany(dict => dict.Keys)
+            .Distinct()
+            .ToList();
+    }
 }
 <h2>Biến thể sản phẩm cho: @Model.Product?.Name</h2>
 @if (!string.IsNullOrEmpty(Model.StatusMessage))
@@ -31,7 +42,7 @@
                         <table class="table table-sm table-bordered mb-0">
                             <thead>
                                 <tr>
-                                    @foreach (var key in variant.Variants[0].Keys)
+                                    @foreach (var key in allKeys)
                                     {
                                         <th>@key</th>
                                     }
@@ -43,9 +54,9 @@
                                 {
                                     var value = variant.Variants[i];
                                     <tr>
-                                        @foreach (var key in value.Keys)
+                                        @foreach (var key in allKeys)
                                         {
-                                            <td>@value[key]</td>
+                                            <td>@(value.ContainsKey(key) ? value[key] : "")</td>
                                         }
                                         <td>
                                             <!-- Nút xóa giá trị biến thể -->
@@ -115,9 +126,3 @@
     }
 </script>
 <hr />
-<h4>Test gọi handler AddVariant</h4>
-<form method="post" asp-page-handler="AddVariant">
-    <input type="hidden" name="Id" value="@Model.Id" />
-    <button type="submit" class="btn btn-primary">Test AddVariant</button>
-</form>
-<!-- Quản lý biến thể sẽ được bổ sung --> 

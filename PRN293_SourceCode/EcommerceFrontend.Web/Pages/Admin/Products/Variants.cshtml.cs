@@ -90,8 +90,12 @@ namespace EcommerceFrontend.Web.Pages.Admin.Products
                 return Page();
             }
 
-            // Tạo object mới cho giá trị biến thể
-            var newValue = new Dictionary<string, object>(attrDict.ToDictionary(kvp => kvp.Key, kvp => (object)kvp.Value));
+            // Tạo object mới cho giá trị biến thể, chỉ add các trường có value
+            var newValue = new Dictionary<string, object>();
+            foreach (var kvp in attrDict)
+            {
+                newValue[kvp.Key] = kvp.Value;
+            }
             newValue["price"] = price;
             newValue["stock"] = stock;
 
