@@ -55,7 +55,7 @@ Phân tích đặc điểm cá nhân (giới tính, sở thích, dáng người)
         {
             try
             { 
-                var keyCalls = new[] { "alo", "ê", "e", "ơi", "này" };
+                var keyCalls = new[] { "alo", "ê", "e", "ơi", "này", "Hello", "hello" };
                 var normalized = userMessage.Trim().ToLowerInvariant();
                 if (keyCalls.Contains(normalized))
                 {
