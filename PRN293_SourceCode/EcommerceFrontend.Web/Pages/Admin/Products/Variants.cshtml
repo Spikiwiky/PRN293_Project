@@ -14,6 +14,7 @@
             .ToList();
     }
 }
+<a asp-page="Index" class="btn btn-secondary mb-3">Quay lại</a>
 <h2>Biến thể sản phẩm cho: @Model.Product?.Name</h2>
 @if (!string.IsNullOrEmpty(Model.StatusMessage))
 {
@@ -23,7 +24,7 @@
     <thead>
         <tr>
             <th>ID</th>
-            <th>Attributes (JSON)</th>
+            <!--<th>Attributes (JSON)</th>-->
             <th>Danh sách biến thể (chi tiết)</th>
             <th>Thao tác</th>
         </tr>
@@ -35,7 +36,7 @@
         {
             <tr>
                 <td>@variant.VariantId</td>
-                <td><pre>@variant.Attributes</pre></td>
+                <!--<td><pre>@variant.Attributes</pre></td>-->
                 <td>
                     @if (variant.Variants != null && variant.Variants.Count > 0)
                     {
