@@ -15,88 +15,170 @@ namespace EcommerceFrontend.Web.Pages.Sale.Products
         [BindProperty]
         public ProductModel Product { get; set; }
 
+        [BindProperty]
+        public string AvailableSizes { get; set; }
+
+        [BindProperty]
+        public string AvailableColors { get; set; }
+
+        [BindProperty]
+        public string ImageUrl { get; set; }
+
+        [BindProperty]
+        public List<ProductVariantDisplayModel> VariantDisplays { get; set; } = new();
+
         public EditModel(IHttpClientFactory httpClientFactory, IOptions<ApiSettings> apiSettings)
         {
             _httpClientFactory = httpClientFactory;
-            _apiSettings = apiSettings.Value ?? throw new ArgumentNullException(nameof(apiSettings), "ApiSettings is not configured.");
+            _apiSettings = apiSettings.Value ?? throw new ArgumentNullException(nameof(apiSettings));
         }
 
         public async Task<IActionResult> OnGetAsync([FromQuery] int id)
         {
             var client = _httpClientFactory.CreateClient("MyAPI");
             var response = await client.GetAsync($"{_apiSettings.BaseUrl}/api/sale/products/{id}");
-            if (response.IsSuccessStatusCode)
-            {
-                Product = await response.Content.ReadFromJsonAsync<ProductModel>() ?? new ProductModel();
-                if (Product.ProductId != id)
-                {
-                    Product.ProductId = id;  
-                }
-                return Page();
-            }
-            return NotFound();
-        }
+            if (!response.IsSuccessStatusCode)
+                return NotFound();
 
+            Product = await response.Content.ReadFromJsonAsync<ProductModel>() ?? new ProductModel();
+
+            // Parse AvailableAttributes safely
+            if (!string.IsNullOrEmpty(Product.AvailableAttributes))
+            {
+                try
+                {
+                    var attributesDict = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(Product.AvailableAttributes);
+
+                    if (attributesDict != null)
+                    {
+                        if (attributesDict.TryGetValue("size", out var sizeElement) && sizeElement.ValueKind == JsonValueKind.Array)
+                            AvailableSizes = string.Join(",", sizeElement.EnumerateArray().Select(x => x.GetString()));
+
+                        if (attributesDict.TryGetValue("color", out var colorElement) && colorElement.ValueKind == JsonValueKind.Array)
+                            AvailableColors = string.Join(",", colorElement.EnumerateArray().Select(x => x.GetString()));
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error parsing AvailableAttributes: {ex.Message}");
+                }
+            }
+
+            // Get ImageUrl
+            ImageUrl = Product.ProductImages?.FirstOrDefault()?.ImageUrl ?? "";
+
+            // Parse Variants
+            VariantDisplays = new List<ProductVariantDisplayModel>();
+            if (Product.Variants != null)
+            {
+                foreach (var v in Product.Variants)
+                {
+                    if (!string.IsNullOrEmpty(v.Variants))
+                    {
+                        try
+                        {
+                            var variantList = JsonSerializer.Deserialize<List<Dictionary<string, JsonElement>>>(v.Variants);
+                            if (variantList != null)
+                            {
+                                foreach (var item in variantList)
+                                {
+                                    VariantDisplays.Add(new ProductVariantDisplayModel
+                                    {
+                                        Size = item.TryGetValue("size", out var sz) ? sz.GetString() : "",
+                                        Color = item.TryGetValue("color", out var cl) ? cl.GetString() : "",
+                                        Price = item.TryGetValue("price", out var pr) ? pr.GetDecimal() : 0,
+                                        Stock = item.TryGetValue("stock", out var st) ? st.GetInt32() : 0
+                                    });
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Error parsing variant: {ex.Message}");
+                        }
+                    }
+                }
+            }
+
+            return Page();
+        }
 
         public async Task<IActionResult> OnPost()
         {
-            Console.WriteLine("OnPost method called.");
-            Console.WriteLine($"ProductId: {Product?.ProductId}");
-
-            if (!ModelState.IsValid) // Kiểm tra validation
-            {
-                Console.WriteLine("ModelState is invalid.");
+            if (!ModelState.IsValid)
                 return Page();
-            }
 
-            if (Product?.ProductId <= 0) // Sử dụng <= 0 để chắc chắn
+            // Serialize AvailableAttributes
+            var attributesDict = new Dictionary<string, List<string>>
             {
-                ModelState.AddModelError(string.Empty, "Invalid Product ID.");
-                Console.WriteLine("Product ID is invalid.");
-                return Page();
-            }
-
-            try
-            {
-                var client = _httpClientFactory.CreateClient("MyAPI");
-                var updateDto = new
                 {
-                    Name = Product.Name,
-                    Description = Product.Description,
-                    ProductCategoryId = Product.ProductCategoryId,
-                    Brand = Product.Brand,
-                    BasePrice = Product.BasePrice,
-                    AvailableAttributes = Product.AvailableAttributes,
-                    Status = Product.Status,
-                    IsDelete = Product.IsDelete,
-                    ProductImages = Product.ProductImages,
-                    Variants = Product.Variants
-                };
-                var content = new StringContent(JsonSerializer.Serialize(updateDto), Encoding.UTF8, "application/json");
-                var fullUrl = $"{_apiSettings.BaseUrl}/api/sale/products/{Product.ProductId}";
-                Console.WriteLine($"Sending PUT to {fullUrl} with data: {await content.ReadAsStringAsync()}");
-                var response = await client.PutAsync(fullUrl, content);
-
-                if (response.IsSuccessStatusCode)
+                    "size",
+                    AvailableSizes?
+                        .Split(new[] { ',', '.' }, StringSplitOptions.RemoveEmptyEntries)
+                        .Select(s => s.Trim())
+                        .Where(s => !string.IsNullOrEmpty(s))
+                        .ToList() ?? new List<string>()
+                },
                 {
-                    Console.WriteLine("Update successful, redirecting to Index.");
-                    return RedirectToPage("/Sale/Products/Index");
+                    "color",
+                    AvailableColors?
+                        .Split(new[] { ',', '.' }, StringSplitOptions.RemoveEmptyEntries)
+                        .Select(c => c.Trim())
+                        .Where(c => !string.IsNullOrEmpty(c))
+                        .ToList() ?? new List<string>()
                 }
-                else
-                {
-                    var error = await response.Content.ReadAsStringAsync();
-                    Console.WriteLine($"Update failed. Status: {response.StatusCode}, Error: {error}");
-                    ModelState.AddModelError(string.Empty, $"Failed to update product. Status code: {response.StatusCode}. Error: {error}");
-                    return Page();
-                }
-            }
-            catch (Exception ex)
+            };
+
+            var availableAttributesJson = JsonSerializer.Serialize(attributesDict);
+
+            // Serialize Variants
+            var variantsList = VariantDisplays.Select(v => new Dictionary<string, object>
             {
-                Console.WriteLine($"Exception during update: {ex.Message}");
-                ModelState.AddModelError(string.Empty, $"Error updating product: {ex.Message}");
-                return Page();
-            }
+                { "size", v.Size },
+                { "color", v.Color },
+                { "price", v.Price },
+                { "stock", v.Stock }
+            }).ToList();
+
+            var client = _httpClientFactory.CreateClient("MyAPI");
+
+            // Prepare DTO
+            var updateDto = new
+            {
+                ProductId = Product.ProductId,
+                Name = Product.Name,
+                Description = Product.Description,
+                ProductCategoryId = Product.ProductCategoryId,
+                Brand = Product.Brand,
+                BasePrice = Product.BasePrice,
+                AvailableAttributes = availableAttributesJson,
+                Status = Product.Status,
+                IsDelete = Product.IsDelete,
+                ProductImages = string.IsNullOrEmpty(ImageUrl)
+                    ? new List<object>()
+                    : new List<object> { new { ImageUrl } },
+                Variants = new List<object> { new { Variants = JsonSerializer.Serialize(variantsList) } }
+            };
+
+            var jsonContent = JsonSerializer.Serialize(updateDto);
+            var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
+            var response = await client.PutAsync($"{_apiSettings.BaseUrl}/api/sale/products/{Product.ProductId}", content);
+
+            if (response.IsSuccessStatusCode)
+                return RedirectToPage("/Sale/Products/Index");
+
+            var error = await response.Content.ReadAsStringAsync();
+            ModelState.AddModelError(string.Empty, $"Update failed: {error}");
+            return Page();
         }
+    }
 
+    public class ProductVariantDisplayModel
+    {
+        public string Size { get; set; }
+        public string Color { get; set; }
+        public decimal Price { get; set; }
+        public int Stock { get; set; }
     }
 }

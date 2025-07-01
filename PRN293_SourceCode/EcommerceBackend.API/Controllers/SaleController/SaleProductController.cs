@@ -68,7 +68,7 @@ namespace EcommerceBackend.API.Controllers.SaleController
                 ProductCategoryId = productDto.ProductCategoryId,
                 Brand = productDto.Brand,
                 BasePrice = productDto.BasePrice,
-                AvailableAttributes = productDto.AvailableAttributes, // lưu JSON string
+                AvailableAttributes = productDto.AvailableAttributes, 
                 Status = productDto.Status,
                 IsDelete = productDto.IsDelete,
                 CreatedAt = DateTime.UtcNow,
