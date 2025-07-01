@@ -1,6 +1,9 @@
 ﻿using EcommerceBackend.BusinessObject.Abstract.AuthAbstract;
 using EcommerceBackend.BusinessObject.dtos.AuthDto;
+using EcommerceBackend.BusinessObject.Services.UserService;
 using EcommerceBackend.DataAccess.Models;
+using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -14,10 +17,12 @@ namespace EcommerceBackend.API.Controllers.AuthController
         private readonly IAuthService _authService;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public AuthController(IAuthService authService, IHttpContextAccessor httpContextAccessor)
+        private readonly IUserService _userService;
+        public AuthController(IAuthService authService, IHttpContextAccessor httpContextAccessor, IUserService userService)
         {
             _authService = authService;
             _httpContextAccessor = httpContextAccessor;
+            _userService = userService;
         }
 
         [HttpPost("login")]
@@ -158,9 +163,43 @@ namespace EcommerceBackend.API.Controllers.AuthController
         }
 
 
+        [HttpGet("google-login")]
+        public IActionResult LoginWithGoogle()
+        {
+            var redirectUrl = Url.Action(nameof(GoogleResponse));
+            var props = new AuthenticationProperties { RedirectUri = redirectUrl };
+            return Challenge(props, GoogleDefaults.AuthenticationScheme);
+        }
 
+        [HttpGet("google-response")]
+        public IActionResult GoogleResponse()
+        {
+            var resultTask = HttpContext.AuthenticateAsync(GoogleDefaults.AuthenticationScheme);
+            resultTask.Wait();
+            var result = resultTask.Result;
 
+            if (!result.Succeeded || result.Principal == null)
+                return Redirect("https://localhost:7257/LoginPage/Login?error=Google authentication failed");
 
+            var email = result.Principal.FindFirst(ClaimTypes.Email)?.Value;
+            var fullName = result.Principal.FindFirst(ClaimTypes.Name)?.Value;
 
+            if (string.IsNullOrEmpty(email))
+                return Redirect("https://localhost:7257/LoginPage/Login?error=No email returned by Google");
+
+            var user = _authService.RegisterUserByGoogle(
+                email,
+                "123",
+                fullName ?? email.Split('@')[0],
+                "",
+                null,
+                ""
+            );
+
+            var token = _authService.GenerateJwtToken(user);
+
+            // Redirect to Razor page with query string
+            return Redirect($"https://localhost:7107/LoginPage/Login?token={token}&userName={Uri.EscapeDataString(user.UserName)}&roleName={Uri.EscapeDataString(user.RoleName)}");
+        }
     }
 }

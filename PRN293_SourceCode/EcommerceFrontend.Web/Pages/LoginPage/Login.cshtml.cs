@@ -32,11 +32,22 @@ namespace EcommerceFrontend.Web.Pages.LoginPage
             _httpClientService = httpClientService;
         }
 
-        public void OnGet()
+        // Handle redirect from Google login with query parameters
+        public IActionResult OnGet(string token, string userName, string roleName)
         {
-            // Khởi tạo trang (nếu cần)
+            if (!string.IsNullOrEmpty(token))
+            {
+                ViewData["Token"] = token;
+                ViewData["UserName"] = userName;
+                ViewData["RoleName"] = roleName;
+
+                // DO NOT return Redirect here again!
+            }
+
+            return Page(); // Important: only return Page, not another redirect
         }
 
+        // Handle traditional login via form submission
         public async Task<IActionResult> OnPostAsync()
         {
             if (!ModelState.IsValid)
@@ -46,39 +57,35 @@ namespace EcommerceFrontend.Web.Pages.LoginPage
 
             try
             {
-                // Tạo dữ liệu gửi đến API
                 var loginRequest = new LoginRequestDto
                 {
                     Email = Input.Email.Trim(),
                     Password = Input.Password.Trim()
                 };
 
-                // Gọi API login
                 var response = await _httpClientService.PostAsync<LoginResponseDto>("api/auth/login", loginRequest);
 
-                // Kiểm tra phản hồi từ API
                 if (response == null || response.message != "successful")
                 {
                     ErrorMessage = response?.message ?? "Đăng nhập thất bại. Vui lòng thử lại.";
                     return Page();
                 }
 
-                // Lưu thông tin vào ViewData để JavaScript sử dụng
+                // Provide token and info for frontend JavaScript to handle
                 ViewData["Token"] = response.token;
                 ViewData["RoleName"] = response.roleName;
                 ViewData["UserName"] = response.userName;
 
-                // Không chuyển hướng ở đây, JavaScript sẽ xử lý
-                return Page();
+                return Page(); // Let JavaScript handle redirect and storage
             }
             catch (HttpRequestException ex)
             {
-                ErrorMessage = ex.Message;
+                ErrorMessage = $"Lỗi khi gọi API: {ex.Message}";
                 return Page();
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
-                ErrorMessage = "Đã xảy ra lỗi: " + ex.Message;
+                ErrorMessage = $"Đã xảy ra lỗi: {ex.Message}";
                 return Page();
             }
         }

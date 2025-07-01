@@ -50,9 +50,9 @@
     <script>
         function deleteBlog(id) {
             if (confirm("Are you sure you want to delete this blog?")) {
-                fetch(`/api/blog/${id}?confirm=true`, {
-                    method: "DELETE"
-                })
+                        fetch("https://localhost:7257/api/blog/" + id + "?confirm=true", {
+            method: "DELETE"
+        })
                 .then(response => {
                     if (response.ok) {
                         location.reload();

@@ -96,18 +96,18 @@ namespace EcommerceBackend.BusinessObject.Services.AuthService
             var user = new User
             {
                 Email = email,
-                Password = password, 
+                Password = password,
                 UserName = userName,
                 Phone = phone,
                 DateOfBirth = dateOfBirth,
                 Address = address,
                 RoleId = 3,
                 CreateDate = DateTime.Now,
-                Status = 1, 
+                Status = 1,
                 IsDelete = false
             };
             var createdUser = _authRepository.CreateUser(user);
-            if(createdUser == null) 
+            if (createdUser == null)
             {
                 throw new Exception();
             }
@@ -119,6 +119,53 @@ namespace EcommerceBackend.BusinessObject.Services.AuthService
                 UserName = user.UserName ?? "",
             };
         }
+        public UserDto RegisterUserByGoogle(string email, string password, string userName, string? phone, DateTime? dateOfBirth, string? address)
+        {
+            var existingUser = _authRepository.GetUserByEmail(email);
+            if (existingUser != null)
+            {
+                // Just return existing user as UserDto
+                return new UserDto
+                {
+                    UserId = existingUser.UserId,
+                    Email = existingUser.Email,
+                    RoleName = existingUser.Role?.RoleName ?? "",
+                    UserName = existingUser.UserName ?? "",
+
+                };
+            }
+
+            // Create new user
+            var user = new User
+            {
+                Email = email,
+                Password = password,
+                UserName = userName,
+                Phone = phone,
+                DateOfBirth = dateOfBirth,
+                Address = address,
+                RoleId = 3,
+                CreateDate = DateTime.Now,
+                Status = 1,
+                IsDelete = false
+            };
+
+            var createdUser = _authRepository.CreateUser(user);
+            if (createdUser == null)
+            {
+                throw new Exception("Failed to create user.");
+            }
+
+            return new UserDto
+            {
+                UserId = createdUser.UserId,
+                Email = createdUser.Email,
+                RoleName = createdUser.Role?.RoleName ?? "",
+                UserName = createdUser.UserName ?? "",
+
+            };
+        }
+
 
 
 
