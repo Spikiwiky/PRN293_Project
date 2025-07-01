@@ -44,29 +44,29 @@ namespace EcommerceFrontend.Web.Pages.Sale.Products
             if (!ModelState.IsValid)
                 return Page();
 
-            // AvailableAttributes JSON
+            // Tạo AvailableAttributes JSON string
             var availableAttributesObj = new Dictionary<string, List<string>>
-{
     {
-        "size",
-        Product.AvailableSizes
-            .SelectMany(s => s.Split(new[]{',','.'}, StringSplitOptions.RemoveEmptyEntries))
-            .Select(s => s.Trim())
-            .Where(s => !string.IsNullOrEmpty(s))
-            .ToList()
-    },
-    {
-        "color",
-        Product.AvailableColors
-            .SelectMany(s => s.Split(new[]{',','.'}, StringSplitOptions.RemoveEmptyEntries))
-            .Select(c => c.Trim())
-            .Where(c => !string.IsNullOrEmpty(c))
-            .ToList()
-    }
-};
-
+        {
+            "size",
+            Product.AvailableSizes
+                .SelectMany(s => s.Split(new[] { ',', '.' }, StringSplitOptions.RemoveEmptyEntries))
+                .Select(s => s.Trim())
+                .Where(s => !string.IsNullOrEmpty(s))
+                .ToList()
+        },
+        {
+            "color",
+            Product.AvailableColors
+                .SelectMany(s => s.Split(new[] { ',', '.' }, StringSplitOptions.RemoveEmptyEntries))
+                .Select(c => c.Trim())
+                .Where(c => !string.IsNullOrEmpty(c))
+                .ToList()
+        }
+    };
             var availableAttributesJson = JsonSerializer.Serialize(availableAttributesObj);
-             
+
+            // Tạo danh sách variants JSON string
             var variantsList = Product.Variants.Select(v => new Dictionary<string, object>
     {
         { "size", v.Size },
@@ -90,13 +90,24 @@ namespace EcommerceFrontend.Web.Pages.Sale.Products
                     ? new List<ProductImageDto>()
                     : new List<ProductImageDto> { new ProductImageDto { ImageUrl = Product.ImageUrl } },
                 Variants = new List<ProductVariantDto>
+    {
+        new ProductVariantDto
         {
-            new ProductVariantDto { Variants = variantsJson }
+            Attributes = availableAttributesJson, 
+            Variants = JsonSerializer.Serialize(variantsList)
         }
+    }
             };
 
-            var client = _httpClientFactory.CreateClient();
+
+            // Serialize DTO
             var json = JsonSerializer.Serialize(dto);
+            Console.WriteLine("====== JSON SENT TO API ======");
+            Console.WriteLine(json);
+            Console.WriteLine("==============================");
+
+            // Gửi request
+            var client = _httpClientFactory.CreateClient();
             var content = new StringContent(json, Encoding.UTF8, "application/json");
             var response = await client.PostAsync($"{_apiSettings.BaseUrl}/api/sale/products", content);
 
