@@ -171,8 +171,7 @@ namespace EcommerceBackend.API.Controllers.SaleController
             {
                 return NotFound("Sản phẩm không tồn tại.");
             }
-
-            // Cập nhật trường cơ bản
+             
             product.Name = productDto.Name;
             product.Description = productDto.Description;
             product.ProductCategoryId = productDto.ProductCategoryId;
@@ -182,14 +181,12 @@ namespace EcommerceBackend.API.Controllers.SaleController
             product.Status = productDto.Status;
             product.IsDelete = productDto.IsDelete;
             product.UpdatedAt = DateTime.UtcNow;
-
-            //// Xóa tất cả Variant cũ nếu có
+             
             //if (product.Variants != null && product.Variants.Any())
             //{
             //    product.Variants.Clear();
             //}
-
-            // Thêm Variant mới (nếu có)
+             
             if (productDto.Variants != null)
             {
                 product.Variants = productDto.Variants.Select(v => new ProductVariant
@@ -200,8 +197,7 @@ namespace EcommerceBackend.API.Controllers.SaleController
                     UpdatedAt = DateTime.UtcNow
                 }).ToList();
             }
-
-            //// (Optional) Xóa và thêm lại hình ảnh
+             
             //if (product.ProductImages != null && product.ProductImages.Any())
             //{
             //    product.ProductImages.Clear();

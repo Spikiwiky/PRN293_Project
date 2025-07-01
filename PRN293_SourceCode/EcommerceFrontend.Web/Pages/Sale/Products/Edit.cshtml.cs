@@ -41,8 +41,7 @@ namespace EcommerceFrontend.Web.Pages.Sale.Products
                 return NotFound();
 
             Product = await response.Content.ReadFromJsonAsync<ProductModel>() ?? new ProductModel();
-
-            // Parse AvailableAttributes safely
+             
             if (!string.IsNullOrEmpty(Product.AvailableAttributes))
             {
                 try
@@ -63,11 +62,9 @@ namespace EcommerceFrontend.Web.Pages.Sale.Products
                     Console.WriteLine($"Error parsing AvailableAttributes: {ex.Message}");
                 }
             }
-
-            // Get ImageUrl
+             
             ImageUrl = Product.ProductImages?.FirstOrDefault()?.ImageUrl ?? "";
-
-            // Parse Variants
+             
             VariantDisplays = new List<ProductVariantDisplayModel>();
             if (Product.Variants != null)
             {
@@ -105,11 +102,6 @@ namespace EcommerceFrontend.Web.Pages.Sale.Products
 
         public async Task<IActionResult> OnPost()
         {
-            Console.WriteLine($"[OnPost] Submitting update for ProductId = {Product?.ProductId}");
-
-            
-
-            // Serialize AvailableAttributes
             var attributesDict = new Dictionary<string, List<string>>
             {
                 {
@@ -131,8 +123,7 @@ namespace EcommerceFrontend.Web.Pages.Sale.Products
             };
 
             var availableAttributesJson = JsonSerializer.Serialize(attributesDict);
-
-            // Serialize Variants
+             
             var variantsList = VariantDisplays.Select(v => new Dictionary<string, object>
             {
                 { "size", v.Size },
@@ -142,11 +133,9 @@ namespace EcommerceFrontend.Web.Pages.Sale.Products
             }).ToList();
 
             var client = _httpClientFactory.CreateClient("MyAPI");
-
-            // Prepare DTO
+             
             var variantsJson = JsonSerializer.Serialize(variantsList);
-
-            // Prepare DTO
+ 
             var updateDto = new
             {
                 ProductId = Product.ProductId,
@@ -165,7 +154,7 @@ namespace EcommerceFrontend.Web.Pages.Sale.Products
     {
         new
         {
-            Attributes = availableAttributesJson, // Gửi thêm attributes
+            Attributes = availableAttributesJson,  
             Variants = variantsJson
         }
     }
