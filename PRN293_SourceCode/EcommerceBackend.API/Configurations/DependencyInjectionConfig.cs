@@ -12,12 +12,8 @@ using EcommerceBackend.DataAccess.Repository;
 
 using EcommerceBackend.DataAccess.Repository;
 using EcommerceBackend.BusinessObject.Services;
-
 using EcommerceBackend.DataAccess.Abstract;
-using EcommerceBackend.BusinessObject.Abstract.OrderAbstract;
 using EcommerceBackend.BusinessObject.Services.OrderService;
-using EcommerceBackend.DataAccess.Abstract.OrderAbstract;
-using EcommerceBackend.DataAccess.Repository.OrderRepository;
 
 
 namespace EcommerceBackend.API.Configurations
