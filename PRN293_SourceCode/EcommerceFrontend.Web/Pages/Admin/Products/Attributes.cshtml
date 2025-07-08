@@ -3,8 +3,6 @@
 @{
     ViewData["Title"] = "Quản lý thuộc tính sản phẩm";
 }
-<a asp-page="Dashboard" class="btn btn-info mb-3 ml-2">Về Dashboard</a>
-<a asp-page="Index" class="btn btn-secondary mb-3">Quay lại</a>
 <h2>Quản lý thuộc tính sản phẩm: @Model.Product?.Name</h2>
 @if (!string.IsNullOrEmpty(Model.Message))
 {
