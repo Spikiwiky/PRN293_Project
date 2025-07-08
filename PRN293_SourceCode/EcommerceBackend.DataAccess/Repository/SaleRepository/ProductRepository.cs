@@ -50,10 +50,12 @@ namespace EcommerceBackend.DataAccess.Repository.SaleRepository
             var product = await _context.Products.FindAsync(id);
             if (product != null)
             {
-                _context.Products.Remove(product);
+                product.IsDelete = true;
+                product.UpdatedAt = DateTime.UtcNow; 
                 await _context.SaveChangesAsync();
             }
         }
+
 
         public Task SaveChangesAsync()
         {

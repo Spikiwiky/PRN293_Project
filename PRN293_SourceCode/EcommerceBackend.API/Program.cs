@@ -48,6 +48,10 @@ builder.Services.AddDbContext<EcommerceDBContext>(options =>
 builder.Services.AddScoped<EcommerceBackend.DataAccess.Repository.IProductRepository, EcommerceBackend.DataAccess.Repository.ProductRepository>();
 builder.Services.AddScoped<IProductService, ProductService>();
 
+//builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+//builder.Services.AddScoped<IOrderService, OrderService>();
+
+
 
 //builder.Services.AddScoped<ISaleProductService, SaleProductService>();
 builder.Services.AddScoped<ISaleService, SaleService>(); 

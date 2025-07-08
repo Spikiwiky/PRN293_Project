@@ -6,7 +6,7 @@ namespace EcommerceBackend.BusinessObject.Services.OrderService
 {
     public interface IOrderService
     {
-        Task<List<OrderDto>> GetAllOrdersAsync();
+        //Task<List<OrderDto>> GetAllOrdersAsync();
         Task<List<OrderDetailDto>> GetAllOrderDetailsAsync();
     }
 } 

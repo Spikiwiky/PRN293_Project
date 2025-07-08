@@ -14,11 +14,11 @@ namespace EcommerceBackend.API.Controllers
             _orderService = orderService;
         }
         [HttpGet]
-        public async Task<IActionResult> GetAllOrders()
-        {
-            var orders = await _orderService.GetAllOrdersAsync();
-            return Ok(orders);
-        }
+        //public async Task<IActionResult> GetAllOrders()
+        //{
+        //    var orders = await _orderService.GetAllOrdersAsync();
+        //    return Ok(orders);
+        //}
         [HttpGet("details")]
         public async Task<IActionResult> GetAllOrderDetails()
         {
