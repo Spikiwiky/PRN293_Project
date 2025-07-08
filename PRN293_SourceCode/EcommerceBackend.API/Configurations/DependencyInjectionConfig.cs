@@ -10,10 +10,12 @@ using EcommerceBackend.DataAccess.Repository;
 //using EcommerceBackend.BusinessObject.Services.ProductService;
 
 
-using EcommerceBackend.DataAccess.Repository;
 using EcommerceBackend.BusinessObject.Services;
+
 using EcommerceBackend.DataAccess.Abstract;
 using EcommerceBackend.BusinessObject.Services.OrderService;
+
+
 
 
 namespace EcommerceBackend.API.Configurations
@@ -42,8 +44,10 @@ namespace EcommerceBackend.API.Configurations
             services.AddScoped<IAuthRepository, AuthRepository>();
 
             //Register for order
+
             //services.AddScoped<IOrderService, OrderService>();
             //services.AddScoped<IOrderRepository, OrderRepository>();
+
 
 
 

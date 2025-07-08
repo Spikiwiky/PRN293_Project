@@ -42,7 +42,9 @@ builder.Services.Configure<ApiSettings>(builder.Configuration.GetSection("ApiSet
 builder.Services.AddScoped<IHttpClientService, HttpClientService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IUserService, UserService>();
+
 //builder.Services.AddScoped<IOrderService, OrderService>();
+
 builder.Services.AddHttpClient<BlogService>();
 builder.Services.AddHttpClient<IAdminBlogService, AdminBlogService>(client =>
 {
@@ -50,10 +52,12 @@ builder.Services.AddHttpClient<IAdminBlogService, AdminBlogService>(client =>
 });
 builder.Services.AddScoped<ISaleProductService, SaleProductService>();
 
+
 //builder.Services.AddHttpClient<IOrderService, OrderService>(client =>
 //{
 //    client.BaseAddress = new Uri(apiBaseUrl);
 //});
+
 
 builder.Services.AddScoped<IAdminBlogService, AdminBlogService>();
 
