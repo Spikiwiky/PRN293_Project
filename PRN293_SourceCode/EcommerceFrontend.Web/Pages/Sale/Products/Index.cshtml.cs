@@ -31,7 +31,6 @@ namespace EcommerceFrontend.Web.Pages.Sale.Products
 
             if (response.IsSuccessStatusCode)
             {
-                // Xóa thành công, reload danh sách
                 return RedirectToPage();
             }
             else
