@@ -11,7 +11,7 @@ using EcommerceBackend.BusinessObject.Services.SaleService.ProductService;
 
 namespace EcommerceBackend.API.Controllers.SaleController
 {
-    [Route("api/sale")]
+    [Route("api/[controller]")]
     [ApiController]
     public class SaleProductController : ControllerBase
     {

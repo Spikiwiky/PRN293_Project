@@ -28,6 +28,8 @@ using EcommerceBackend.BusinessObject.Services.SaleService.ProductService;
 using EcommerceBackend.DataAccess.Repository.SaleRepository.OrderRepo;
 using EcommerceBackend.BusinessObject.Services.SaleService.OrderService;
 using EcommerceBackend.DataAccess.Repository;
+using EcommerceBackend.BusinessObject.Services.SaleService.UserService;
+using EcommerceBackend.DataAccess.Repository.SaleRepository.UserRepo;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -60,6 +62,8 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<ISaleOrderService, SaleOrderService>();
 builder.Services.AddScoped<ISaleOrderRepository, SaleOrderRepository>();  
+builder.Services.AddScoped<ISaleUserService, SaleUserService>();  
+builder.Services.AddScoped<ISaleUserRepository, SaleUserRepository>();  
 // Config Authentication Jwt
 JwtConfig.ConfigureJwtAuthentication(builder.Services, builder.Configuration);
 JwtConfig.ConfigureSwagger(builder.Services);
