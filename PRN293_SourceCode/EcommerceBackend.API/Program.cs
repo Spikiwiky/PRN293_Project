@@ -27,6 +27,8 @@ using EcommerceBackend.BusinessObject.Services.SaleService.CategoryService;
 using EcommerceBackend.BusinessObject.Services.SaleService.ProductService;
 using EcommerceBackend.DataAccess.Repository.SaleRepository.OrderRepo;
 using EcommerceBackend.BusinessObject.Services.SaleService.OrderService;
+using EcommerceBackend.DataAccess.Repository;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -45,8 +47,10 @@ builder.Services.AddDbContext<EcommerceDBContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<EcommerceBackend.DataAccess.Repository.IProductRepository, EcommerceBackend.DataAccess.Repository.ProductRepository>();
 builder.Services.AddScoped<IProductService, ProductService>();
+
 //builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 //builder.Services.AddScoped<IOrderService, OrderService>();
+
 
 
 //builder.Services.AddScoped<ISaleProductService, SaleProductService>();

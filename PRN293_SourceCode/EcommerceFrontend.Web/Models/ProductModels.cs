@@ -16,8 +16,6 @@ namespace EcommerceFrontend.Web.Models
         public List<ProductVariantDTO> Variants { get; set; } = new List<ProductVariantDTO>();
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
-        public int Status { get; set; }
-        public bool IsDelete { get; set; }
     }
 
     public class ProductVariantDTO

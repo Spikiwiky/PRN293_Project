@@ -1,70 +1,7 @@
 @page
 @model Admin.Products.AnalyticsModel
 @{
-    ViewData["Title"] = "Thống kê bán hàng";
+    ViewData["Title"] = "Thống kê sản phẩm";
 }
-<a asp-page="Dashboard" class="btn btn-info mb-3 ml-2">Về Dashboard</a>
-<a asp-page="Index" class="btn btn-secondary mb-3">Quay lại</a>
-<h2>Thống kê bán hàng</h2>
-<div class="row mb-4">
-    <div class="col-md-4">
-        <div class="card text-white bg-primary mb-3">
-            <div class="card-header">Tổng số đơn hàng</div>
-            <div class="card-body">
-                <h4 class="card-title">@Model.TotalOrders</h4>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card text-white bg-success mb-3">
-            <div class="card-header">Tổng sản phẩm đã bán</div>
-            <div class="card-body">
-                <h4 class="card-title">@Model.TotalProductsSold</h4>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card text-white bg-danger mb-3">
-            <div class="card-header">Tổng doanh thu</div>
-            <div class="card-body">
-                <h4 class="card-title">@Model.TotalRevenue.ToString("N0") ₫</h4>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="card mb-4">
-    <div class="card-header">Doanh thu theo sản phẩm</div>
-    <div class="card-body">
-        <canvas id="revenueChart" height="100"></canvas>
-    </div>
-</div>
-@section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        var ctx = document.getElementById('revenueChart').getContext('2d');
-        var chart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ProductNames)),
-                datasets: [{
-                    label: 'Doanh thu',
-                    data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ProductRevenues)),
-                    backgroundColor: 'rgba(54, 162, 235, 0.7)'
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function(value) {
-                                return value.toLocaleString() + ' ₫';
-                            }
-                        }
-                    }
-                }
-            }
-        });
-    </script>
-} 
+<h2>Thống kê sản phẩm</h2>
+<!-- Biểu đồ, thống kê sẽ được bổ sung --> 
