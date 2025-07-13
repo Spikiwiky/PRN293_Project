@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EcommerceBackend.BusinessObject.Services.SaleService
+namespace EcommerceBackend.BusinessObject.Services.SaleService.CategoryService
 {
     public interface ICategoryService
     {
