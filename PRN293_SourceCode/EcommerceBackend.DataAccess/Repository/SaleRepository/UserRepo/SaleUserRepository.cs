@@ -23,7 +23,7 @@ namespace EcommerceBackend.DataAccess.Repository.SaleRepository.UserRepo
         }
 
         public User? GetById(int id) =>
-            _context.Users.FirstOrDefault(u => u.UserId == id && u.IsDelete != true);
+            _context.Users.FirstOrDefault(u => u.UserId == id);
 
         public void Add(User user)
         {

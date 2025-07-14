@@ -1,0 +1,53 @@
+﻿@page "{id:int}"
+@model EcommerceFrontend.Web.Pages.Sale.Sale_User.EditModel
+@{
+	ViewData["Title"] = "Chỉnh sửa User";
+}
+<h2>Chỉnh sửa User</h2>
+
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+	<div class="alert alert-danger">@Model.ErrorMessage</div>
+}
+
+<form method="post">
+	<div class="form-group">
+		<label>Email</label>
+		<input asp-for="UserDto.Email" class="form-control" />
+	</div>
+	<div class="form-group">
+		<label>Password</label>
+		<input asp-for="UserDto.Password" class="form-control" />
+	</div>
+	<div class="form-group">
+		<label>UserName</label>
+		<input asp-for="UserDto.UserName" class="form-control" />
+	</div>
+	<div class="form-group">
+		<label>Role ID</label>
+		<input asp-for="UserDto.RoleId" class="form-control" />
+	</div>
+	<div class="form-group">
+		<label>Date of Birth</label>
+		<input asp-for="UserDto.DateOfBirth" type="date" class="form-control" />
+	</div>
+	<div class="form-group">
+		<label>Phone</label>
+		<input asp-for="UserDto.Phone" class="form-control" />
+	</div>
+	<div class="form-group">
+		<label>Address</label>
+		<input asp-for="UserDto.Address" class="form-control" />
+	</div>
+	<div class="form-group">
+		<label>Status</label>
+		<input asp-for="UserDto.Status" class="form-control" />
+	</div>
+	<div class="form-group">
+		<label>Is Delete</label>
+		<input asp-for="UserDto.IsDelete" class="form-control" />
+	</div>
+
+	<button type="submit" class="btn btn-success">Lưu</button>
+	<a asp-page="/Sale/Sale_User/Index" class="btn btn-secondary">Hủy</a>
+</form>
