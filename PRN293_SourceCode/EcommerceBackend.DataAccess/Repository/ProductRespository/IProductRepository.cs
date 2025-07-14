@@ -44,7 +44,7 @@ namespace EcommerceBackend.DataAccess.Repository
         Task<bool> CreateProductAsync(Product product);
         Task<bool> UpdateProductAsync(Product product);
         Task<bool> DeleteProductAsync(int productId);
-
+        Task<bool> AddProductImageAsync(int productId, string imageUrl);
         Task<List<ProductVariant>> GetVariantsByProductIdAsync(int productId);
     }
 }

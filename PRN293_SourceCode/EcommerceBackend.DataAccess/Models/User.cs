@@ -26,5 +26,7 @@ namespace EcommerceBackend.DataAccess.Models
         public virtual UserRole? Role { get; set; }
         public virtual ICollection<Cart> Carts { get; set; }
         public virtual ICollection<Order> Orders { get; set; }
+        public virtual ICollection<Review> Reviews { get; set; }
+        public virtual ICollection<Rating> Ratings { get; set; }
     }
 }

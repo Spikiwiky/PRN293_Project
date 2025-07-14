@@ -407,6 +407,11 @@ namespace EcommerceBackend.BusinessObject.Services
             return await _productRepository.DeleteProductAsync(productId);
         }
 
+        public async Task<bool> AddProductImageAsync(int productId, string imageUrl)
+        {
+            return await _productRepository.AddProductImageAsync(productId, imageUrl);
+        }
+
         private ProductDTO MapToDTO(Product product)
         {
             var variants = product.Variants?.Select(v => new ProductVariantDTO

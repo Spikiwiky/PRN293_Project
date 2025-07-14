@@ -38,6 +38,7 @@ namespace EcommerceBackend.BusinessObject.Services
 
         Task<bool> CreateProductAsync(ProductDTO product);
         Task<bool> UpdateProductAsync(int productId, ProductDTO product);
+        Task<bool> AddProductImageAsync(int productId, string imageUrl);
         Task<bool> DeleteProductAsync(int productId);
     }
 } 

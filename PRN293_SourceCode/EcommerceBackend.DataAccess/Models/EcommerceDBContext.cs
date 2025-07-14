@@ -31,6 +31,8 @@ namespace EcommerceBackend.DataAccess.Models
         public virtual DbSet<ProductVariant> ProductVariants { get; set; } = null!;
         public virtual DbSet<User> Users { get; set; } = null!;
         public virtual DbSet<UserRole> UserRoles { get; set; } = null!;
+        public virtual DbSet<Review> Reviews { get; set; } = null!;
+        public virtual DbSet<Rating> Ratings { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -401,6 +403,50 @@ namespace EcommerceBackend.DataAccess.Models
                 entity.Property(e => e.RoleName)
                     .HasMaxLength(100)
                     .HasColumnName("Role_name");
+            });
+
+            modelBuilder.Entity<Review>(entity =>
+            {
+                entity.ToTable("reviews");
+
+                entity.Property(e => e.ReviewId).HasColumnName("review_id");
+                entity.Property(e => e.ProductId).HasColumnName("product_id");
+                entity.Property(e => e.UserId).HasColumnName("user_id");
+                entity.Property(e => e.Content).HasColumnName("content").HasMaxLength(1000);
+                entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("datetime2").HasDefaultValueSql("GETDATE()");
+                entity.Property(e => e.IsVisible).HasColumnName("is_visible").HasDefaultValue(true);
+
+                entity.HasOne(d => d.Product)
+                    .WithMany(p => p.Reviews)
+                    .HasForeignKey(d => d.ProductId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.User)
+                    .WithMany(u => u.Reviews)
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<Rating>(entity =>
+            {
+                entity.ToTable("ratings");
+
+                entity.Property(e => e.RatingId).HasColumnName("rating_id");
+                entity.Property(e => e.ProductId).HasColumnName("product_id");
+                entity.Property(e => e.UserId).HasColumnName("user_id");
+                entity.Property(e => e.Score).HasColumnName("score");
+                entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("datetime2").HasDefaultValueSql("GETDATE()");
+                entity.Property(e => e.IsVisible).HasColumnName("is_visible").HasDefaultValue(true);
+
+                entity.HasOne(d => d.Product)
+                    .WithMany(p => p.Ratings)
+                    .HasForeignKey(d => d.ProductId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.User)
+                    .WithMany(u => u.Ratings)
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             OnModelCreatingPartial(modelBuilder);

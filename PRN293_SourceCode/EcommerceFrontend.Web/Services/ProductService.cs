@@ -26,6 +26,7 @@ namespace EcommerceFrontend.Web.Services
         Task<bool> DeleteVariantValueAsync(int variantId, int valueIndex);
         Task<bool> UpdateProductAsync(int id, ProductDTO product);
         Task<bool> CreateProductAsync(ProductDTO product);
+        Task<bool> AddProductImageAsync(int productId, string imageUrl);
     }
 
     public class ProductService : IProductService
@@ -260,6 +261,16 @@ namespace EcommerceFrontend.Web.Services
         {
             var content = new StringContent(JsonSerializer.Serialize(product), Encoding.UTF8, "application/json");
             var response = await _httpClient.PostAsync($"/api/admin/products", content);
+            response.EnsureSuccessStatusCode();
+            var responseContent = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<bool>(responseContent, _jsonOptions);
+        }
+
+        public async Task<bool> AddProductImageAsync(int productId, string imageUrl)
+        {
+            var request = new { imageUrl };
+            var content = new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
+            var response = await _httpClient.PostAsync($"/api/product/{productId}/images", content);
             response.EnsureSuccessStatusCode();
             var responseContent = await response.Content.ReadAsStringAsync();
             return JsonSerializer.Deserialize<bool>(responseContent, _jsonOptions);

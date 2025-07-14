@@ -1,19 +1,27 @@
+using EcommerceBackend.BusinessObject.Services.SaleService;
 using EcommerceFrontend.Web.Models;
+using EcommerceFrontend.Web.Models.Sale;
 using EcommerceFrontend.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using System.Net.Http.Json;
 
 namespace EcommerceFrontend.Web.Pages.Products;
 
 public class IndexModel : PageModel
 {
     private readonly IProductService _productService;
+    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly ApiSettings _apiSettings;
     private readonly ILogger<IndexModel> _logger;
 
-    public IndexModel(IProductService productService, ILogger<IndexModel> logger)
+    public IndexModel(IProductService productService, IHttpClientFactory httpClientFactory, IOptions<ApiSettings> apiSettings, ILogger<IndexModel> logger)
     {
         _productService = productService;
+        _httpClientFactory = httpClientFactory;
+        _apiSettings = apiSettings.Value ?? throw new ArgumentNullException(nameof(apiSettings), "ApiSettings is not configured.");
         _logger = logger;
     }
 
@@ -23,6 +31,7 @@ public class IndexModel : PageModel
     public int PageSize { get; set; } = 10;
     public int TotalPages { get; set; }
     public string? ErrorMessage { get; set; }
+    public List<CategoryModel> Categories { get; set; } = new();
 
     public async Task<IActionResult> OnGetAsync(
         string? name = null,
@@ -42,7 +51,7 @@ public class IndexModel : PageModel
                 Page = page,
                 PageSize = PageSize
             };
-             // search bàng  parameter
+             // search bï¿½ng  parameter
            
             Products = await _productService.SearchProductsAsync(SearchParams);
 
@@ -57,6 +66,18 @@ public class IndexModel : PageModel
             );
 
             TotalPages = (int)Math.Ceiling(totalProducts / (double)PageSize);
+
+            var client = _httpClientFactory.CreateClient("MyAPI");
+            var fullUrl = $"{_apiSettings.BaseUrl}/api/sale/categories";
+            var response = await client.GetAsync(fullUrl);
+            if (response.IsSuccessStatusCode)
+            {
+                Categories = await response.Content.ReadFromJsonAsync<List<CategoryModel>>() ?? new List<CategoryModel>();
+            }
+            else
+            {
+                Categories = new List<CategoryModel>();
+            }
 
             return Page();
         }
