@@ -39,20 +39,17 @@ namespace EcommerceBackend.DataAccess.Repository.SaleRepository.OrderRepo
             _context.Orders.Update(order);
             await SaveChangesAsync();
         }
-
-        //public async Task DeleteOrderAsync(int id)
-        //{
-        //    var order = await GetOrderByIdAsync(id);
-        //    if (order != null)
-        //    {
-        //        _context.Orders.Remove(order);
-        //        await SaveChangesAsync();
-        //    }
-        //}
-
         public async Task SaveChangesAsync()
         {
             await _context.SaveChangesAsync();
+        }
+        public async Task<List<OrderDetail>> GetOrderDetailsByOrderIdAsync(int orderId)
+        {
+            return await _context.OrderDetails
+                .Include(od => od.Order)
+                .Include(od => od.Product)
+                .Where(od => od.OrderId == orderId)
+                .ToListAsync();
         }
     }
 }

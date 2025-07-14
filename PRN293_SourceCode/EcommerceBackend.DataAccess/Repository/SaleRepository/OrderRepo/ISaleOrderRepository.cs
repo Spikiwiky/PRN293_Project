@@ -8,7 +8,7 @@ namespace EcommerceBackend.DataAccess.Repository.SaleRepository.OrderRepo
         Task<Order> GetOrderByIdAsync(int id);
         Task CreateOrderAsync(Order order);
         Task UpdateOrderAsync(Order order);
-        //Task DeleteOrderAsync(int id);
         Task SaveChangesAsync();
+        Task<List<OrderDetail>> GetOrderDetailsByOrderIdAsync(int orderId);
     }
 }

@@ -18,6 +18,6 @@ namespace EcommerceBackend.BusinessObject.Services.SaleService.OrderService
         Task<Order> GetOrderByIdAsync(int id);
         Task CreateOrderAsync(Order order);
         Task UpdateOrderAsync(Order order);
-        //Task DeleteOrderAsync(int id);
+        Task<List<OrderDetail>> GetOrderDetailsByOrderIdAsync(int orderId);
     }
 }

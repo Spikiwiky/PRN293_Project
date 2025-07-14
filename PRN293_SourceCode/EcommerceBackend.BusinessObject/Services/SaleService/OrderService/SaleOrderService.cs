@@ -18,8 +18,7 @@ namespace EcommerceBackend.BusinessObject.Services.SaleService.OrderService
             _productRepository = productRepository ?? throw new ArgumentNullException(nameof(productRepository));
             _orderRepository = orderRepository ?? throw new ArgumentNullException(nameof(orderRepository));
         }
-
-        // Product-related methods
+         
         public async Task<List<Product>> GetAllProductsAsync()
         {
             return (await _productRepository.GetAllProductsAsync()).ToList();
@@ -56,8 +55,7 @@ namespace EcommerceBackend.BusinessObject.Services.SaleService.OrderService
             {
                 throw new ArgumentNullException(nameof(order));
             }
-
-            // Kiểm tra và tính toán TotalQuantity, AmountDue
+             
             int totalQuantity = 0;
             decimal amountDue = 0;
             if (order.OrderDetails == null)
@@ -80,12 +78,11 @@ namespace EcommerceBackend.BusinessObject.Services.SaleService.OrderService
                 {
                     throw new ArgumentException($"Sản phẩm với ID {detail.ProductId} không tồn tại hoặc đã bị xóa.");
                 }
-                if (product.Status != 1) // Giả định 1 là trạng thái "Available"
+                if (product.Status != 1)  
                 {
                     throw new ArgumentException($"Sản phẩm với ID {detail.ProductId} không khả dụng.");
                 }
-
-                // Kiểm tra VariantId nếu có
+                 
                 if (!string.IsNullOrEmpty(detail.VariantId))
                 {
                     var variant = await _productRepository.GetProductVariantAsync(detail.ProductId.Value, detail.VariantId);
@@ -94,15 +91,13 @@ namespace EcommerceBackend.BusinessObject.Services.SaleService.OrderService
                         throw new ArgumentException($"Biến thể với ID {detail.VariantId} không tồn tại cho sản phẩm {detail.ProductId}.");
                     }
                 }
-
-                // Lưu tên sản phẩm và giá vào OrderDetail
+                 
                 detail.ProductName = product.Name;
                 detail.Price = product.BasePrice;
                 totalQuantity += detail.Quantity.Value;
                 amountDue += detail.Quantity.Value * detail.Price.Value;
             }
-
-            // Gán giá trị cho các trường nullable
+             
             order.TotalQuantity = totalQuantity;
             order.AmountDue = amountDue;
 
@@ -115,8 +110,7 @@ namespace EcommerceBackend.BusinessObject.Services.SaleService.OrderService
             {
                 throw new ArgumentNullException(nameof(order));
             }
-
-            // Kiểm tra và cập nhật TotalQuantity, AmountDue
+             
             int totalQuantity = 0;
             decimal amountDue = 0;
             if (order.OrderDetails == null)
@@ -139,12 +133,11 @@ namespace EcommerceBackend.BusinessObject.Services.SaleService.OrderService
                 {
                     throw new ArgumentException($"Sản phẩm với ID {detail.ProductId} không tồn tại hoặc đã bị xóa.");
                 }
-                if (product.Status != 1) // Giả định 1 là trạng thái "Available"
+                if (product.Status != 1)  
                 {
                     throw new ArgumentException($"Sản phẩm với ID {detail.ProductId} không khả dụng.");
                 }
-
-                // Kiểm tra VariantId nếu có
+                 
                 if (!string.IsNullOrEmpty(detail.VariantId))
                 {
                     var variant = await _productRepository.GetProductVariantAsync(detail.ProductId.Value, detail.VariantId);
@@ -159,17 +152,19 @@ namespace EcommerceBackend.BusinessObject.Services.SaleService.OrderService
                 totalQuantity += detail.Quantity.Value;
                 amountDue += detail.Quantity.Value * detail.Price.Value;
             }
-
-            // Gán giá trị cho các trường nullable
             order.TotalQuantity = totalQuantity;
             order.AmountDue = amountDue;
 
             await _orderRepository.UpdateOrderAsync(order);
         }
-
-        //public async Task DeleteOrderAsync(int id)
-        //{
-        //    await _orderRepository.DeleteOrderAsync(id);
-        //}
+        public async Task<List<OrderDetail>> GetOrderDetailsByOrderIdAsync(int orderId)
+        {
+            var details = await _orderRepository.GetOrderDetailsByOrderIdAsync(orderId);
+            if (!details.Any())
+            {
+                throw new ArgumentException($"No order details found for OrderId {orderId}");
+            }
+            return details;
+        }
     }
 }

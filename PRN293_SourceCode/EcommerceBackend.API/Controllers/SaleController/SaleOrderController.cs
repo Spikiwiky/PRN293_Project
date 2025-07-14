@@ -138,12 +138,30 @@ namespace EcommerceBackend.API.Controllers.SaleController
                 return StatusCode(500, new { Message = "Đã xảy ra lỗi server khi tạo đơn hàng.", Error = ex.InnerException?.Message ?? ex.Message });
             }
         }
-         
+
         [HttpGet]
         public async Task<IActionResult> GetAllOrders()
         {
             var orders = await _orderRepository.GetAllOrdersAsync();
-            return Ok(orders);
+            var orderDtos = orders.Select(o => new OrderDto
+            {
+                OrderId = o.OrderId,
+                CustomerId = (int)o.CustomerId,
+                TotalQuantity = (int)o.TotalQuantity,
+                AmountDue = (decimal)o.AmountDue,
+                PaymentMethodId = (int)o.PaymentMethodId,
+                OrderNote = o.OrderNote,
+                OrderStatusId = (int)o.OrderStatusId,
+                OrderDetails = o.OrderDetails?.Select(od => new OrderDetailResponseDto
+                {
+                    ProductId = od.ProductId,
+                    VariantId = od.VariantId,
+                    Quantity = (int)od.Quantity,
+                    Price = od.Price,
+                    ProductName = od.ProductName
+                }).ToList()
+            }).ToList();
+            return Ok(orderDtos);
         }
 
         [HttpGet("{id}")]
@@ -154,8 +172,29 @@ namespace EcommerceBackend.API.Controllers.SaleController
             {
                 return NotFound();
             }
-            return Ok(order);
+
+            var responseDto = new OrderResponseDto
+            {
+                OrderId = order.OrderId,
+                CustomerId = order.CustomerId,
+                TotalQuantity = order.TotalQuantity,
+                AmountDue = order.AmountDue,
+                PaymentMethodId = order.PaymentMethodId,
+                OrderNote = order.OrderNote,
+                OrderStatusId = order.OrderStatusId,
+                OrderDetails = order.OrderDetails?.Select(od => new OrderDetailResponseDto
+                {
+                    ProductId = od.ProductId,
+                    VariantId = od.VariantId,
+                    Quantity = od.Quantity ?? 0,
+                    Price = od.Price,
+                    ProductName = od.ProductName
+                }).ToList() ?? new List<OrderDetailResponseDto>()
+            };
+
+            return Ok(responseDto);
         }
+
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateOrder(int id, [FromBody] UpdateOrderDto orderDto)
@@ -173,35 +212,24 @@ namespace EcommerceBackend.API.Controllers.SaleController
                 {
                     return NotFound($"Đơn hàng với ID {id} không tồn tại.");
                 }
-                 
+
                 if (orderDto.CustomerId.HasValue && orderDto.CustomerId > 0)
                 {
                     existingOrder.CustomerId = orderDto.CustomerId.Value;
                 }
-                 
+
                 existingOrder.PaymentMethodId = orderDto.PaymentMethodId ?? existingOrder.PaymentMethodId;
-                 
-                //if (orderDto.OrderStatusId.HasValue)
-                //{
-                //    var statusExists = await _orderRepository.CheckOrderStatusExistsAsync(orderDto.OrderStatusId.Value);
-                //    if (!statusExists)
-                //    {
-                //        return BadRequest($"Trạng thái đơn hàng với ID {orderDto.OrderStatusId} không tồn tại.");
-                //    }
-                //    existingOrder.OrderStatusId = orderDto.OrderStatusId.Value;
-                //}
-                 
+
                 var existingDetails = existingOrder.OrderDetails.ToList();
                 var updatedDetails = new HashSet<OrderDetail>(existingDetails, new OrderDetailEqualityComparer());
 
                 foreach (var detail in orderDto.OrderDetails)
                 {
                     Console.WriteLine($"Processing OrderDetail: ProductId = {detail.ProductId}, Quantity = {detail.Quantity}, VariantId = {detail.VariantId}");
-                    // Bỏ qua nếu ProductId hoặc Quantity không hợp lệ
                     if (!detail.ProductId.HasValue || detail.ProductId <= 0 || detail.Quantity <= 0)
                     {
                         Console.WriteLine($"ProductId {detail.ProductId} or Quantity {detail.Quantity} is invalid, skipping update.");
-                        continue;  
+                        continue;
                     }
 
                     var product = await _productRepository.GetProductByIdAsync(detail.ProductId.Value);
@@ -246,13 +274,13 @@ namespace EcommerceBackend.API.Controllers.SaleController
                         });
                     }
                 }
-                 
+
                 existingOrder.OrderDetails.Clear();
                 foreach (var detail in updatedDetails)
                 {
                     existingOrder.OrderDetails.Add(detail);
                 }
-                 
+
                 existingOrder.TotalQuantity = existingOrder.OrderDetails.Sum(d => d.Quantity);
                 existingOrder.AmountDue = existingOrder.OrderDetails.Sum(d => d.Price * d.Quantity);
 
@@ -309,7 +337,34 @@ namespace EcommerceBackend.API.Controllers.SaleController
 
             return NoContent();
         }
-        public class OrderDetailEqualityComparer : IEqualityComparer<OrderDetail>
+
+        [HttpGet("{id}/details")]
+        public async Task<IActionResult> GetOrderDetails(int id)
+        {
+            try
+            {
+                var details = await _saleService.GetOrderDetailsByOrderIdAsync(id);
+                var response = details.Select(od => new OrderDetailResponseDto
+                {
+                    ProductId = od.ProductId,
+                    VariantId = od.VariantId,
+                    Quantity = od.Quantity ?? 0,
+                    Price = od.Price,
+                    ProductName = od.ProductName
+                }).ToList();
+                return Ok(response);
+            }
+            catch (ArgumentException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = "Đã xảy ra lỗi server khi lấy chi tiết đơn hàng.", Error = ex.Message });
+            }
+        }
+
+    public class OrderDetailEqualityComparer : IEqualityComparer<OrderDetail>
         {
             public bool Equals(OrderDetail x, OrderDetail y)
             {
