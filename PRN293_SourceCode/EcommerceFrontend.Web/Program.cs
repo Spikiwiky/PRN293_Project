@@ -26,7 +26,7 @@ if (string.IsNullOrEmpty(apiBaseUrl))
 builder.Services.AddHttpClient("MyAPI", client =>
 {
     client.BaseAddress = new Uri(apiBaseUrl);
-    Console.WriteLine($"Configured BaseAddress for MyAPI: {apiBaseUrl}"); // Debug log
+    Console.WriteLine($"Configured BaseAddress for MyAPI: {apiBaseUrl}");  
 });
 
 //Tri
@@ -51,13 +51,6 @@ builder.Services.AddHttpClient<IAdminBlogService, AdminBlogService>(client =>
     client.BaseAddress = new Uri("https://localhost:7107/");
 });
 builder.Services.AddScoped<ISaleProductService, SaleProductService>();
-
-
-//builder.Services.AddHttpClient<IOrderService, OrderService>(client =>
-//{
-//    client.BaseAddress = new Uri(apiBaseUrl);
-//});
-
 
 builder.Services.AddScoped<IAdminBlogService, AdminBlogService>();
 

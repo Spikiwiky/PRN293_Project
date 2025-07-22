@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EcommerceBackend.DataAccess.Repository.SaleRepository
+namespace EcommerceBackend.DataAccess.Repository.SaleRepository.ProductRepo
 {
     public class ProductRepository : IProductRepository
     {
@@ -18,11 +18,12 @@ namespace EcommerceBackend.DataAccess.Repository.SaleRepository
 
         public async Task<Product> GetProductByIdAsync(int id)
         {
-            return await _context.Products
+            var product = await _context.Products
                 .Include(p => p.ProductCategory)
                 .Include(p => p.ProductImages)
                 .Include(p => p.Variants)
-                .FirstOrDefaultAsync(p => p.ProductId == id);
+                .FirstOrDefaultAsync(p => p.ProductId == id && !p.IsDelete && p.Status == 1);
+            return product;
         }
 
         public async Task<IEnumerable<Product>> GetAllProductsAsync()
@@ -51,12 +52,10 @@ namespace EcommerceBackend.DataAccess.Repository.SaleRepository
             if (product != null)
             {
                 product.IsDelete = true;
-                product.UpdatedAt = DateTime.UtcNow; 
+                product.UpdatedAt = DateTime.UtcNow;
                 await _context.SaveChangesAsync();
             }
         }
-
-
         public Task SaveChangesAsync()
         {
             return _context.SaveChangesAsync();
@@ -79,6 +78,12 @@ namespace EcommerceBackend.DataAccess.Repository.SaleRepository
                 product.Variants = variants;
                 _context.ProductVariants.AddRange(variants);
             }
+        }
+
+        public async Task<ProductVariant> GetProductVariantAsync(int productId, string variantId)
+        {
+            return await _context.ProductVariants
+                .FirstOrDefaultAsync(v => v.ProductId == productId && v.VariantId.ToString() == variantId);
         }
     }
 }
