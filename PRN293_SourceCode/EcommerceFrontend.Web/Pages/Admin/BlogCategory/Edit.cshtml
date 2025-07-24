@@ -1,0 +1,29 @@
+﻿@page "{id:int}"
+@model EcommerceFrontend.WebApp.Pages.Admin.BlogCategory.EditModel
+@{
+    ViewData["Title"] = "Edit Blog Category";
+}
+
+<h2>Edit Blog Category</h2>
+
+<form method="post">
+    <div class="form-group">
+        <label asp-for="BlogCategory.BlogCategoryTitle" class="control-label"></label>
+        <input asp-for="BlogCategory.BlogCategoryTitle" class="form-control" />
+        <span asp-validation-for="BlogCategory.BlogCategoryTitle" class="text-danger"></span>
+    </div>
+
+    <div class="form-group form-check">
+        <input asp-for="BlogCategory.IsDelete" class="form-check-input" />
+        <label asp-for="BlogCategory.IsDelete" class="form-check-label">Is Deleted</label>
+    </div>
+
+    <input type="hidden" asp-for="BlogCategory.BlogCategoryId" />
+
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a asp-page="./Index" class="btn btn-secondary">Cancel</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

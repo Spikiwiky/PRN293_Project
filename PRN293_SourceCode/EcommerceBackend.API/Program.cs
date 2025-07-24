@@ -11,7 +11,6 @@ using EcommerceBackend.API.Hubs;
 using EcommerceBackend.BusinessObject.Services;
 
 using EcommerceBackend.DataAccess.Abstract.BlogAbstract;
-using EcommerceBackend.DataAccess.Repository.BlogRepository;
 using EcommerceBackend.DataAccess.Repository.SaleRepository.ProductRepo;
 
 using EcommerceBackend.BusinessObject.Services.UserService;
@@ -30,6 +29,11 @@ using EcommerceBackend.BusinessObject.Services.SaleService.OrderService;
 using EcommerceBackend.DataAccess.Repository;
 using EcommerceBackend.BusinessObject.Services.SaleService.UserService;
 using EcommerceBackend.DataAccess.Repository.SaleRepository.UserRepo;
+using EcommerceBackend.DataAccess.Repository.BlogCategoryRespository;
+using EcommerceBackend.BusinessObject.Abstract.BlogCategoryAbstract;
+using EcommerceBackend.BusinessObject.Services.BlogCategoryService;
+using EcommerceBackend.BusinessObject.Abstract;
+using EcommerceBackend.BusinessObject.Abstract.BlogAbstract;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -39,7 +43,10 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IBlogRepository, BlogRepository>();
-builder.Services.AddScoped<BlogService>();
+builder.Services.AddScoped<IBlogService, BlogService>();
+builder.Services.AddScoped<ICommentRepository, CommentRepository>();
+builder.Services.AddScoped<ICommentService, CommentService>();
+ 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 
@@ -63,12 +70,32 @@ builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<ISaleOrderService, SaleOrderService>();
 builder.Services.AddScoped<ISaleOrderRepository, SaleOrderRepository>();  
 builder.Services.AddScoped<ISaleUserService, SaleUserService>();  
-builder.Services.AddScoped<ISaleUserRepository, SaleUserRepository>();  
+builder.Services.AddScoped<ISaleUserRepository, SaleUserRepository>();
+builder.Services.AddScoped<IBlogCategoryRepository, BlogCategoryRepository>();
+builder.Services.AddScoped<IBlogCategoryService, BlogCategoryService>();
 // Config Authentication Jwt
 JwtConfig.ConfigureJwtAuthentication(builder.Services, builder.Configuration);
 JwtConfig.ConfigureSwagger(builder.Services);
 // Add Application Services (custom config DI)
 builder.Services.AddApplicationServices(builder.Configuration);
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("https://localhost:7107")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 
 //session
 builder.Services.AddHttpContextAccessor();

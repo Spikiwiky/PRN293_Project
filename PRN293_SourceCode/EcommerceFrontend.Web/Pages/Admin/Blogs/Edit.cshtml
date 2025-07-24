@@ -1,43 +1,48 @@
-﻿@page 
+﻿@page "{id:int}"
 @model EcommerceFrontend.Web.Pages.Admin.Blogs.EditModel
 @{
-    ViewData["Title"] = "Edit Blog";
-    Layout = "_AdminLayout";
+    ViewData["Title"] = "Chỉnh sửa Blog";
 }
-
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
 
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card shadow p-4">
-                <h2 class="text-center mb-4">Edit Blog</h2>
+                <h2 class="text-center mb-4">Chỉnh sửa Blog</h2>
+
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger">
+                        @Html.ValidationSummary()
+                    </div>
+                }
 
                 <form method="post">
-                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
                     <input type="hidden" asp-for="Blog.BlogId" />
 
                     <div class="mb-3">
-                        <label asp-for="Blog.BlogTittle" class="form-label">Title</label>
-                        <input asp-for="Blog.BlogTittle" class="form-control" />
-                        <span asp-validation-for="Blog.BlogTittle" class="text-danger"></span>
+                        <label asp-for="Blog.Title" class="form-label">Tiêu đề</label>
+                        <input asp-for="Blog.Title" class="form-control" />
+                        <span asp-validation-for="Blog.Title" class="text-danger"></span>
                     </div>
 
                     <div class="mb-3">
-                        <label asp-for="Blog.BlogContent" class="form-label">Content</label>
-                        <textarea asp-for="Blog.BlogContent" class="form-control" rows="5"></textarea>
-                        <span asp-validation-for="Blog.BlogContent" class="text-danger"></span>
+                        <label asp-for="Blog.Content" class="form-label">Nội dung</label>
+                        <textarea asp-for="Blog.Content" id="blogContent" class="form-control" rows="5"></textarea>
+                        <span asp-validation-for="Blog.Content" class="text-danger"></span>
                     </div>
 
                     <div class="mb-3">
-                        <label asp-for="Blog.BlogCategoryId" class="form-label">Category ID</label>
-                        <input asp-for="Blog.BlogCategoryId" type="number" class="form-control" />
+                        <label asp-for="Blog.BlogCategoryId" class="form-label">Danh mục</label>
+                        <select asp-for="Blog.BlogCategoryId" class="form-control" asp-items="Model.Categories">
+                            <option value="">-- Chọn danh mục --</option>
+                        </select>
                         <span asp-validation-for="Blog.BlogCategoryId" class="text-danger"></span>
                     </div>
 
                     <div class="text-center">
-                        <button type="submit" class="btn btn-primary">Update</button>
-                        <a asp-page="./Index" class="btn btn-outline-secondary ms-2">Cancel</a>
+                        <button type="submit" class="btn btn-primary">Cập nhật</button>
+                        <a asp-page="Index" class="btn btn-outline-secondary ms-2">Hủy</a>
                     </div>
                 </form>
             </div>
@@ -46,5 +51,28 @@
 </div>
 
 @section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <partial name="_ValidationScriptsPartial" />
+    <script src="https://cdn.tiny.cloud/1/4r6f5s1eoxidsz9wsrbdph6hkth8jwgyd00idk3ubgpozuse/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            tinymce.init({
+                selector: '#blogContent',
+                height: 500,
+                plugins: 'lists link image table code help wordcount',
+                toolbar: 'undo redo | blocks | bold italic underline | ' +
+                    'alignleft aligncenter alignright | bullist numlist | ' +
+                    'link image | code | help',
+                branding: false,
+                menubar: false,
+                promotion: false,
+                content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:16px }',
+                setup: function (editor) {
+                    editor.on('change', function () {
+                        editor.save();
+                    });
+                }
+            });
+        });
+    </script>
 }

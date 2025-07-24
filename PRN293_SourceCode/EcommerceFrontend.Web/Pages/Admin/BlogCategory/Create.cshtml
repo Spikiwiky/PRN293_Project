@@ -1,0 +1,23 @@
+﻿@page
+@model EcommerceFrontend.WebApp.Pages.Admin.BlogCategory.CreateModel
+
+@{
+    ViewData["Title"] = "Create Blog Category";
+}
+
+<h2>Create Blog Category</h2>
+
+<form method="post">
+    <div class="form-group">
+        <label asp-for="BlogCategory.BlogCategoryTitle" class="control-label"></label>
+        <input asp-for="BlogCategory.BlogCategoryTitle" class="form-control" />
+        <span asp-validation-for="BlogCategory.BlogCategoryTitle" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Create</button>
+    <a asp-page="./Index" class="btn btn-secondary">Cancel</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

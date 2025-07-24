@@ -1,12 +1,8 @@
 ﻿@page
 @model EcommerceFrontend.Web.Pages.Admin.Blogs.CreateModel
-
 @{
     ViewData["Title"] = "Thêm Blog";
-    Layout = "_AdminLayout";
 }
-
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
 
 <div class="container mt-5">
     <div class="row justify-content-center">
@@ -14,28 +10,34 @@
             <div class="card shadow p-4">
                 <h2 class="text-center mb-4">Tạo Blog Mới</h2>
 
-                <form method="post">
-                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger">
+                        @Html.ValidationSummary()
+                    </div>
+                }
 
+                <form method="post">
                     <div class="mb-3">
-                        <label asp-for="Blog.BlogTittle" class="form-label">Tiêu đề</label>
-                        <input asp-for="Blog.BlogTittle" class="form-control" />
-                        <span asp-validation-for="Blog.BlogTittle" class="text-danger"></span>
+                        <label asp-for="Blog.Title" class="form-label">Tiêu đề</label>
+                        <input asp-for="Blog.Title" class="form-control" />
+                        <span asp-validation-for="Blog.Title" class="text-danger"></span>
                     </div>
 
                     <div class="mb-3">
-                        <label asp-for="Blog.BlogContent" class="form-label">Nội dung</label>
-                        <textarea asp-for="Blog.BlogContent" class="form-control" rows="5"></textarea>
-                        <span asp-validation-for="Blog.BlogContent" class="text-danger"></span>
+                        <label asp-for="Blog.Content" class="form-label">Nội dung</label>
+                        <textarea asp-for="Blog.Content" id="blogContent" class="form-control" rows="5"></textarea>
+                        <span asp-validation-for="Blog.Content" class="text-danger"></span>
                     </div>
 
                     <div class="mb-3">
                         <label asp-for="Blog.BlogCategoryId" class="form-label">Danh mục</label>
-                        <input asp-for="Blog.BlogCategoryId" class="form-control" />
+                        <select asp-for="Blog.BlogCategoryId" class="form-control"
+                                asp-items="Model.Categories">
+                            <option value="">-- Chọn danh mục --</option>
+                        </select>
                         <span asp-validation-for="Blog.BlogCategoryId" class="text-danger"></span>
                     </div>
-
-               
 
                     <div class="text-center">
                         <button type="submit" class="btn btn-success">Lưu</button>
@@ -48,5 +50,33 @@
 </div>
 
 @section Scripts {
+    <!-- Load jQuery FIRST -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Then load validation scripts -->
     <partial name="_ValidationScriptsPartial" />
+
+    <!-- TinyMCE Script with your API Key -->
+    <script src="https://cdn.tiny.cloud/1/4r6f5s1eoxidsz9wsrbdph6hkth8jwgyd00idk3ubgpozuse/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            tinymce.init({
+                selector: '#blogContent',
+                height: 500,
+                plugins: 'lists link image table code help wordcount',
+                toolbar: 'undo redo | blocks | bold italic underline | ' +
+                         'alignleft aligncenter alignright | bullist numlist | ' +
+                         'link image | code | help',
+                branding: false,
+                menubar: false,
+                promotion: false,
+                content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:16px }',
+                setup: function(editor) {
+                    editor.on('change', function() {
+                        editor.save();
+                    });
+                }
+            });
+        });
+    </script>
 }

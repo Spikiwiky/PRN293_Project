@@ -1,7 +1,8 @@
-
 using EcommerceBackend.DataAccess;
 using EcommerceBackend.DataAccess.Models;
 using EcommerceBackend.DataAccess.Repository;
+using EcommerceBackend.BusinessObject.Abstract;
+using EcommerceBackend.BusinessObject.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace EcommerceBackend.API
@@ -16,11 +17,10 @@ namespace EcommerceBackend.API
 
             // Add Repositories
             services.AddScoped<IProductRepository, ProductRepository>();
-
-            // Add Services
-         
+   
+          
 
             return services;
         }
     }
-} 
+}

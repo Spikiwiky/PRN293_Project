@@ -1,116 +1,171 @@
 ﻿using EcommerceBackend.BusinessObject.Abstract.BlogAbstract;
-using EcommerceBackend.BusinessObject.dtos.BlogDto;
+using EcommerceBackend.BusinessObject.dtos;
+using EcommerceBackend.BusinessObject.Dtos;
 using EcommerceBackend.DataAccess.Abstract;
 using EcommerceBackend.DataAccess.Abstract.BlogAbstract;
 using EcommerceBackend.DataAccess.Models;
-using EcommerceBackend.DataAccess.Repository.BlogRepository;
-using System.Net.Http;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace EcommerceBackend.BusinessObject.Services
 {
     public class BlogService : IBlogService
     {
-        private readonly IBlogRepository _repository;
+        private readonly IBlogRepository _blogRepository;
+        private readonly IBlogCategoryRepository _categoryRepository;
+        private readonly ICommentRepository _commentRepository;
 
-        public BlogService(IBlogRepository repository)
+        public BlogService(
+            IBlogRepository blogRepository,
+            IBlogCategoryRepository categoryRepository,
+            ICommentRepository commentRepository)
         {
-            _repository = repository;
+            _blogRepository = blogRepository;
+            _categoryRepository = categoryRepository;
+            _commentRepository = commentRepository;
         }
 
-        public async Task<IEnumerable<BlogDto>> GetAllAsync()
+        public async Task<IEnumerable<BlogDto>> GetAllBlogsAsync(bool includeDeleted = false)
         {
-            var blogs = await _repository.GetAllAsync();
-            return blogs.Select(b => new BlogDto
+            var blogs = await _blogRepository.GetAllAsync(includeDeleted);
+            return blogs.Select(MapToDto).ToList();
+        }
+
+        public async Task<BlogDetailDto> GetBlogByIdAsync(int id, bool includeDeleted = false)
+        {
+            var blog = await _blogRepository.GetByIdAsync(id, includeDeleted);
+            if (blog == null) return null;
+
+            var comments = includeDeleted
+                ? await _commentRepository.GetByBlogIdAsync(blog.BlogId, includeDeleted: true)
+                : await _commentRepository.GetByBlogIdAsync(blog.BlogId);
+
+            return new BlogDetailDto
             {
-                BlogId = b.BlogId,
-                BlogCategoryId = b.BlogCategoryId,
-                BlogTittle = b.BlogTittle,
-                BlogContent = b.BlogContent
-            });
+                BlogId = blog.BlogId,
+                Title = blog.BlogTittle,
+                Content = blog.BlogContent,
+                CreatedAt = blog.CreatedAt,
+                IsDelete = blog.IsDelete,
+                Category = blog.BlogCategory != null ? new BlogCategoryDto
+                {
+                    BlogCategoryId = blog.BlogCategory.BlogCategoryId,
+                    BlogCategoryTitle = blog.BlogCategory.BlogCategoryTitle
+                } : null,
+                Comments = comments.Select(c => new CommentDto
+                {
+                    CommentId = c.CommentId,
+                    Content = c.Content,
+                    CreatedAt = c.CreatedAt,
+                    Author = c.User != null ? c.User.UserName : "Anonymous",
+                    
+                }).ToList()
+            };
         }
 
-        public async Task AddAsync(BlogDto dto)
+        public async Task<BlogDto> CreateBlogAsync(CreateBlogDto dto)
         {
+            if (dto.BlogCategoryId.HasValue && !await _categoryRepository.ExistsAsync(dto.BlogCategoryId.Value))
+            {
+                throw new ArgumentException("Invalid blog category ID");
+            }
+
             var blog = new Blog
             {
+                BlogTittle = dto.Title,
+                BlogContent = dto.Content,
                 BlogCategoryId = dto.BlogCategoryId,
-                BlogTittle = dto.BlogTittle,
-                BlogContent = dto.BlogContent
+                CreatedAt = DateTime.UtcNow,
+                IsDelete = false
             };
 
-            await _repository.AddAsync(blog);
+            await _blogRepository.AddAsync(blog);
+            return MapToDto(blog);
         }
 
-        public async Task<BlogDto> GetByIdAsync(int id)
+        public async Task UpdateBlogAsync(UpdateBlogDto dto)
         {
-            var b = await _repository.GetByIdAsync(id);
+            var blog = await _blogRepository.GetByIdAsync(dto.BlogId, includeDeleted: true);
+            if (blog == null) throw new KeyNotFoundException("Blog not found");
+
+            if (blog.IsDelete) throw new InvalidOperationException("Cannot update a deleted blog");
+
+            if (dto.BlogCategoryId.HasValue && dto.BlogCategoryId != blog.BlogCategoryId)
+            {
+                if (!await _categoryRepository.ExistsAsync(dto.BlogCategoryId.Value))
+                {
+                    throw new ArgumentException("Invalid blog category ID");
+                }
+            }
+
+            blog.BlogTittle = dto.Title ?? blog.BlogTittle;
+            blog.BlogContent = dto.Content ?? blog.BlogContent;
+            blog.BlogCategoryId = dto.BlogCategoryId ?? blog.BlogCategoryId;
+
+            await _blogRepository.UpdateAsync(blog);
+        }
+
+        public async Task DeleteBlogAsync(int id, bool hardDelete = false)
+        {
+            if (hardDelete)
+            {
+                // First delete all comments
+                var comments = await _commentRepository.GetByBlogIdAsync(id, includeDeleted: true);
+                foreach (var comment in comments)
+                {
+                    await _commentRepository.HardDeleteAsync(comment.CommentId);
+                }
+
+                // Then delete the blog
+                await _blogRepository.HardDeleteAsync(id);
+            }
+            else
+            {
+                await _blogRepository.SoftDeleteAsync(id);
+            }
+        }
+
+        public async Task RestoreBlogAsync(int id)
+        {
+            await _blogRepository.RestoreAsync(id);
+        }
+
+        public async Task<IEnumerable<BlogDto>> GetBlogsByCategoryAsync(int categoryId)
+        {
+            if (!await _categoryRepository.ExistsAsync(categoryId))
+            {
+                throw new ArgumentException("Invalid category ID");
+            }
+
+            var blogs = await _blogRepository.GetByCategoryIdAsync(categoryId);
+            return blogs.Select(MapToDto).ToList();
+        }
+
+        public async Task<IEnumerable<BlogDto>> SearchBlogsAsync(string searchTerm, bool includeDeleted = false)
+        {
+            var blogs = await _blogRepository.FindByTitleAsync(searchTerm, includeDeleted);
+            return blogs.Select(MapToDto).ToList();
+        }
+
+        private BlogDto MapToDto(Blog blog)
+        {
             return new BlogDto
             {
-                BlogId = b.BlogId,
-                BlogCategoryId = b.BlogCategoryId,
-                BlogTittle = b.BlogTittle,
-                BlogContent = b.BlogContent
+                BlogId = blog.BlogId,
+                Title = blog.BlogTittle,
+                ContentPreview = blog.BlogContent.Length > 100
+                    ? blog.BlogContent.Substring(0, 100) + "..."
+                    : blog.BlogContent,
+                CreatedAt = blog.CreatedAt,
+                IsDelete = blog.IsDelete,
+                Category = blog.BlogCategory != null ? new BlogCategoryDto
+                {
+                    BlogCategoryId = blog.BlogCategory.BlogCategoryId, 
+                    BlogCategoryTitle = blog.BlogCategory.BlogCategoryTitle
+                } : null
             };
         }
-
-        public async Task UpdateAsync(BlogDto dto)
-        {
-            var blog = new Blog
-            {
-                BlogId = dto.BlogId,
-                BlogCategoryId = dto.BlogCategoryId,
-                BlogTittle = dto.BlogTittle,
-                BlogContent = dto.BlogContent
-            };
-
-            await _repository.UpdateAsync(blog);
-        }
-
-        public async Task DeleteAsync(int id)
-        {
-            await _repository.DeleteAsync(id);
-        }
-        public async Task<IEnumerable<BlogDto>> LoadBlogsAsync(int page, int pageSize)
-        {
-            var blogs = await _repository.GetPagedAsync(page, pageSize);
-            return blogs.Select(b => new BlogDto
-            {
-                BlogId = b.BlogId,
-                BlogCategoryId = b.BlogCategoryId,
-                BlogTittle = b.BlogTittle,
-                BlogContent = b.BlogContent
-            });
-        }
-
-        //public async Task<List<BlogDto>> LoadBlogsAsync()
-        //{
-        //    var response = await _repository.GetFromJsonAsync<List<BlogDto>>("api/blog/load?page=1&pageSize=10");
-        //    return response ?? new List<BlogDto>();
-        //}
-        //public async Task<PagedResponse<BlogDto>> LoadBlogsAsync(int page, int pageSize)
-        //{
-        //    var query = await _blogRepository.GetAllAsync();
-
-        //    var totalItems = query.Count;
-        //    var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
-        //    var items = query.Skip((page - 1) * pageSize).Take(pageSize).ToList();
-
-        //    return new PagedResponse<BlogDto>
-        //    {
-        //        Items = items.Select(b => new BlogDto
-        //        {
-        //            BlogId = b.BlogId,
-        //            Title = b.Title,
-        //            Description = b.Description,
-        //            Image = b.Image,
-        //            CreatedAt = b.CreatedAt,
-        //            Status = b.Status
-        //        }).ToList(),
-        //        TotalItems = totalItems,
-        //        TotalPages = totalPages,
-        //        CurrentPage = page
-        //    };
-        //}
-
     }
 }

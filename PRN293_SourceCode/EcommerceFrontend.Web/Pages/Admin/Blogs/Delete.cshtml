@@ -1,0 +1,30 @@
+﻿@page "{id:int}"
+@model EcommerceFrontend.Web.Pages.Admin.Blogs.DeleteModel
+@{
+    ViewData["Title"] = "Delete Blog";
+}
+
+<div class="container mt-4">
+    <h2>Confirm Delete</h2>
+
+    <div class="alert alert-warning">
+        Are you sure you want to delete the following blog?
+    </div>
+
+    <dl class="row">
+        <dt class="col-sm-2">Title</dt>
+        <dd class="col-sm-10">@Model.Blog.Title</dd>
+
+        <dt class="col-sm-2">Category</dt>
+        <dd class="col-sm-10">@Model.Blog.Category?.BlogCategoryTitle ?? "Uncategorized"</dd>
+
+        <dt class="col-sm-2">Created</dt>
+        <dd class="col-sm-10">@Model.Blog.CreatedAt.ToString("yyyy-MM-dd")</dd>
+    </dl>
+
+    <form method="post">
+        <input type="hidden" asp-for="Blog.BlogId" />
+        <button type="submit" class="btn btn-danger">Delete</button>
+        <a asp-page="./Index" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>

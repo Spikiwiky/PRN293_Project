@@ -1,14 +1,14 @@
 ﻿using EcommerceFrontend.Web.Services;
 using EcommerceFrontend.Web.Services.User;
-using EcommerceFrontend.Web.Services.Admin.Blog;
+
 using EcommerceFrontend.Web.Services.Blog;
 using EcommerceFrontend.Web.Services.Sale;
-using EcommerceFrontend.Web.Models; 
-using Microsoft.Extensions.Options;
 using EcommerceFrontend.Web.Models.Sale;
 using EcommerceFrontend.Web.Services.AI;
 using EcommerceFrontend.Web.Service.AI;
-using EcommerceFrontend.Web.Services.Order;
+using EcommerceFrontend.Web.Services.Admin.BlogCategory;
+using BlogCategoryService = EcommerceFrontend.Web.Services.Admin.BlogCategory.BlogCategoryService;
+using EcommerceFrontend.Web.Services.Admin.Blog;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -46,16 +46,19 @@ builder.Services.AddScoped<IUserService, UserService>();
 //builder.Services.AddScoped<IOrderService, OrderService>();
 
 builder.Services.AddHttpClient<BlogService>();
-builder.Services.AddHttpClient<IAdminBlogService, AdminBlogService>(client =>
+builder.Services.AddHttpClient<AdminBlogService>(client =>
 {
     client.BaseAddress = new Uri("https://localhost:7107/");
 });
+builder.Services.AddScoped<IAdminBlogService, AdminBlogService>(); 
 builder.Services.AddScoped<ISaleProductService, SaleProductService>();
 
-builder.Services.AddScoped<IAdminBlogService, AdminBlogService>();
+
 
 builder.Services.AddScoped<IUserService, UserService>();
 
+
+builder.Services.AddScoped<IBlogCategoryServiceWeb, BlogCategoryService>();
 
 builder.Services.AddScoped<IBlogService, BlogService>();
 

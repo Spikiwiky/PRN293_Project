@@ -1,19 +1,20 @@
-﻿using EcommerceBackend.BusinessObject.dtos.BlogDto;
-using System;
+﻿using EcommerceBackend.BusinessObject.dtos;
+
+using EcommerceBackend.BusinessObject.Dtos;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace EcommerceBackend.BusinessObject.Abstract.BlogAbstract
 {
     public interface IBlogService
     {
-        Task<IEnumerable<BlogDto>> GetAllAsync();
-        Task<BlogDto> GetByIdAsync(int id);
-        Task AddAsync(BlogDto dto);              
-        Task UpdateAsync(BlogDto dto);
-        Task DeleteAsync(int id);
-        Task<IEnumerable<BlogDto>> LoadBlogsAsync(int page, int pageSize);
+        Task<IEnumerable<BlogDto>> GetAllBlogsAsync(bool includeDeleted = false);
+        Task<BlogDetailDto> GetBlogByIdAsync(int id, bool includeDeleted = false);
+        Task<BlogDto> CreateBlogAsync(CreateBlogDto dto);
+        Task UpdateBlogAsync(UpdateBlogDto dto);
+        Task DeleteBlogAsync(int id, bool hardDelete = false);
+        Task RestoreBlogAsync(int id);
+        Task<IEnumerable<BlogDto>> GetBlogsByCategoryAsync(int categoryId);
+        Task<IEnumerable<BlogDto>> SearchBlogsAsync(string searchTerm, bool includeDeleted = false);
     }
 }

@@ -31,6 +31,8 @@ namespace EcommerceBackend.DataAccess.Models
         public virtual DbSet<ProductVariant> ProductVariants { get; set; } = null!;
         public virtual DbSet<User> Users { get; set; } = null!;
         public virtual DbSet<UserRole> UserRoles { get; set; } = null!;
+        public virtual DbSet<Comment> Comments { get; set; } = null!;
+
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -49,26 +51,73 @@ namespace EcommerceBackend.DataAccess.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Comment>(entity =>
+            {
+                entity.ToTable("Comment");
+
+                entity.Property(e => e.CommentId).HasColumnName("CommentId");
+
+                entity.Property(e => e.BlogId).HasColumnName("BlogId");
+
+                entity.Property(e => e.UserId).HasColumnName("UserId");
+
+                entity.Property(e => e.Content)
+                    .HasColumnName("Content");
+
+                entity.Property(e => e.CreatedAt)
+                    .HasColumnName("CreatedAt")
+                    .HasDefaultValueSql("GETDATE()");
+
+                entity.Property(e => e.IsDeleted)
+                    .HasColumnName("IsDeleted")
+                    .HasDefaultValue(false);
+
+                entity.HasOne(d => d.Blog)
+                    .WithMany(p => p.Comments)
+                    .HasForeignKey(d => d.BlogId)
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .HasConstraintName("FK_Comment_Blog");
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.Comments)
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .HasConstraintName("FK_Comment_User");
+            });
+
             modelBuilder.Entity<Blog>(entity =>
             {
                 entity.ToTable("Blog");
 
+                // Primary key
+                entity.HasKey(e => e.BlogId);
+
+                // Properties
                 entity.Property(e => e.BlogId).HasColumnName("Blog_id");
-
                 entity.Property(e => e.BlogCategoryId).HasColumnName("Blog_category_id");
-
-                entity.Property(e => e.BlogContent).HasColumnName("Blog_content");
-
                 entity.Property(e => e.BlogTittle)
-                    .HasMaxLength(255)
-                    .HasColumnName("Blog_tittle");
+                    .HasColumnName("Blog_tittle")
+                    .HasMaxLength(255);
+                entity.Property(e => e.BlogContent).HasColumnName("Blog_content");
+                entity.Property(e => e.CreatedAt)
+                    .HasColumnName("CreatedAt")
+                    .HasDefaultValueSql("GETDATE()");
+                entity.Property(e => e.IsDelete)
+                    .HasColumnName("IsDelete")
+                    .HasDefaultValue(false);
 
+                // Relationships
                 entity.HasOne(d => d.BlogCategory)
                     .WithMany(p => p.Blogs)
                     .HasForeignKey(d => d.BlogCategoryId)
                     .HasConstraintName("FK__Blog__Blog_categ__4F7CD00D");
-            });
 
+                entity.HasMany(d => d.Comments)
+                    .WithOne(p => p.Blog)
+                    .HasForeignKey(d => d.BlogId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+            modelBuilder.Entity<Blog>().HasQueryFilter(b => !b.IsDelete);
             modelBuilder.Entity<BlogCategory>(entity =>
             {
                 entity.ToTable("Blog_category");
