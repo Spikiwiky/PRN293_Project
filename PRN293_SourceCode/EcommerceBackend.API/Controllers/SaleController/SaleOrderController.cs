@@ -146,20 +146,22 @@ namespace EcommerceBackend.API.Controllers.SaleController
             var orderDtos = orders.Select(o => new OrderDto
             {
                 OrderId = o.OrderId,
-                CustomerId = (int)o.CustomerId,
-                TotalQuantity = (int)o.TotalQuantity,
-                AmountDue = (decimal)o.AmountDue,
-                PaymentMethodId = (int)o.PaymentMethodId,
+                // Sửa lỗi Nullable object must have a value.
+                // Sử dụng toán tử ?? để cung cấp giá trị mặc định 0 nếu thuộc tính là null.
+                CustomerId = o.CustomerId ?? 0,          // <-- Đã sửa
+                TotalQuantity = o.TotalQuantity ?? 0,    // <-- Đã sửa
+                AmountDue = o.AmountDue ?? 0m,           // <-- Đã sửa (sử dụng 0m cho decimal)
+                PaymentMethodId = o.PaymentMethodId ?? 0, // <-- Đã sửa
                 OrderNote = o.OrderNote,
-                OrderStatusId = (int)o.OrderStatusId,
+                OrderStatusId = o.OrderStatusId ?? 0,    // <-- Đã sửa
                 OrderDetails = o.OrderDetails?.Select(od => new OrderDetailResponseDto
                 {
                     ProductId = od.ProductId,
                     VariantId = od.VariantId,
-                    Quantity = (int)od.Quantity,
+                    Quantity = od.Quantity ?? 0,
                     Price = od.Price,
                     ProductName = od.ProductName
-                }).ToList()
+                }).ToList() ?? new List<OrderDetailResponseDto>() // Đảm bảo trả về list rỗng nếu OrderDetails là null
             }).ToList();
             return Ok(orderDtos);
         }
@@ -281,8 +283,8 @@ namespace EcommerceBackend.API.Controllers.SaleController
                     existingOrder.OrderDetails.Add(detail);
                 }
 
-                existingOrder.TotalQuantity = existingOrder.OrderDetails.Sum(d => d.Quantity);
-                existingOrder.AmountDue = existingOrder.OrderDetails.Sum(d => d.Price * d.Quantity);
+                existingOrder.TotalQuantity = existingOrder.OrderDetails.Sum(d => d.Quantity ?? 0); // Handle nullable Quantity
+                existingOrder.AmountDue = existingOrder.OrderDetails.Sum(d => (d.Price ?? 0m) * (d.Quantity ?? 0)); // Handle nullable Price and Quantity
 
                 await _saleService.UpdateOrderAsync(existingOrder);
                 await _orderRepository.SaveChangesAsync();
@@ -364,7 +366,7 @@ namespace EcommerceBackend.API.Controllers.SaleController
             }
         }
 
-    public class OrderDetailEqualityComparer : IEqualityComparer<OrderDetail>
+        public class OrderDetailEqualityComparer : IEqualityComparer<OrderDetail>
         {
             public bool Equals(OrderDetail x, OrderDetail y)
             {
