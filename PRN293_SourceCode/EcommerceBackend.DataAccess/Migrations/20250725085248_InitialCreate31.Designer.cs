@@ -4,6 +4,7 @@ using EcommerceBackend.DataAccess.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EcommerceBackend.DataAccess.Migrations
 {
     [DbContext(typeof(EcommerceDBContext))]
-    partial class EcommerceDBContextModelSnapshot : ModelSnapshot
+    [Migration("20250725085248_InitialCreate31")]
+    partial class InitialCreate31
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -151,11 +153,13 @@ namespace EcommerceBackend.DataAccess.Migrations
 
                     b.Property<decimal?>("AmountDue")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("decimal(18,2)")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)")
                         .HasColumnName("Amount_due")
                         .HasDefaultValueSql("((0))");
 
                     b.Property<int?>("CustomerId")
+                        .IsRequired()
                         .HasColumnType("int")
                         .HasColumnName("Customer_id");
 
@@ -182,28 +186,36 @@ namespace EcommerceBackend.DataAccess.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CartDetailId"), 1L, 1);
 
                     b.Property<int?>("CartId")
+                        .IsRequired()
                         .HasColumnType("int")
                         .HasColumnName("Cart_id");
 
                     b.Property<decimal?>("Price")
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)")
+                        .HasColumnName("Price");
 
                     b.Property<int?>("ProductId")
+                        .IsRequired()
                         .HasColumnType("int")
                         .HasColumnName("Product_id");
 
                     b.Property<string>("ProductName")
+                        .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)")
                         .HasColumnName("Product_name");
 
                     b.Property<int?>("Quantity")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("Quantity");
 
                     b.Property<string>("VariantAttributes")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("VariantId")
+                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)")
                         .HasColumnName("Variant_id");
@@ -728,6 +740,8 @@ namespace EcommerceBackend.DataAccess.Migrations
                     b.HasOne("EcommerceBackend.DataAccess.Models.User", "Customer")
                         .WithMany("Carts")
                         .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
                         .HasConstraintName("FK__Cart__Customer_i__37A5467C");
 
                     b.Navigation("Customer");
@@ -738,11 +752,15 @@ namespace EcommerceBackend.DataAccess.Migrations
                     b.HasOne("EcommerceBackend.DataAccess.Models.Cart", "Cart")
                         .WithMany("CartDetails")
                         .HasForeignKey("CartId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
                         .HasConstraintName("FK__Cart_deta__Cart___3C69FB99");
 
                     b.HasOne("EcommerceBackend.DataAccess.Models.Product", "Product")
                         .WithMany("CartDetails")
                         .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
                         .HasConstraintName("FK__Cart_deta__Produ__3D5E1FD2");
 
                     b.Navigation("Cart");

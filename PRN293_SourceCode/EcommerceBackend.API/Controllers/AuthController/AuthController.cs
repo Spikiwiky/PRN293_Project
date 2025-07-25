@@ -198,8 +198,8 @@ namespace EcommerceBackend.API.Controllers.AuthController
 
             var token = _authService.GenerateJwtToken(user);
 
-            // Redirect to Razor page with query string
-            return Redirect($"https://localhost:7107/LoginPage/Login?token={token}&userName={Uri.EscapeDataString(user.UserName)}&roleName={Uri.EscapeDataString(user.RoleName)}");
+            // Redirect to Razor page with query string including userId
+            return Redirect($"https://localhost:7107/LoginPage/Login?token={token}&userName={Uri.EscapeDataString(user.UserName)}&roleName={Uri.EscapeDataString(user.RoleName)}&userId={user.UserId}");
         }
     }
 }
