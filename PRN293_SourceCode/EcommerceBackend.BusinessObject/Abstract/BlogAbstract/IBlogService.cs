@@ -15,5 +15,7 @@ namespace EcommerceBackend.BusinessObject.Abstract.BlogAbstract
         Task UpdateAsync(BlogDto dto);
         Task DeleteAsync(int id);
         Task<IEnumerable<BlogDto>> LoadBlogsAsync(int page, int pageSize);
+        Task IncrementViewCountAsync(int id);
+        Task<IEnumerable<BlogDto>> GetPublishedBlogsAsync();
     }
 }

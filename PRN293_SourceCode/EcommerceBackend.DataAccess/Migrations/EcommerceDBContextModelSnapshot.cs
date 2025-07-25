@@ -39,14 +39,43 @@ namespace EcommerceBackend.DataAccess.Migrations
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("Blog_content");
 
+                    b.Property<string>("BlogImage")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("BlogSummary")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("BlogTittle")
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)")
                         .HasColumnName("Blog_tittle");
 
+                    b.Property<DateTime?>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsPublished")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("PublishedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Tags")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ViewCount")
+                        .HasColumnType("int");
+
                     b.HasKey("BlogId");
 
                     b.HasIndex("BlogCategoryId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Blog", (string)null);
                 });
@@ -73,6 +102,42 @@ namespace EcommerceBackend.DataAccess.Migrations
                     b.HasKey("BlogCategoryId");
 
                     b.ToTable("Blog_category", (string)null);
+                });
+
+            modelBuilder.Entity("EcommerceBackend.DataAccess.Models.BlogComment", b =>
+                {
+                    b.Property<int>("CommentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CommentId"), 1L, 1);
+
+                    b.Property<int>("BlogId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CommentContent")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CommenterEmail")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CommenterName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CommenterWebsite")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsApproved")
+                        .HasColumnType("bit");
+
+                    b.HasKey("CommentId");
+
+                    b.HasIndex("BlogId");
+
+                    b.ToTable("BlogComment");
                 });
 
             modelBuilder.Entity("EcommerceBackend.DataAccess.Models.Cart", b =>
@@ -135,6 +200,9 @@ namespace EcommerceBackend.DataAccess.Migrations
                     b.Property<int?>("Quantity")
                         .HasColumnType("int");
 
+                    b.Property<string>("VariantAttributes")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("VariantId")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)")
@@ -162,6 +230,9 @@ namespace EcommerceBackend.DataAccess.Migrations
                         .HasColumnType("decimal(18,2)")
                         .HasColumnName("Amount_due");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<int?>("CustomerId")
                         .HasColumnType("int")
                         .HasColumnName("Customer_id");
@@ -179,9 +250,15 @@ namespace EcommerceBackend.DataAccess.Migrations
                         .HasColumnType("int")
                         .HasColumnName("Payment_method_id");
 
+                    b.Property<string>("ShippingAddress")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int?>("TotalQuantity")
                         .HasColumnType("int")
                         .HasColumnName("Total_quantity");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("OrderId");
 
@@ -221,6 +298,9 @@ namespace EcommerceBackend.DataAccess.Migrations
 
                     b.Property<int?>("Quantity")
                         .HasColumnType("int");
+
+                    b.Property<string>("VariantAttributes")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("VariantId")
                         .HasMaxLength(50)
@@ -446,6 +526,92 @@ namespace EcommerceBackend.DataAccess.Migrations
                     b.HasCheckConstraint("chk_variants", "ISJSON(variants) = 1");
                 });
 
+            modelBuilder.Entity("EcommerceBackend.DataAccess.Models.Rating", b =>
+                {
+                    b.Property<int>("RatingId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("rating_id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RatingId"), 1L, 1);
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.Property<bool>("IsVisible")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true)
+                        .HasColumnName("is_visible");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int")
+                        .HasColumnName("product_id");
+
+                    b.Property<int>("Score")
+                        .HasColumnType("int")
+                        .HasColumnName("score");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("RatingId");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ratings", (string)null);
+                });
+
+            modelBuilder.Entity("EcommerceBackend.DataAccess.Models.Review", b =>
+                {
+                    b.Property<int>("ReviewId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("review_id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ReviewId"), 1L, 1);
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)")
+                        .HasColumnName("content");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.Property<bool>("IsVisible")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true)
+                        .HasColumnName("is_visible");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int")
+                        .HasColumnName("product_id");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("ReviewId");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("reviews", (string)null);
+                });
+
             modelBuilder.Entity("EcommerceBackend.DataAccess.Models.User", b =>
                 {
                     b.Property<int>("UserId")
@@ -537,7 +703,24 @@ namespace EcommerceBackend.DataAccess.Migrations
                         .HasForeignKey("BlogCategoryId")
                         .HasConstraintName("FK__Blog__Blog_categ__4F7CD00D");
 
+                    b.HasOne("EcommerceBackend.DataAccess.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
                     b.Navigation("BlogCategory");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("EcommerceBackend.DataAccess.Models.BlogComment", b =>
+                {
+                    b.HasOne("EcommerceBackend.DataAccess.Models.Blog", "Blog")
+                        .WithMany("Comments")
+                        .HasForeignKey("BlogId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Blog");
                 });
 
             modelBuilder.Entity("EcommerceBackend.DataAccess.Models.Cart", b =>
@@ -642,6 +825,44 @@ namespace EcommerceBackend.DataAccess.Migrations
                     b.Navigation("Product");
                 });
 
+            modelBuilder.Entity("EcommerceBackend.DataAccess.Models.Rating", b =>
+                {
+                    b.HasOne("EcommerceBackend.DataAccess.Models.Product", "Product")
+                        .WithMany("Ratings")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("EcommerceBackend.DataAccess.Models.User", "User")
+                        .WithMany("Ratings")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("EcommerceBackend.DataAccess.Models.Review", b =>
+                {
+                    b.HasOne("EcommerceBackend.DataAccess.Models.Product", "Product")
+                        .WithMany("Reviews")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("EcommerceBackend.DataAccess.Models.User", "User")
+                        .WithMany("Reviews")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("EcommerceBackend.DataAccess.Models.User", b =>
                 {
                     b.HasOne("EcommerceBackend.DataAccess.Models.UserRole", "Role")
@@ -650,6 +871,11 @@ namespace EcommerceBackend.DataAccess.Migrations
                         .HasConstraintName("FK__User__Role_id__267ABA7A");
 
                     b.Navigation("Role");
+                });
+
+            modelBuilder.Entity("EcommerceBackend.DataAccess.Models.Blog", b =>
+                {
+                    b.Navigation("Comments");
                 });
 
             modelBuilder.Entity("EcommerceBackend.DataAccess.Models.BlogCategory", b =>
@@ -685,6 +911,10 @@ namespace EcommerceBackend.DataAccess.Migrations
 
                     b.Navigation("ProductImages");
 
+                    b.Navigation("Ratings");
+
+                    b.Navigation("Reviews");
+
                     b.Navigation("Variants");
                 });
 
@@ -698,6 +928,10 @@ namespace EcommerceBackend.DataAccess.Migrations
                     b.Navigation("Carts");
 
                     b.Navigation("Orders");
+
+                    b.Navigation("Ratings");
+
+                    b.Navigation("Reviews");
                 });
 
             modelBuilder.Entity("EcommerceBackend.DataAccess.Models.UserRole", b =>

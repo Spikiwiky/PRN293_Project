@@ -5,6 +5,11 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using EcommerceBackend.BusinessObject.Services;
 using EcommerceBackend.BusinessObject.DTOs;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using System.IO;
+using System.Linq;
+using EcommerceBackend.DataAccess.Models;
 
 namespace EcommerceBackend.API.Controllers
 {
@@ -12,13 +17,15 @@ namespace EcommerceBackend.API.Controllers
     [ApiController]
     public class ProductController : ControllerBase
     {
+        private readonly IWebHostEnvironment _env;
         private readonly IProductService _productService;
         private readonly ILogger<ProductController> _logger;
 
-        public ProductController(IProductService productService, ILogger<ProductController> logger)
+        public ProductController(IProductService productService, ILogger<ProductController> logger, IWebHostEnvironment env)
         {
             _productService = productService;
             _logger = logger;
+            _env = env;
         }
 
         [HttpGet]
@@ -279,6 +286,51 @@ namespace EcommerceBackend.API.Controllers
             }
         }
 
+        [HttpPost("upload-image")]
+        public async Task<IActionResult> UploadProductImage([FromForm] IFormFile imageFile, [FromForm] int productId)
+        {
+            if (imageFile == null || imageFile.Length == 0)
+                return BadRequest("No file uploaded");
+
+            // Tạo thư mục nếu chưa có
+            var uploadPath = Path.Combine(_env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot"), "images", "products");
+            if (!Directory.Exists(uploadPath))
+                Directory.CreateDirectory(uploadPath);
+
+            // Đặt tên file duy nhất
+            var fileName = $"{Guid.NewGuid()}_{Path.GetFileName(imageFile.FileName)}";
+            var filePath = Path.Combine(uploadPath, fileName);
+
+            // Lưu file
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await imageFile.CopyToAsync(stream);
+            }
+
+            // Tạo URL ảnh
+            var imageUrl = $"/images/products/{fileName}";
+
+            // Lưu vào DB (gọi service)
+            await _productService.AddProductImageAsync(productId, imageUrl);
+
+            return Ok(new { imageUrl });
+        }
+
+        [HttpPost("{productId}/images")]
+        public async Task<ActionResult<bool>> AddProductImage(int productId, [FromBody] AddProductImageRequest request)
+        {
+            try
+            {
+                var result = await _productService.AddProductImageAsync(productId, request.ImageUrl);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error adding product image");
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
         [HttpGet("count")]
         public async Task<ActionResult<int>> GetTotalProductsCount(
             [FromQuery] string? name = null,
@@ -304,5 +356,10 @@ namespace EcommerceBackend.API.Controllers
     {
         public string AttributeName { get; set; } = string.Empty;
         public List<string> AttributeValues { get; set; } = new List<string>();
+    }
+
+    public class AddProductImageRequest
+    {
+        public string ImageUrl { get; set; } = string.Empty;
     }
 } 

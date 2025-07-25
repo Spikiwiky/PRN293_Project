@@ -16,6 +16,34 @@ namespace EcommerceFrontend.Web.Models
         public List<ProductVariantDTO> Variants { get; set; } = new List<ProductVariantDTO>();
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
+
+        // Helper method để chuyển đổi URL ảnh thành full URL của Backend API
+        public List<string> GetFullImageUrls(string apiBaseUrl)
+        {
+            return Images.Select(img => GetFullImageUrl(img, apiBaseUrl)).ToList();
+        }
+
+        public string GetFirstImageUrl(string apiBaseUrl)
+        {
+            return Images.Any() ? GetFullImageUrl(Images.First(), apiBaseUrl) : string.Empty;
+        }
+
+        private string GetFullImageUrl(string imageUrl, string apiBaseUrl)
+        {
+            if (string.IsNullOrEmpty(imageUrl))
+                return string.Empty;
+
+            // Nếu URL đã là full URL thì trả về nguyên
+            if (imageUrl.StartsWith("http://") || imageUrl.StartsWith("https://"))
+                return imageUrl;
+
+            // Nếu là relative path thì thêm base URL của API
+            if (imageUrl.StartsWith("/"))
+                return $"{apiBaseUrl.TrimEnd('/')}{imageUrl}";
+
+            // Nếu không có / ở đầu thì thêm
+            return $"{apiBaseUrl.TrimEnd('/')}/{imageUrl}";
+        }
     }
 
     public class ProductVariantDTO

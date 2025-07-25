@@ -21,7 +21,7 @@ namespace EcommerceBackend.API.Controllers.AdminController
         // ===== PRODUCT MANAGEMENT =====
         
         [HttpGet("products")]
-        public async Task<IActionResult> GetAllProducts([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetAllProducts([FromQuery] int page = 1, [FromQuery] int pageSize = 20)
         {
             try
             {

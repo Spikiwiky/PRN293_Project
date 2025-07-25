@@ -4,8 +4,13 @@
     ViewData["Title"] = "Sửa sản phẩm";
 }
 <h2>Sửa sản phẩm</h2>
-<form method="post">
+<form method="post" enctype="multipart/form-data">
     <div asp-validation-summary="All" class="text-danger"></div>
+    <div class="form-group">
+        <label>Ảnh sản phẩm</label>
+        <img id="product-image-preview" src="@(Model.Product.Images != null && Model.Product.Images.Any() ? Model.Product.GetFirstImageUrl(Model.ApiBaseUrl) : "")" alt="Ảnh sản phẩm" style="max-width: 200px; display: block; margin-bottom: 10px;" />
+        <input type="file" name="imageFile" class="form-control" accept="image/*" onchange="previewProductImage(event)" />
+    </div>
     <div class="form-group">
         <label>Tên sản phẩm</label>
         <input asp-for="Product.Name" class="form-control" />
@@ -40,4 +45,18 @@
     <button type="submit" class="btn btn-primary">Lưu</button>
     <a asp-page="Index" class="btn btn-secondary">Quay lại</a>
     <a asp-page="Attributes" asp-route-id="@Model.Product.ProductId" class="btn btn-info ml-2">Quản lý thuộc tính</a>
-</form> 
+</form>
+@section Scripts {
+    <script>
+        function previewProductImage(event) {
+            const input = event.target;
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    document.getElementById('product-image-preview').src = e.target.result;
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
+} 

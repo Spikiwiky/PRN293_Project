@@ -5,11 +5,224 @@
     Layout = "_Layout";
 }
 
-<div class="container mt-4">
-    <div class="card shadow p-4">
-        <h2>@Model.Blog?.BlogTittle</h2>
-        <hr />
-        <p>@Model.Blog?.BlogContent</p>
-        <a asp-page="./Index" class="btn btn-outline-secondary mt-3">Back to Blog List</a>
+<!-- breadcrumb -->
+<div class="container">
+    <div class="bread-crumb flex-w p-l-25 p-r-15 p-t-30 p-lr-0-lg">
+        <a href="/" class="stext-109 cl8 hov-cl1 trans-04">
+            Trang chủ
+            <i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
+        </a>
+
+        <a href="/Blog" class="stext-109 cl8 hov-cl1 trans-04">
+            Bài viết
+            <i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
+        </a>
+
+        <span class="stext-109 cl4">
+            @Model.Blog?.BlogTittle
+        </span>
     </div>
 </div>
+
+<!-- Content page -->
+<section class="bg0 p-t-52 p-b-20">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8 col-lg-9 p-b-80">
+                <div class="p-r-45 p-r-0-lg">
+                    @if (Model.Blog != null)
+                    {
+                        <!-- Blog Image -->
+                        <div class="wrap-pic-w how-pos5-parent">
+                            <img src="@(string.IsNullOrEmpty(Model.Blog.BlogImage) ? Url.Content("~/images/blog-01.jpg") : Model.Blog.BlogImage)" alt="IMG-BLOG">
+
+                            <div class="flex-col-c-m size-123 bg9 how-pos5">
+                                <span class="ltext-107 cl2 txt-center">
+                                    @(Model.Blog.PublishedDate?.Day ?? Model.Blog.CreatedDate?.Day ?? DateTime.Now.Day)
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="p-t-32">
+                            <h4 class="p-b-15">
+                                <a href="#" class="ltext-108 cl2 hov-cl1 trans-04">
+                                    @Model.Blog.BlogTittle
+                                </a>
+                            </h4>
+
+                            <p class="stext-117 cl6">
+                                @Model.Blog.BlogContent
+                            </p>
+
+                            <div class="flex-w flex-sb-m p-t-18">
+                                <span class="flex-w flex-m stext-111 cl2 p-r-30 m-tb-10">
+                                    <span>
+                                        <span class="cl4">Đăng bởi</span> @(string.IsNullOrEmpty(Model.Blog.UserName) ? "Admin" : Model.Blog.UserName)
+                                        <span class="cl12 m-l-4 m-r-6">|</span>
+                                    </span>
+
+                                    <span>
+                                        <i class="fa fa-eye"></i> @Model.Blog.ViewCount lượt xem
+                                    </span>
+                                </span>
+
+                                <a href="/Blog" class="stext-101 cl2 hov-cl1 trans-04 m-tb-10">
+                                    Quay lại danh sách
+                                    <i class="fa fa-long-arrow-right m-l-9"></i>
+                                </a>
+                            </div>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(Model.Blog.Tags))
+                        {
+                            <div class="flex-w flex-t p-t-16">
+                                <span class="size-216 stext-116 cl8 p-t-4">
+                                    Nhãn
+                                </span>
+
+                                <div class="flex-w size-217">
+                                    @foreach (var tag in Model.Blog.Tags.Split(','))
+                                    {
+                                        <a href="#" class="flex-c-m stext-107 cl6 size-301 bor7 p-lr-15 hov-tag1 trans-04 m-r-5 m-b-5">
+                                            @tag.Trim()
+                                        </a>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-center p-t-50">
+                            <h3>Không tìm thấy bài viết</h3>
+                            <p>Bài viết bạn đang tìm kiếm không tồn tại hoặc đã bị xóa.</p>
+                            <a href="/Blog" class="btn btn-primary">Quay lại danh sách</a>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="col-md-4 col-lg-3 p-b-80">
+                <div class="side-menu">
+                    <div class="bor17 of-hidden pos-relative">
+                        <input class="stext-103 cl2 plh4 size-116 p-l-28 p-r-55" type="text" name="search" placeholder="Tìm kiếm ...">
+
+                        <button class="flex-c-m size-122 ab-t-r fs-18 cl4 hov-cl1 trans-04">
+                            <i class="zmdi zmdi-search"></i>
+                        </button>
+                    </div>
+
+                    <div class="p-t-55">
+                        <h4 class="mtext-112 cl2 p-b-33">
+                            Thể loại
+                        </h4>
+
+                        <ul>
+                            <li class="bor18">
+                                <a href="#" class="dis-block stext-115 cl6 hov-cl1 trans-04 p-tb-8 p-lr-4">
+                                    Thời trang
+                                </a>
+                            </li>
+
+                            <li class="bor18">
+                                <a href="#" class="dis-block stext-115 cl6 hov-cl1 trans-04 p-tb-8 p-lr-4">
+                                    Lifestyle
+                                </a>
+                            </li>
+
+                            <li class="bor18">
+                                <a href="#" class="dis-block stext-115 cl6 hov-cl1 trans-04 p-tb-8 p-lr-4">
+                                    Beauty
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="p-t-65">
+                        <h4 class="mtext-112 cl2 p-b-33">
+                            Bài viết nổi bật
+                        </h4>
+
+                        <ul>
+                            <li class="flex-w flex-t p-b-30">
+                                <a href="#" class="wrap-pic-w size-214 hov-ovelay1 m-r-20">
+                                    <img src="~/images/blog-01.jpg" alt="PRODUCT">
+                                </a>
+
+                                <div class="size-215 flex-col-t p-t-8">
+                                    <a href="#" class="stext-116 cl8 hov-cl1 trans-04">
+                                        8 Cách Mặc Váy Đầy Cảm Hứng
+                                    </a>
+
+                                    <span class="stext-116 cl6 p-t-20">
+                                        22 Jan 2024
+                                    </span>
+                                </div>
+                            </li>
+
+                            <li class="flex-w flex-t p-b-30">
+                                <a href="#" class="wrap-pic-w size-214 hov-ovelay1 m-r-20">
+                                    <img src="~/images/blog-02.jpg" alt="PRODUCT">
+                                </a>
+
+                                <div class="size-215 flex-col-t p-t-8">
+                                    <a href="#" class="stext-116 cl8 hov-cl1 trans-04">
+                                        Quà Tặng Nam Hoàn Hảo
+                                    </a>
+
+                                    <span class="stext-116 cl6 p-t-20">
+                                        18 Jan 2024
+                                    </span>
+                                </div>
+                            </li>
+
+                            <li class="flex-w flex-t p-b-30">
+                                <a href="#" class="wrap-pic-w size-214 hov-ovelay1 m-r-20">
+                                    <img src="~/images/blog-03.jpg" alt="PRODUCT">
+                                </a>
+
+                                <div class="size-215 flex-col-t p-t-8">
+                                    <a href="#" class="stext-116 cl8 hov-cl1 trans-04">
+                                        Xu Hướng Thời Trang Đông-Xuân
+                                    </a>
+
+                                    <span class="stext-116 cl6 p-t-20">
+                                        16 Jan 2024
+                                    </span>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="p-t-50">
+                        <h4 class="mtext-112 cl2 p-b-27">
+                            Nhãn
+                        </h4>
+
+                        <div class="flex-w m-r--5">
+                            <a href="#" class="flex-c-m stext-107 cl6 size-301 bor7 p-lr-15 hov-tag1 trans-04 m-r-5 m-b-5">
+                                Thời trang
+                            </a>
+
+                            <a href="#" class="flex-c-m stext-107 cl6 size-301 bor7 p-lr-15 hov-tag1 trans-04 m-r-5 m-b-5">
+                                Lifestyle
+                            </a>
+
+                            <a href="#" class="flex-c-m stext-107 cl6 size-301 bor7 p-lr-15 hov-tag1 trans-04 m-r-5 m-b-5">
+                                Beauty
+                            </a>
+
+                            <a href="#" class="flex-c-m stext-107 cl6 size-301 bor7 p-lr-15 hov-tag1 trans-04 m-r-5 m-b-5">
+                                Mùa đông
+                            </a>
+
+                            <a href="#" class="flex-c-m stext-107 cl6 size-301 bor7 p-lr-15 hov-tag1 trans-04 m-r-5 m-b-5">
+                                Xu hướng
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

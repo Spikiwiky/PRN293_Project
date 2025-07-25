@@ -55,5 +55,7 @@ namespace EcommerceBackend.DataAccess.Models
         public virtual ICollection<ProductImage> ProductImages { get; set; }
         public virtual ICollection<CartDetail> CartDetails { get; set; }
         public virtual ICollection<OrderDetail> OrderDetails { get; set; }
+        public virtual ICollection<Review> Reviews { get; set; }
+        public virtual ICollection<Rating> Ratings { get; set; }
     }
 }

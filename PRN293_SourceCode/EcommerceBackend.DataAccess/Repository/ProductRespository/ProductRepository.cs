@@ -52,10 +52,11 @@ namespace EcommerceBackend.DataAccess.Repository
       decimal? minPrice = null,
       decimal? maxPrice = null,
       int page = 1,
-      int pageSize = 10)
+      int pageSize = 100)
         {
             var query = _context.Products
                 .Include(p => p.ProductCategory)
+                .Include(p => p.ProductImages)
                 .Include(p => p.Variants)
                 .Where(p => !p.IsDelete);
 
@@ -575,6 +576,20 @@ namespace EcommerceBackend.DataAccess.Repository
         public async Task<bool> UpdateProductVariantAsync(ProductVariant variant)
         {
             return await UpdateProductVariantAsync(variant, false);
+        }
+
+        public async Task<bool> AddProductImageAsync(int productId, string imageUrl)
+        {
+            var product = await _context.Products.Include(p => p.ProductImages).FirstOrDefaultAsync(p => p.ProductId == productId && !p.IsDelete);
+            if (product == null) return false;
+            var productImage = new ProductImage
+            {
+                ProductId = productId,
+                ImageUrl = imageUrl
+            };
+            _context.ProductImages.Add(productImage);
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 }

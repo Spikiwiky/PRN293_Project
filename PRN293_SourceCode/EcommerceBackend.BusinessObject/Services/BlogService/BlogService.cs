@@ -25,7 +25,18 @@ namespace EcommerceBackend.BusinessObject.Services
                 BlogId = b.BlogId,
                 BlogCategoryId = b.BlogCategoryId,
                 BlogTittle = b.BlogTittle,
-                BlogContent = b.BlogContent
+                BlogContent = b.BlogContent,
+                BlogSummary = b.BlogSummary,
+                BlogImage = b.BlogImage,
+                UserId = b.UserId,
+                UserName = b.User?.UserName,
+                PublishedDate = b.PublishedDate,
+                CreatedDate = b.CreatedDate,
+                UpdatedDate = b.UpdatedDate,
+                IsPublished = b.IsPublished,
+                ViewCount = b.ViewCount,
+                Tags = b.Tags,
+                BlogCategoryTitle = b.BlogCategory?.BlogCategoryTitle
             });
         }
 
@@ -35,7 +46,16 @@ namespace EcommerceBackend.BusinessObject.Services
             {
                 BlogCategoryId = dto.BlogCategoryId,
                 BlogTittle = dto.BlogTittle,
-                BlogContent = dto.BlogContent
+                BlogContent = dto.BlogContent,
+                BlogSummary = dto.BlogSummary,
+                BlogImage = dto.BlogImage,
+                UserId = dto.UserId,
+                PublishedDate = dto.PublishedDate,
+                CreatedDate = DateTime.Now,
+                UpdatedDate = DateTime.Now,
+                IsPublished = dto.IsPublished,
+                ViewCount = dto.ViewCount,
+                Tags = dto.Tags
             };
 
             await _repository.AddAsync(blog);
@@ -44,12 +64,25 @@ namespace EcommerceBackend.BusinessObject.Services
         public async Task<BlogDto> GetByIdAsync(int id)
         {
             var b = await _repository.GetByIdAsync(id);
+            if (b == null) return null;
+            
             return new BlogDto
             {
                 BlogId = b.BlogId,
                 BlogCategoryId = b.BlogCategoryId,
                 BlogTittle = b.BlogTittle,
-                BlogContent = b.BlogContent
+                BlogContent = b.BlogContent,
+                BlogSummary = b.BlogSummary,
+                BlogImage = b.BlogImage,
+                UserId = b.UserId,
+                UserName = b.User?.UserName,
+                PublishedDate = b.PublishedDate,
+                CreatedDate = b.CreatedDate,
+                UpdatedDate = b.UpdatedDate,
+                IsPublished = b.IsPublished,
+                ViewCount = b.ViewCount,
+                Tags = b.Tags,
+                BlogCategoryTitle = b.BlogCategory?.BlogCategoryTitle
             };
         }
 
@@ -60,7 +93,16 @@ namespace EcommerceBackend.BusinessObject.Services
                 BlogId = dto.BlogId,
                 BlogCategoryId = dto.BlogCategoryId,
                 BlogTittle = dto.BlogTittle,
-                BlogContent = dto.BlogContent
+                BlogContent = dto.BlogContent,
+                BlogSummary = dto.BlogSummary,
+                BlogImage = dto.BlogImage,
+                UserId = dto.UserId,
+                PublishedDate = dto.PublishedDate,
+                CreatedDate = dto.CreatedDate,
+                UpdatedDate = DateTime.Now,
+                IsPublished = dto.IsPublished,
+                ViewCount = dto.ViewCount,
+                Tags = dto.Tags
             };
 
             await _repository.UpdateAsync(blog);
@@ -70,6 +112,7 @@ namespace EcommerceBackend.BusinessObject.Services
         {
             await _repository.DeleteAsync(id);
         }
+        
         public async Task<IEnumerable<BlogDto>> LoadBlogsAsync(int page, int pageSize)
         {
             var blogs = await _repository.GetPagedAsync(page, pageSize);
@@ -78,8 +121,53 @@ namespace EcommerceBackend.BusinessObject.Services
                 BlogId = b.BlogId,
                 BlogCategoryId = b.BlogCategoryId,
                 BlogTittle = b.BlogTittle,
-                BlogContent = b.BlogContent
+                BlogContent = b.BlogContent,
+                BlogSummary = b.BlogSummary,
+                BlogImage = b.BlogImage,
+                UserId = b.UserId,
+                UserName = b.User?.UserName,
+                PublishedDate = b.PublishedDate,
+                CreatedDate = b.CreatedDate,
+                UpdatedDate = b.UpdatedDate,
+                IsPublished = b.IsPublished,
+                ViewCount = b.ViewCount,
+                Tags = b.Tags,
+                BlogCategoryTitle = b.BlogCategory?.BlogCategoryTitle
             });
+        }
+
+        public async Task IncrementViewCountAsync(int id)
+        {
+            var blog = await _repository.GetByIdAsync(id);
+            if (blog != null)
+            {
+                blog.ViewCount++;
+                await _repository.UpdateAsync(blog);
+            }
+        }
+
+        public async Task<IEnumerable<BlogDto>> GetPublishedBlogsAsync()
+        {
+            var blogs = await _repository.GetAllAsync();
+            return blogs.Where(b => b.IsPublished)
+                       .Select(b => new BlogDto
+                       {
+                           BlogId = b.BlogId,
+                           BlogCategoryId = b.BlogCategoryId,
+                           BlogTittle = b.BlogTittle,
+                           BlogContent = b.BlogContent,
+                           BlogSummary = b.BlogSummary,
+                           BlogImage = b.BlogImage,
+                           UserId = b.UserId,
+                           UserName = b.User?.UserName,
+                           PublishedDate = b.PublishedDate,
+                           CreatedDate = b.CreatedDate,
+                           UpdatedDate = b.UpdatedDate,
+                           IsPublished = b.IsPublished,
+                           ViewCount = b.ViewCount,
+                           Tags = b.Tags,
+                           BlogCategoryTitle = b.BlogCategory?.BlogCategoryTitle
+                       });
         }
 
         //public async Task<List<BlogDto>> LoadBlogsAsync()
@@ -100,17 +188,15 @@ namespace EcommerceBackend.BusinessObject.Services
         //        Items = items.Select(b => new BlogDto
         //        {
         //            BlogId = b.BlogId,
-        //            Title = b.Title,
-        //            Description = b.Description,
-        //            Image = b.Image,
-        //            CreatedAt = b.CreatedAt,
-        //            Status = b.Status
+        //            BlogCategoryId = b.BlogCategoryId,
+        //            BlogTittle = b.BlogTittle,
+        //            BlogContent = b.BlogContent
         //        }).ToList(),
         //        TotalItems = totalItems,
         //        TotalPages = totalPages,
-        //        CurrentPage = page
+        //        CurrentPage = page,
+        //        PageSize = pageSize
         //    };
         //}
-
     }
 }

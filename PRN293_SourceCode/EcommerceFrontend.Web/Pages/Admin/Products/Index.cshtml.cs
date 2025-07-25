@@ -9,15 +9,28 @@ namespace EcommerceFrontend.Web.Pages.Admin.Products
     {
         private readonly IProductService _productService;
         public List<ProductDTO> Products { get; set; } = new List<ProductDTO>();
+        public int CurrentPage { get; set; } = 1;
+        public int PageSize { get; set; } = 20;
+        public int TotalPages { get; set; }
+        public ProductSearchParams? SearchParams { get; set; }
 
         public IndexModel(IProductService productService)
         {
             _productService = productService;
         }
 
-        public async Task OnGetAsync(int page = 1, int pageSize = 10)
+        public async Task OnGetAsync(int page = 1, int pageSize = 20, string? name = null, string? category = null)
         {
+            SearchParams = new ProductSearchParams
+            {
+                Name = name,
+                Category = category
+            };
             Products = await _productService.GetAllProductsAsync(page, pageSize);
+            CurrentPage = page;
+            PageSize = pageSize;
+            int totalProducts = await _productService.GetTotalProductsCountAsync(name, category);
+            TotalPages = (int)Math.Ceiling(totalProducts / (double)PageSize);
         }
     }
 } 

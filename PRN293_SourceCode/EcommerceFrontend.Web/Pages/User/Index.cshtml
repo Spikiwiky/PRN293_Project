@@ -22,6 +22,7 @@
                 <table class="table table-striped">
                     <thead>
                         <tr>
+                            <th>Ảnh</th>
                             <th>Tên</th>
                             <th>Email</th>
                             <th>Role ID</th>
@@ -38,6 +39,12 @@
                         @foreach (var u in Model.Users)
                         {
                             <tr>
+                              @*   <td>
+                                    @if (!string.IsNullOrEmpty(u.ImageUrl))
+                                    {
+                                        <img src="@u.ImageUrl" alt="Ảnh đại diện" style="width: 48px; height: 48px; object-fit: cover; border-radius: 50%;" />
+                                    }
+                                </td> *@
                                 <td>@u.UserName</td>
                                 <td>@u.Email</td>
                                 <td>@u.RoleId</td>
