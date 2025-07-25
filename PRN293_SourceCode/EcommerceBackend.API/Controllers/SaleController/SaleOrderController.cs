@@ -1,14 +1,16 @@
 ﻿using EcommerceBackend.API.Dtos.Sale;
 using EcommerceBackend.BusinessObject.Services.SaleService.OrderService;
 using EcommerceBackend.BusinessObject.Services.SaleService.ProductService;
+using EcommerceBackend.BusinessObject.Services;
 using EcommerceBackend.DataAccess.Models;
 using EcommerceBackend.DataAccess.Repository.SaleRepository.OrderRepo;
 using EcommerceBackend.DataAccess.Repository.SaleRepository.ProductRepo;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using EcommerceBackend.BusinessObject.Services.CartService;
 
-namespace EcommerceBackend.API.SaleController
+namespace EcommerceBackend.API.Controllers.SaleController
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -17,15 +19,18 @@ namespace EcommerceBackend.API.SaleController
         private readonly ISaleOrderRepository _orderRepository;
         private readonly ISaleOrderService _saleService;
         private readonly IProductRepository _productRepository;
+        private readonly CartService _cartService;
 
         public SaleOrderController(
             ISaleOrderRepository orderRepository,
             ISaleOrderService saleService,
-            IProductRepository productRepository)
+            IProductRepository productRepository,
+            CartService cartService)
         {
             _orderRepository = orderRepository ?? throw new ArgumentNullException(nameof(orderRepository));
             _saleService = saleService ?? throw new ArgumentNullException(nameof(saleService));
             _productRepository = productRepository ?? throw new ArgumentNullException(nameof(productRepository));
+            _cartService = cartService ?? throw new ArgumentNullException(nameof(cartService));
         }
 
         [HttpPost]
@@ -47,12 +52,12 @@ namespace EcommerceBackend.API.SaleController
                     PaymentMethodId = orderDto.PaymentMethodId,
                     OrderStatusId = 1,
                     OrderNote = orderDto.OrderNote,
+                    ShippingAddress = orderDto.ShippingAddress,
                     OrderDetails = new HashSet<OrderDetail>()
                 };
 
                 foreach (var detail in orderDto.OrderDetails)
                 {
-                    Console.WriteLine($"Processing OrderDetail: ProductId = {detail.ProductId}, Quantity = {detail.Quantity}, VariantId = {detail.VariantId}");
                     if (detail.Quantity <= 0)
                     {
                         return BadRequest($"Số lượng sản phẩm {detail.ProductId} phải lớn hơn 0.");
@@ -66,12 +71,10 @@ namespace EcommerceBackend.API.SaleController
                     var product = await _productRepository.GetProductByIdAsync(detail.ProductId.Value);
                     if (product == null || product.IsDelete)
                     {
-                        Console.WriteLine($"Product with ID {detail.ProductId} not found or deleted.");
                         return BadRequest($"Sản phẩm với ID {detail.ProductId} không tồn tại hoặc đã bị xóa.");
                     }
                     if (product.Status != 1)
                     {
-                        Console.WriteLine($"Product with ID {detail.ProductId} is not available (Status = {product.Status}).");
                         return BadRequest($"Sản phẩm với ID {detail.ProductId} không khả dụng. (Status: {product.Status})");
                     }
 
@@ -80,11 +83,9 @@ namespace EcommerceBackend.API.SaleController
                         var variant = await _productRepository.GetProductVariantAsync(detail.ProductId.Value, detail.VariantId);
                         if (variant == null)
                         {
-                            Console.WriteLine($"Variant with ID {detail.VariantId} not found for ProductId {detail.ProductId}.");
                             return BadRequest($"Biến thể với ID {detail.VariantId} không tồn tại cho sản phẩm {detail.ProductId}.");
                         }
                     }
-
                     order.OrderDetails.Add(new OrderDetail
                     {
                         OrderId = order.OrderId,
@@ -92,10 +93,14 @@ namespace EcommerceBackend.API.SaleController
                         VariantId = detail.VariantId,
                         ProductName = product.Name,
                         Quantity = detail.Quantity,
-                        Price = product.BasePrice
+                        Price = product.BasePrice,
+                        VariantAttributes = detail.VariantAttributes != null
+                            ? Newtonsoft.Json.JsonConvert.SerializeObject(detail.VariantAttributes)
+                            : null
                     });
                     order.AmountDue += product.BasePrice * detail.Quantity;
                 }
+                order.AmountDue += orderDto.ShippingFee;
 
                 await _saleService.CreateOrderAsync(order);
                 await _orderRepository.SaveChangesAsync();
@@ -106,6 +111,8 @@ namespace EcommerceBackend.API.SaleController
                 }
                 await _orderRepository.SaveChangesAsync();
 
+                //await _cartService.ClearCart(orderDto.CustomerId);
+
                 var responseDto = new OrderResponseDto
                 {
                     OrderId = order.OrderId,
@@ -115,13 +122,17 @@ namespace EcommerceBackend.API.SaleController
                     PaymentMethodId = order.PaymentMethodId,
                     OrderNote = order.OrderNote,
                     OrderStatusId = order.OrderStatusId,
+                    ShippingAddress = order.ShippingAddress,
+                    CreatedAt = order.CreatedAt,
+                    UpdatedAt = order.UpdatedAt,
                     OrderDetails = order.OrderDetails?.Select(od => new OrderDetailResponseDto
                     {
                         ProductId = od.ProductId,
                         VariantId = od.VariantId,
                         Quantity = od.Quantity ?? 0,
-                        Price = od.Price,
-                        ProductName = od.ProductName
+                        Price = (decimal)od.Price,
+                        ProductName = od.ProductName,
+                        VariantAttributes = od.VariantAttributes
                     }).ToList() ?? new List<OrderDetailResponseDto>()
                 };
 
@@ -129,42 +140,50 @@ namespace EcommerceBackend.API.SaleController
             }
             catch (ArgumentException ex)
             {
-                Console.WriteLine($"ArgumentException: {ex.Message}");
                 return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Exception: {ex.Message}, StackTrace: {ex.StackTrace}, InnerException: {ex.InnerException?.Message}");
-                return StatusCode(500, new { Message = "Đã xảy ra lỗi server khi tạo đơn hàng.", Error = ex.InnerException?.Message ?? ex.Message });
+                return StatusCode(500, new { Message = "Đã xảy ra lỗi server khi tạo đơn hàng.", Error = ex.Message });
             }
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAllOrders()
         {
-            var orders = await _orderRepository.GetAllOrdersAsync();
-            var orderDtos = orders.Select(o => new OrderDto
+            try
             {
-                OrderId = o.OrderId,
-                // Sửa lỗi Nullable object must have a value.
-                // Sử dụng toán tử ?? để cung cấp giá trị mặc định 0 nếu thuộc tính là null.
-                CustomerId = o.CustomerId ?? 0,          // <-- Đã sửa
-                TotalQuantity = o.TotalQuantity ?? 0,    // <-- Đã sửa
-                AmountDue = o.AmountDue ?? 0m,           // <-- Đã sửa (sử dụng 0m cho decimal)
-                PaymentMethodId = o.PaymentMethodId ?? 0, // <-- Đã sửa
-                OrderNote = o.OrderNote,
-                OrderStatusId = o.OrderStatusId ?? 0,    // <-- Đã sửa
-                OrderDetails = o.OrderDetails?.Select(od => new OrderDetailResponseDto
+                var orders = await _orderRepository.GetAllOrdersAsync();
+
+                var orderDtos = orders.Select(o => new OrderDto
                 {
-                    ProductId = od.ProductId,
-                    VariantId = od.VariantId,
-                    Quantity = od.Quantity ?? 0,
-                    Price = od.Price,
-                    ProductName = od.ProductName
-                }).ToList() ?? new List<OrderDetailResponseDto>() // Đảm bảo trả về list rỗng nếu OrderDetails là null
-            }).ToList();
-            return Ok(orderDtos);
+                    OrderId = o.OrderId,
+                    CustomerId = o.CustomerId ?? 0,
+                    TotalQuantity = o.TotalQuantity ?? 0,
+                    AmountDue = o.AmountDue ?? 0.0m,
+                    PaymentMethodId = o.PaymentMethodId ?? 0,
+                    OrderNote = o.OrderNote,
+                    OrderStatusId = o.OrderStatusId ?? 0,
+                    ShippingAddress = o.ShippingAddress,
+                    OrderDetails = o.OrderDetails?.Select(od => new OrderDetailResponseDto
+                    {
+                        ProductId = od.ProductId,
+                        VariantId = od.VariantId,
+                        Quantity = (int)od.Quantity,
+                        Price = (decimal)od.Price,
+                        ProductName = od.ProductName,
+                        VariantAttributes = od.VariantAttributes
+                    }).ToList()
+                }).ToList();
+
+                return Ok(orderDtos);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = "Đã xảy ra lỗi khi lấy danh sách đơn hàng.", Error = ex.Message });
+            }
         }
+
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetOrder(int id)
@@ -184,13 +203,17 @@ namespace EcommerceBackend.API.SaleController
                 PaymentMethodId = order.PaymentMethodId,
                 OrderNote = order.OrderNote,
                 OrderStatusId = order.OrderStatusId,
+                CreatedAt = order.CreatedAt,
+                UpdatedAt = order.UpdatedAt,
+                ShippingAddress = order.ShippingAddress,
                 OrderDetails = order.OrderDetails?.Select(od => new OrderDetailResponseDto
                 {
                     ProductId = od.ProductId,
                     VariantId = od.VariantId,
                     Quantity = od.Quantity ?? 0,
-                    Price = od.Price,
-                    ProductName = od.ProductName
+                    Price = (decimal)od.Price,
+                    ProductName = od.ProductName,
+                    VariantAttributes = od.VariantAttributes
                 }).ToList() ?? new List<OrderDetailResponseDto>()
             };
 
@@ -215,34 +238,41 @@ namespace EcommerceBackend.API.SaleController
                     return NotFound($"Đơn hàng với ID {id} không tồn tại.");
                 }
 
+                // Cập nhật các thông tin từ orderDto vào existingOrder
                 if (orderDto.CustomerId.HasValue && orderDto.CustomerId > 0)
                 {
                     existingOrder.CustomerId = orderDto.CustomerId.Value;
                 }
 
                 existingOrder.PaymentMethodId = orderDto.PaymentMethodId ?? existingOrder.PaymentMethodId;
+                existingOrder.OrderNote = orderDto.OrderNote ?? existingOrder.OrderNote;
+                existingOrder.ShippingAddress = orderDto.ShippingAddress ?? existingOrder.ShippingAddress;
+
+                // Cập nhật OrderStatusId nếu có trong orderDto
+                if (orderDto.OrderStatusId.HasValue)
+                {
+                    existingOrder.OrderStatusId = orderDto.OrderStatusId.Value;  // Cập nhật OrderStatusId
+                }
+
+                existingOrder.UpdatedAt = DateTime.UtcNow;
 
                 var existingDetails = existingOrder.OrderDetails.ToList();
                 var updatedDetails = new HashSet<OrderDetail>(existingDetails, new OrderDetailEqualityComparer());
 
                 foreach (var detail in orderDto.OrderDetails)
                 {
-                    Console.WriteLine($"Processing OrderDetail: ProductId = {detail.ProductId}, Quantity = {detail.Quantity}, VariantId = {detail.VariantId}");
                     if (!detail.ProductId.HasValue || detail.ProductId <= 0 || detail.Quantity <= 0)
                     {
-                        Console.WriteLine($"ProductId {detail.ProductId} or Quantity {detail.Quantity} is invalid, skipping update.");
                         continue;
                     }
 
                     var product = await _productRepository.GetProductByIdAsync(detail.ProductId.Value);
                     if (product == null || product.IsDelete)
                     {
-                        Console.WriteLine($"Product with ID {detail.ProductId} not found or deleted.");
                         return BadRequest($"Sản phẩm với ID {detail.ProductId} không tồn tại hoặc đã bị xóa.");
                     }
                     if (product.Status != 1)
                     {
-                        Console.WriteLine($"Product with ID {detail.ProductId} is not available (Status = {product.Status}).");
                         return BadRequest($"Sản phẩm với ID {detail.ProductId} không khả dụng. (Status: {product.Status})");
                     }
 
@@ -251,7 +281,6 @@ namespace EcommerceBackend.API.SaleController
                         var variant = await _productRepository.GetProductVariantAsync(detail.ProductId.Value, detail.VariantId);
                         if (variant == null)
                         {
-                            Console.WriteLine($"Variant with ID {detail.VariantId} not found for ProductId {detail.ProductId}.");
                             return BadRequest($"Biến thể với ID {detail.VariantId} không tồn tại cho sản phẩm {detail.ProductId}.");
                         }
                     }
@@ -262,6 +291,9 @@ namespace EcommerceBackend.API.SaleController
                         existingDetail.Quantity = detail.Quantity;
                         existingDetail.Price = product.BasePrice;
                         existingDetail.ProductName = product.Name;
+                        existingDetail.VariantAttributes = detail.VariantAttributes != null
+                            ? Newtonsoft.Json.JsonConvert.SerializeObject(detail.VariantAttributes)
+                            : existingDetail.VariantAttributes;
                     }
                     else
                     {
@@ -272,7 +304,10 @@ namespace EcommerceBackend.API.SaleController
                             VariantId = detail.VariantId,
                             ProductName = product.Name,
                             Quantity = detail.Quantity,
-                            Price = product.BasePrice
+                            Price = product.BasePrice,
+                            VariantAttributes = detail.VariantAttributes != null
+                                ? Newtonsoft.Json.JsonConvert.SerializeObject(detail.VariantAttributes)
+                                : null
                         });
                     }
                 }
@@ -283,8 +318,8 @@ namespace EcommerceBackend.API.SaleController
                     existingOrder.OrderDetails.Add(detail);
                 }
 
-                existingOrder.TotalQuantity = existingOrder.OrderDetails.Sum(d => d.Quantity ?? 0); // Handle nullable Quantity
-                existingOrder.AmountDue = existingOrder.OrderDetails.Sum(d => (d.Price ?? 0m) * (d.Quantity ?? 0)); // Handle nullable Price and Quantity
+                existingOrder.TotalQuantity = existingOrder.OrderDetails.Sum(d => d.Quantity);
+                existingOrder.AmountDue = existingOrder.OrderDetails.Sum(d => d.Price * d.Quantity);
 
                 await _saleService.UpdateOrderAsync(existingOrder);
                 await _orderRepository.SaveChangesAsync();
@@ -298,13 +333,17 @@ namespace EcommerceBackend.API.SaleController
                     PaymentMethodId = existingOrder.PaymentMethodId,
                     OrderNote = existingOrder.OrderNote,
                     OrderStatusId = existingOrder.OrderStatusId,
+                    ShippingAddress = existingOrder.ShippingAddress,
+                    CreatedAt = existingOrder.CreatedAt,
+                    UpdatedAt = existingOrder.UpdatedAt,
                     OrderDetails = existingOrder.OrderDetails?.Select(od => new OrderDetailResponseDto
                     {
                         ProductId = od.ProductId,
                         VariantId = od.VariantId,
                         Quantity = od.Quantity ?? 0,
-                        Price = od.Price,
-                        ProductName = od.ProductName
+                        Price = (decimal)od.Price,
+                        ProductName = od.ProductName,
+                        VariantAttributes = od.VariantAttributes
                     }).ToList() ?? new List<OrderDetailResponseDto>()
                 };
 
@@ -312,15 +351,14 @@ namespace EcommerceBackend.API.SaleController
             }
             catch (ArgumentException ex)
             {
-                Console.WriteLine($"ArgumentException: {ex.Message}");
                 return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Exception: {ex.Message}, StackTrace: {ex.StackTrace}, InnerException: {ex.InnerException?.Message}");
-                return StatusCode(500, new { Message = "Đã xảy ra lỗi server khi cập nhật đơn hàng.", Error = ex.InnerException?.Message ?? ex.Message });
+                return StatusCode(500, new { Message = "Đã xảy ra lỗi server khi cập nhật đơn hàng.", Error = ex.Message });
             }
         }
+
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteOrder(int id)
@@ -332,7 +370,7 @@ namespace EcommerceBackend.API.SaleController
                 return NotFound($"Đơn hàng với ID {id} không tồn tại.");
             }
 
-            order.OrderStatusId = 4;
+            order.OrderStatusId = 5;
 
             await _saleService.UpdateOrderAsync(order);
             await _orderRepository.SaveChangesAsync();
@@ -346,14 +384,20 @@ namespace EcommerceBackend.API.SaleController
             try
             {
                 var details = await _saleService.GetOrderDetailsByOrderIdAsync(id);
+
+                var order = await _orderRepository.GetOrderByIdAsync(id);
+
                 var response = details.Select(od => new OrderDetailResponseDto
                 {
                     ProductId = od.ProductId,
                     VariantId = od.VariantId,
                     Quantity = od.Quantity ?? 0,
-                    Price = od.Price,
-                    ProductName = od.ProductName
+                    Price = (decimal)od.Price,
+                    ProductName = od.ProductName,
+                    VariantAttributes = od.VariantAttributes,
+                    OrderStatusId = order.OrderStatusId
                 }).ToList();
+
                 return Ok(response);
             }
             catch (ArgumentException ex)
