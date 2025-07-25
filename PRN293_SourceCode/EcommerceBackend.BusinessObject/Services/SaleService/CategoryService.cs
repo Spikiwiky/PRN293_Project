@@ -1,5 +1,5 @@
 ﻿using EcommerceBackend.DataAccess.Models;
-using EcommerceBackend.DataAccess.Repository.SaleRepository;
+using EcommerceBackend.DataAccess.Repository.SaleRepository.SaleCategory;
 using System;
 using System.Collections.Generic;
 using System.Linq;

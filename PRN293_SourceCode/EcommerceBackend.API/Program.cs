@@ -10,9 +10,6 @@ using EcommerceBackend.API.Configurations;
 using EcommerceBackend.API.Hubs;
 using EcommerceBackend.BusinessObject.Services;
 
-
-using EcommerceBackend.DataAccess.Repository.SaleRepository;
-
 using EcommerceBackend.DataAccess.Abstract.BlogAbstract;
 using EcommerceBackend.DataAccess.Repository.BlogRepository;
 
@@ -28,6 +25,7 @@ using EcommerceBackend.DataAccess.Models;
 using EcommerceBackend.BusinessObject.Services.SaleService;
 using EcommerceBackend.DataAccess.Abstract;
 using EcommerceBackend.DataAccess.Repository;
+using EcommerceBackend.DataAccess.Repository.SaleRepository.SaleCategory;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -55,9 +53,9 @@ builder.Services.AddScoped<IProductService, ProductService>();
 
 //builder.Services.AddScoped<ISaleProductService, SaleProductService>();
 builder.Services.AddScoped<ISaleService, SaleService>(); 
-builder.Services.AddScoped<EcommerceBackend.DataAccess.Repository.SaleRepository.IProductRepository, EcommerceBackend.DataAccess.Repository.SaleRepository.ProductRepository>();
+builder.Services.AddScoped<EcommerceBackend.DataAccess.Repository.SaleRepository.SaleProduct.IProductRepository, EcommerceBackend.DataAccess.Repository.SaleRepository.SaleProduct.ProductRepository>();
 builder.Services.AddScoped<EcommerceBackend.BusinessObject.Services.SaleService.ICategoryService, EcommerceBackend.BusinessObject.Services.SaleService.CategoryService>();
-builder.Services.AddScoped<EcommerceBackend.DataAccess.Repository.SaleRepository.ICategoryRepository, EcommerceBackend.DataAccess.Repository.SaleRepository.CategoryRepository>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 
 // Config Authentication Jwt
 JwtConfig.ConfigureJwtAuthentication(builder.Services, builder.Configuration);
