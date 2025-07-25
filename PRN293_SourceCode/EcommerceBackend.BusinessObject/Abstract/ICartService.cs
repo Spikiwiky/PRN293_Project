@@ -7,13 +7,10 @@ namespace EcommerceBackend.BusinessObject.Abstract
     {
         // Cart operations
         Task<CartResponseDto?> GetUserCartAsync(int userId);
-        Task<CartResponseDto?> GetUserCartByUsernameAsync(string username);
         Task<CartResponseDto> CreateUserCartAsync(int userId);
-        Task<CartResponseDto> CreateUserCartByUsernameAsync(string username);
         
         // Cart item operations
         Task<CartOperationResultDto> AddToCartAsync(int userId, AddToCartRequestDto request);
-        Task<CartOperationResultDto> AddToCartAsync(string username, AddToCartRequestDto request);
         Task<CartDetailResponseDto?> GetCartItemAsync(int cartDetailId);
         Task<CartOperationResultDto> UpdateCartItemQuantityAsync(int cartDetailId, UpdateCartItemRequestDto request);
         Task<CartOperationResultDto> IncreaseCartItemQuantityAsync(int cartDetailId, IncreaseCartItemRequestDto request);

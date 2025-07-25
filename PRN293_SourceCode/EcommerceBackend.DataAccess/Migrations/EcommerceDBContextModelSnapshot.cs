@@ -4,7 +4,6 @@ using EcommerceBackend.DataAccess.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -12,10 +11,9 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EcommerceBackend.DataAccess.Migrations
 {
     [DbContext(typeof(EcommerceDBContext))]
-    [Migration("20250725085248_InitialCreate31")]
-    partial class InitialCreate31
+    partial class EcommerceDBContextModelSnapshot : ModelSnapshot
     {
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -219,7 +217,6 @@ namespace EcommerceBackend.DataAccess.Migrations
                         .HasColumnName("Quantity");
 
                     b.Property<string>("VariantAttributes")
-
                         .ValueGeneratedOnAdd()
                         .HasColumnType("nvarchar(max)")
                         .HasDefaultValue("[]")

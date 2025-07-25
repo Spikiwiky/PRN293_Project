@@ -46,20 +46,6 @@ namespace EcommerceBackend.DataAccess.Repository.AuthRepository
             }
         }
 
-        public async Task<User?> GetUserByUsernameAsync(string username)
-        {
-            try
-            {
-                return await _context.Users
-                    .Include(u => u.Role)
-                    .FirstOrDefaultAsync(u => u.UserName == username && (u.IsDelete == null || u.IsDelete == false));
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
         public User? CreateUser(User user)
         {
             _context.Users.Add(user);

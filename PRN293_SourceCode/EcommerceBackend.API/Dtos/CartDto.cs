@@ -8,7 +8,7 @@ namespace EcommerceBackend.API.Dtos
         [Required]
         public int ProductId { get; set; }
         
-        public int? VariantId { get; set; }
+        public string? VariantId { get; set; }
         
         public string? VariantAttributes { get; set; }
         
@@ -20,9 +20,6 @@ namespace EcommerceBackend.API.Dtos
     public class UpdateCartItemDto
     {
         [Required]
-        public int UserId { get; set; }
-        
-        [Required]
         public int CartDetailId { get; set; }
         
         [Required]
@@ -33,9 +30,6 @@ namespace EcommerceBackend.API.Dtos
     public class IncreaseCartItemDto
     {
         [Required]
-        public int UserId { get; set; }
-        
-        [Required]
         public int CartDetailId { get; set; }
         
         [Range(1, int.MaxValue, ErrorMessage = "Quantity to add must be greater than 0")]
@@ -45,36 +39,7 @@ namespace EcommerceBackend.API.Dtos
     public class DecreaseCartItemDto
     {
         [Required]
-        public int UserId { get; set; }
-        
-        [Required]
         public int CartDetailId { get; set; }
-        
-        [Range(1, int.MaxValue, ErrorMessage = "Quantity to remove must be greater than 0")]
-        public int QuantityToRemove { get; set; } = 1;
-    }
-
-    public class IncreaseCartItemByProductDto
-    {
-        [Required]
-        public int ProductId { get; set; }
-        
-        public int? VariantId { get; set; }
-        
-        public string? VariantAttributes { get; set; }
-        
-        [Range(1, int.MaxValue, ErrorMessage = "Quantity to add must be greater than 0")]
-        public int QuantityToAdd { get; set; } = 1;
-    }
-
-    public class DecreaseCartItemByProductDto
-    {
-        [Required]
-        public int ProductId { get; set; }
-        
-        public int? VariantId { get; set; }
-        
-        public string? VariantAttributes { get; set; }
         
         [Range(1, int.MaxValue, ErrorMessage = "Quantity to remove must be greater than 0")]
         public int QuantityToRemove { get; set; } = 1;
@@ -83,34 +48,7 @@ namespace EcommerceBackend.API.Dtos
     public class RemoveFromCartDto
     {
         [Required]
-        public int UserId { get; set; }
-        
-        [Required]
         public int CartDetailId { get; set; }
-    }
-
-    public class UpdateCartItemByProductDto
-    {
-        [Required]
-        public int ProductId { get; set; }
-        
-        public int? VariantId { get; set; }
-        
-        public string? VariantAttributes { get; set; }
-        
-        [Required]
-        [Range(1, int.MaxValue, ErrorMessage = "Quantity must be greater than 0")]
-        public int Quantity { get; set; }
-    }
-
-    public class RemoveFromCartByProductDto
-    {
-        [Required]
-        public int ProductId { get; set; }
-        
-        public int? VariantId { get; set; }
-        
-        public string? VariantAttributes { get; set; }
     }
 
     // Response DTOs for API
@@ -118,7 +56,7 @@ namespace EcommerceBackend.API.Dtos
     {
         public int CartDetailId { get; set; }
         public int ProductId { get; set; }
-        public int? VariantId { get; set; }
+        public string? VariantId { get; set; }
         public string ProductName { get; set; } = string.Empty;
         public int Quantity { get; set; }
         public decimal Price { get; set; }

@@ -83,14 +83,14 @@ namespace EcommerceBackend.BusinessObject.Services.SaleService.OrderService
                     throw new ArgumentException($"Sản phẩm với ID {detail.ProductId} không khả dụng.");
                 }
 
-                //if (!string.IsNullOrEmpty(detail.VariantId))
-                //{
-                //    // var variant = await _productRepository.GetProductVariantAsync(detail.ProductId.Value, detail.VariantId);
-                //    // if (variant == null)
-                //    // {
-                //    //     throw new ArgumentException($"Biến thể với ID {detail.VariantId} không tồn tại cho sản phẩm {detail.ProductId}.");
-                //    // }
-                //}
+                if (!string.IsNullOrEmpty(detail.VariantId))
+                {
+                    var variant = await _productRepository.GetProductVariantAsync(detail.ProductId.Value, detail.VariantId);
+                    if (variant == null)
+                    {
+                        throw new ArgumentException($"Biến thể với ID {detail.VariantId} không tồn tại cho sản phẩm {detail.ProductId}.");
+                    }
+                }
 
                 detail.ProductName = product.Name;
                 detail.Price = product.BasePrice;
@@ -138,14 +138,14 @@ namespace EcommerceBackend.BusinessObject.Services.SaleService.OrderService
                     throw new ArgumentException($"Sản phẩm với ID {detail.ProductId} không khả dụng.");
                 }
 
-                //if (!string.IsNullOrEmpty(detail.VariantId))
-                //{
-                //    // var variant = await _productRepository.GetProductVariantAsync(detail.ProductId.Value, detail.VariantId);
-                //    // if (variant == null)
-                //    // {
-                //    //     throw new ArgumentException($"Biến thể với ID {detail.VariantId} không tồn tại cho sản phẩm {detail.ProductId}.");
-                //    // }
-                //}
+                if (!string.IsNullOrEmpty(detail.VariantId))
+                {
+                    var variant = await _productRepository.GetProductVariantAsync(detail.ProductId.Value, detail.VariantId);
+                    if (variant == null)
+                    {
+                        throw new ArgumentException($"Biến thể với ID {detail.VariantId} không tồn tại cho sản phẩm {detail.ProductId}.");
+                    }
+                }
 
                 detail.ProductName = product.Name;
                 detail.Price = product.BasePrice;

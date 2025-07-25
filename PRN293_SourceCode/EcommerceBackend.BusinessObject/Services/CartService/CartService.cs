@@ -1,7 +1,6 @@
 using EcommerceBackend.BusinessObject.Abstract;
 using EcommerceBackend.BusinessObject.dtos.CartDto;
 using EcommerceBackend.DataAccess.Abstract;
-using EcommerceBackend.DataAccess.Abstract.AuthAbstract;
 using EcommerceBackend.DataAccess.Models;
 using EcommerceBackend.DataAccess.Repository;
 using Newtonsoft.Json;
@@ -13,31 +12,16 @@ namespace EcommerceBackend.BusinessObject.Services.CartService
     {
         private readonly ICartRepository _cartRepository;
         private readonly IProductRepository _productRepository;
-        private readonly IAuthRepository _authRepository;
 
-        public CartService(ICartRepository cartRepository, IProductRepository productRepository, IAuthRepository authRepository)
+        public CartService(ICartRepository cartRepository, IProductRepository productRepository)
         {
             _cartRepository = cartRepository;
             _productRepository = productRepository;
-            _authRepository = authRepository;
         }
 
         public async Task<CartResponseDto?> GetUserCartAsync(int userId)
         {
-            Console.WriteLine($"GetUserCartAsync called with userId: {userId}");
-            
             var cart = await _cartRepository.GetCartByCustomerIdAsync(userId);
-            Console.WriteLine($"CartRepository returned: {(cart != null ? "Cart found" : "Cart not found")}");
-            
-            if (cart == null)
-                return null;
-
-            return MapToCartResponseDto(cart);
-        }
-
-        public async Task<CartResponseDto?> GetUserCartByUsernameAsync(string username)
-        {
-            var cart = await _cartRepository.GetCartByUsernameAsync(username);
             if (cart == null)
                 return null;
 
@@ -46,41 +30,12 @@ namespace EcommerceBackend.BusinessObject.Services.CartService
 
         public async Task<CartResponseDto> CreateUserCartAsync(int userId)
         {
-            // For guest users (ID 999), skip user validation
-            if (userId != 999)
-            {
-                // Validate that user exists
-                var user = await _authRepository.GetUserByIdAsync(userId);
-                if (user == null)
-                {
-                    throw new InvalidOperationException($"User with ID {userId} does not exist in the database.");
-                }
-            }
-
             // Check if user already has a cart
             var existingCart = await _cartRepository.GetCartByCustomerIdAsync(userId);
             if (existingCart != null)
                 return MapToCartResponseDto(existingCart);
 
             var cart = await _cartRepository.CreateCartAsync(userId);
-            return MapToCartResponseDto(cart);
-        }
-
-        public async Task<CartResponseDto> CreateUserCartByUsernameAsync(string username)
-        {
-            // Validate that user exists
-            var user = await _authRepository.GetUserByUsernameAsync(username);
-            if (user == null)
-            {
-                throw new InvalidOperationException($"User with username '{username}' does not exist in the database.");
-            }
-
-            // Check if user already has a cart
-            var existingCart = await _cartRepository.GetCartByUsernameAsync(username);
-            if (existingCart != null)
-                return MapToCartResponseDto(existingCart);
-
-            var cart = await _cartRepository.CreateCartByUsernameAsync(username);
             return MapToCartResponseDto(cart);
         }
 
@@ -110,51 +65,6 @@ namespace EcommerceBackend.BusinessObject.Services.CartService
 
                 var updatedCart = await GetUserCartAsync(userId);
                 var summary = await GetCartSummaryAsync(userId);
-
-                return new CartOperationResultDto
-                {
-                    Success = true,
-                    Message = "Item added to cart successfully",
-                    Cart = updatedCart,
-                    Summary = summary
-                };
-            }
-            catch (Exception ex)
-            {
-                return new CartOperationResultDto
-                {
-                    Success = false,
-                    Message = $"Error adding item to cart: {ex.Message}"
-                };
-            }
-        }
-
-        public async Task<CartOperationResultDto> AddToCartAsync(string username, AddToCartRequestDto request)
-        {
-            try
-            {
-                // Validate product and quantity
-                if (!await ValidateProductForCartAsync(request.ProductId, request.Quantity))
-                    return new CartOperationResultDto
-                    {
-                        Success = false,
-                        Message = "Invalid product or quantity"
-                    };
-
-                // Get or create user cart
-                var cart = await GetUserCartByUsernameAsync(username) ?? await CreateUserCartByUsernameAsync(username);
-
-                // Add item to cart
-                var cartItem = await _cartRepository.AddItemToCartAsync(
-                    cart.CartId, 
-                    request.ProductId, 
-                    request.VariantId, 
-                    request.VariantAttributes, 
-                    request.Quantity
-                );
-
-                var updatedCart = await GetUserCartByUsernameAsync(username);
-                var summary = await GetCartSummaryAsync(cart.CustomerId);
 
                 return new CartOperationResultDto
                 {
@@ -472,8 +382,8 @@ namespace EcommerceBackend.BusinessObject.Services.CartService
                 CustomerId = cart.CustomerId ?? 0,
                 TotalQuantity = cart.TotalQuantity ?? 0,
                 AmountDue = cart.AmountDue ?? 0,
-                CreatedAt = DateTime.UtcNow, // Use current time since the column doesn't exist in DB
-                UpdatedAt = DateTime.UtcNow, // Use current time since the column doesn't exist in DB
+                CreatedAt = cart.CreatedAt,
+                UpdatedAt = cart.UpdatedAt,
                 CartDetails = cart.CartDetails?.Select(cd => MapToCartDetailResponseDto(cd)).ToList() ?? new List<CartDetailResponseDto>()
             };
         }

@@ -15,7 +15,7 @@ namespace EcommerceFrontend.Web.Models.Sale
             public string Color { get; set; } = string.Empty;
 
             [JsonPropertyName("variant_id")]
-            public int? VariantId { get; set; }
+            public string VariantId { get; set; } = string.Empty;
 
             [JsonPropertyName("price")]
             public decimal Price { get; set; }
@@ -69,7 +69,7 @@ namespace EcommerceFrontend.Web.Models.Sale
             public string? Color => Variants.FirstOrDefault()?.Color;
             public bool IsFeatured => Variants.FirstOrDefault()?.IsFeatured ?? false;
             public int StockQuantity => Variants.FirstOrDefault()?.StockQuantity ?? 0;
-            public int? VariantId => Variants.FirstOrDefault()?.VariantId;
+            public string? VariantId => Variants.FirstOrDefault()?.VariantId;
         }
 
         public class SaleProductCreateDto
@@ -88,7 +88,7 @@ namespace EcommerceFrontend.Web.Models.Sale
             public string? Color { get; set; }
             public bool IsFeatured { get; set; }
             public int StockQuantity { get; set; }
-            public int? VariantId { get; set; }
+            public string? VariantId { get; set; }
             public string? CreatedBy { get; set; }
         }
 
@@ -109,7 +109,7 @@ namespace EcommerceFrontend.Web.Models.Sale
             public string? Color { get; set; }
             public bool? IsFeatured { get; set; }
             public int? StockQuantity { get; set; }
-            public int? VariantId { get; set; }
+            public string? VariantId { get; set; }
             public string? UpdatedBy { get; set; }
         }
     }

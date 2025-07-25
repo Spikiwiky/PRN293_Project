@@ -32,13 +32,13 @@ namespace EcommerceBackend.API.Configurations
             services.AddScoped<DataAccess.Repository.IProductRepository, ProductRepository>();
             services.AddScoped<IProductService, ProductService>();
            
-            //Register for auth - Moved to Program.cs
-            //services.AddScoped<IAuthService, AuthService>();
-            //services.AddScoped<IAuthRepository, AuthRepository>();
+            //Register for auth
+            services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IAuthRepository, AuthRepository>();
 
-            //Register for cart - Moved to Program.cs
-            //services.AddScoped<ICartService, CartService>();
-            //services.AddScoped<ICartRepository, CartRepository>();
+            //Register for cart
+            services.AddScoped<ICartService, CartService>();
+            services.AddScoped<ICartRepository, CartRepository>();
 
             //Register for order
             //services.AddScoped<IOrderService, OrderService>();

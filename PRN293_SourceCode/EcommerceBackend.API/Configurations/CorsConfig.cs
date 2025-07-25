@@ -17,24 +17,11 @@
                                 "https://localhost:7107",
                                 "http://localhost:5107",
                                 "https://localhost:44321",
-                                "http://localhost:44321",
-                                "https://localhost:7257",
-                                "http://localhost:7257",
-                                "https://localhost:5287",
-                                "http://localhost:5287"
+                                "http://localhost:44321"
                               )
                               .AllowAnyHeader()
                               .AllowAnyMethod()
-                              .AllowCredentials()
-                              .SetIsOriginAllowedToAllowWildcardSubdomains();
-                    });
-
-                options.AddPolicy("AllowAll",
-                    policy =>
-                    {
-                        policy.AllowAnyOrigin()
-                              .AllowAnyHeader()
-                              .AllowAnyMethod();
+                              .AllowCredentials();
                     });
             });
         }

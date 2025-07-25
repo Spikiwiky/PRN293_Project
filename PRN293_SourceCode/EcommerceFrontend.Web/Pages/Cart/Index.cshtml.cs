@@ -1,198 +1,72 @@
+using EcommerceFrontend.Web.Models;
+using EcommerceFrontend.Web.Models.Sale;
+using EcommerceFrontend.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using System.Net.Http.Json;
+using System.Text;
 using System.Text.Json;
-using System.Net.Http;
-using System.Text.Json.Serialization;
 
 namespace EcommerceFrontend.Web.Pages.Cart;
 
 public class IndexModel : PageModel
 {
-    private readonly ILogger<IndexModel> _logger;
     private readonly IHttpClientFactory _httpClientFactory;
+    private readonly ApiSettings _apiSettings;
+    private readonly ILogger<IndexModel> _logger;
 
-    public IndexModel(ILogger<IndexModel> logger, IHttpClientFactory httpClientFactory)
+    public IndexModel(IHttpClientFactory httpClientFactory, IOptions<ApiSettings> apiSettings, ILogger<IndexModel> logger)
     {
-        _logger = logger;
         _httpClientFactory = httpClientFactory;
+        _apiSettings = apiSettings.Value ?? throw new ArgumentNullException(nameof(apiSettings), "ApiSettings is not configured.");
+        _logger = logger;
     }
 
     public List<CartItemModel> CartItems { get; set; } = new List<CartItemModel>();
     public int CartItemCount { get; set; }
+    public int TotalQuantity { get; set; }
     public decimal TotalAmount { get; set; }
+    public string? SuccessMessage { get; set; }
     public string? ErrorMessage { get; set; }
-
-    private string GetProductImageUrl(string? productImage)
-    {
-        if (string.IsNullOrEmpty(productImage))
-            return "/images/default-product.jpg";
-        
-        // If it's already a full URL, return as is
-        if (productImage.StartsWith("http"))
-            return productImage;
-        
-        // If it's a relative path starting with /images/, convert to backend URL
-        if (productImage.StartsWith("/images/"))
-        {
-            var backendUrl = "https://localhost:7257"; // Backend API URL
-            return $"{backendUrl}{productImage}";
-        }
-        
-        // Default fallback
-        return "/images/default-product.jpg";
-    }
-
-    [HttpGet("test-cookies")]
-    public IActionResult TestCookies()
-    {
-        var allCookies = Request.Cookies.Select(c => new { Key = c.Key, Value = c.Value }).ToList();
-        var userId = Request.Cookies["UserId"];
-        
-        return new JsonResult(new
-        {
-            success = true,
-            cookieCount = allCookies.Count,
-            allCookies = allCookies,
-            userId = userId,
-            hasUserId = !string.IsNullOrEmpty(userId)
-        });
-    }
 
     public async Task<IActionResult> OnGetAsync()
     {
         try
         {
-            _logger.LogInformation("Cart page OnGetAsync called");
-            
-            // Debug: Log all cookies
-            var allCookies = Request.Cookies.Select(c => new { Key = c.Key, Value = c.Value }).ToList();
-            _logger.LogInformation("All cookies in Cart page: {Cookies}", string.Join(", ", allCookies.Select(c => $"{c.Key}={c.Value}")));
-            
-            // Get userId from cookies
-            var userIdStr = Request.Cookies["UserId"];
-            if (string.IsNullOrEmpty(userIdStr))
-            {
-                _logger.LogWarning("No UserId found in cookies");
-                ErrorMessage = "Vui lòng đăng nhập để xem giỏ hàng";
-                CartItems = new List<CartItemModel>();
-                return Page();
-            }
+            // TODO: Get current user ID from authentication
+            var userId = 1; // Placeholder - should get from JWT token
 
-            if (!int.TryParse(userIdStr, out int userId))
-            {
-                _logger.LogWarning("Invalid UserId in cookies: {UserIdStr}", userIdStr);
-                ErrorMessage = "Thông tin người dùng không hợp lệ";
-                CartItems = new List<CartItemModel>();
-                return Page();
-            }
+            var client = _httpClientFactory.CreateClient("MyAPI");
+            var response = await client.GetAsync($"{_apiSettings.BaseUrl}/api/cart");
 
-            _logger.LogInformation("Loading cart for user ID: {UserId}", userId);
-
-            // Call frontend CartController to get cart data (backend will get userId from cookies)
-            var client = _httpClientFactory.CreateClient();
-            var cartUrl = $"{Request.Scheme}://{Request.Host}/api/Cart";
-            
-            _logger.LogInformation("Calling frontend CartController: {CartUrl}", cartUrl);
-            
-            // Create request with cookies
-            var request = new HttpRequestMessage(HttpMethod.Get, cartUrl);
-            
-            // Forward all cookies from the current request
-            var cookieHeader = Request.Headers["Cookie"].ToString();
-            if (!string.IsNullOrEmpty(cookieHeader))
-            {
-                request.Headers.Add("Cookie", cookieHeader);
-                _logger.LogInformation("Forwarding cookies: {CookieHeader}", cookieHeader);
-            }
-            else
-            {
-                _logger.LogWarning("No cookies found in request headers");
-            }
-            
-            var response = await client.SendAsync(request);
-            var content = await response.Content.ReadAsStringAsync();
-            
-            _logger.LogInformation("CartController response status: {StatusCode}", response.StatusCode);
-            _logger.LogInformation("CartController response content: {Content}", content);
-            
             if (response.IsSuccessStatusCode)
             {
-                try
+                var cartResponse = await response.Content.ReadFromJsonAsync<CartResponseDto>();
+                if (cartResponse?.Success == true && cartResponse.Cart != null)
                 {
-                    _logger.LogInformation("Starting JSON parsing...");
-                    
-                    // Parse the outer response first
-                    var outerResponse = JsonSerializer.Deserialize<JsonElement>(content);
-                    _logger.LogInformation("Outer response parsed successfully");
-                    
-                    if (outerResponse.TryGetProperty("data", out var dataElement))
+                    CartItems = cartResponse.Cart.CartDetails?.Select(cd => new CartItemModel
                     {
-                        _logger.LogInformation("Found 'data' property, parsing inner object...");
-                        
-                        // Parse the inner data object
-                        var cartResponse = JsonSerializer.Deserialize<CartResponseDto>(dataElement.GetRawText());
-                        _logger.LogInformation("Inner cartResponse parsed successfully");
-                        
-                        _logger.LogInformation("Parsed cartResponse - Success: {Success}, Cart: {Cart}, CartDetails: {CartDetails}", 
-                            cartResponse?.Success, 
-                            cartResponse?.Cart != null ? "Not null" : "null",
-                            cartResponse?.Cart?.CartDetails?.Count ?? 0);
-                        
-                        if (cartResponse?.Success == true && cartResponse.Cart != null)
-                        {
-                            // Parse cart details
-                            if (cartResponse.Cart.CartDetails != null)
-                            {
-                                CartItems = cartResponse.Cart.CartDetails.Select(cd => new CartItemModel
-                                {
-                                    CartDetailId = cd.CartDetailId,
-                                    ProductId = cd.ProductId,
-                                    ProductName = cd.ProductName,
-                                    ProductImage = GetProductImageUrl(cd.ProductImage),
-                                    VariantId = cd.VariantId,
-                                    VariantAttributes = cd.VariantAttributes,
-                                    Quantity = cd.Quantity,
-                                    Price = cd.Price
-                                }).ToList();
-                            }
-                            else
-                            {
-                                CartItems = new List<CartItemModel>();
-                            }
-                            
-                            CartItemCount = CartItems.Count;
-                            TotalAmount = CartItems.Sum(item => item.Price * item.Quantity);
-                            
-                            _logger.LogInformation("Successfully loaded {Count} cart items", CartItems.Count);
-                        }
-                        else
-                        {
-                            CartItems = new List<CartItemModel>();
-                            CartItemCount = 0;
-                            TotalAmount = 0;
-                            _logger.LogInformation("Cart is empty or response indicates no items");
-                        }
-                    }
-                    else
-                    {
-                        _logger.LogError("No 'data' property found in response");
-                        ErrorMessage = "Dữ liệu giỏ hàng không hợp lệ";
-                        CartItems = new List<CartItemModel>();
-                    }
-                }
-                catch (JsonException jsonEx)
-                {
-                    _logger.LogError(jsonEx, "Failed to parse cart response");
-                    ErrorMessage = "Lỗi khi xử lý dữ liệu giỏ hàng";
-                    CartItems = new List<CartItemModel>();
+                        CartDetailId = cd.CartDetailId,
+                        ProductId = cd.ProductId,
+                        ProductName = cd.ProductName,
+                        ProductBrand = cd.ProductBrand,
+                        ProductImageUrl = cd.ProductImageUrl,
+                        VariantAttributes = cd.VariantAttributes,
+                        Quantity = cd.Quantity,
+                        Price = cd.Price
+                    }).ToList() ?? new List<CartItemModel>();
+
+                    CartItemCount = cartResponse.Summary?.CartItemCount ?? 0;
+                    TotalQuantity = cartResponse.Summary?.TotalItems ?? 0;
+                    TotalAmount = cartResponse.Summary?.TotalAmount ?? 0;
                 }
             }
             else
             {
-                _logger.LogError("CartController returned error: {StatusCode}, {Content}", response.StatusCode, content);
-                ErrorMessage = $"Lỗi khi tải giỏ hàng: {response.StatusCode}";
-                CartItems = new List<CartItemModel>();
+                _logger.LogWarning("Failed to get cart. Status: {StatusCode}", response.StatusCode);
+                ErrorMessage = "Không thể tải giỏ hàng. Vui lòng thử lại.";
             }
 
             return Page();
@@ -201,8 +75,123 @@ public class IndexModel : PageModel
         {
             _logger.LogError(ex, "Error loading cart");
             ErrorMessage = "Có lỗi xảy ra khi tải giỏ hàng. Vui lòng thử lại.";
-            CartItems = new List<CartItemModel>();
             return Page();
+        }
+    }
+
+    public async Task<IActionResult> OnPostUpdateQuantityAsync([FromBody] UpdateQuantityRequest request)
+    {
+        try
+        {
+            if (request.Quantity <= 0)
+            {
+                return new JsonResult(new { success = false, message = "Số lượng phải lớn hơn 0" });
+            }
+
+            var client = _httpClientFactory.CreateClient("MyAPI");
+            var updateRequest = new
+            {
+                cartDetailId = request.CartDetailId,
+                quantity = request.Quantity
+            };
+
+            var json = JsonSerializer.Serialize(updateRequest);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await client.PutAsync($"{_apiSettings.BaseUrl}/api/cart/update", content);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return new JsonResult(new { success = true, message = "Cập nhật số lượng thành công" });
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                return new JsonResult(new { success = false, message = error });
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating cart item quantity");
+            return new JsonResult(new { success = false, message = "Có lỗi xảy ra khi cập nhật số lượng" });
+        }
+    }
+
+    public async Task<IActionResult> OnPostRemoveFromCartAsync([FromBody] RemoveFromCartRequest request)
+    {
+        try
+        {
+            var client = _httpClientFactory.CreateClient("MyAPI");
+            var removeRequest = new
+            {
+                cartDetailId = request.CartDetailId
+            };
+
+            var json = JsonSerializer.Serialize(removeRequest);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await client.DeleteAsync($"{_apiSettings.BaseUrl}/api/cart/remove");
+
+            if (response.IsSuccessStatusCode)
+            {
+                return new JsonResult(new { success = true, message = "Xóa sản phẩm khỏi giỏ hàng thành công" });
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                return new JsonResult(new { success = false, message = error });
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error removing item from cart");
+            return new JsonResult(new { success = false, message = "Có lỗi xảy ra khi xóa sản phẩm" });
+        }
+    }
+
+    public async Task<IActionResult> OnPostClearCartAsync()
+    {
+        try
+        {
+            var client = _httpClientFactory.CreateClient("MyAPI");
+            var response = await client.DeleteAsync($"{_apiSettings.BaseUrl}/api/cart/clear");
+
+            if (response.IsSuccessStatusCode)
+            {
+                return new JsonResult(new { success = true, message = "Xóa giỏ hàng thành công" });
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                return new JsonResult(new { success = false, message = error });
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error clearing cart");
+            return new JsonResult(new { success = false, message = "Có lỗi xảy ra khi xóa giỏ hàng" });
+        }
+    }
+
+    public async Task<IActionResult> OnGetGetCartCountAsync()
+    {
+        try
+        {
+            var client = _httpClientFactory.CreateClient("MyAPI");
+            var response = await client.GetAsync($"{_apiSettings.BaseUrl}/api/cart/summary");
+
+            if (response.IsSuccessStatusCode)
+            {
+                var summary = await response.Content.ReadFromJsonAsync<CartSummaryDto>();
+                return Content((summary?.CartItemCount ?? 0).ToString());
+            }
+
+            return Content("0");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting cart count");
+            return Content("0");
         }
     }
 }
@@ -213,94 +202,61 @@ public class CartItemModel
     public int CartDetailId { get; set; }
     public int ProductId { get; set; }
     public string ProductName { get; set; } = string.Empty;
-    public string ProductImage { get; set; } = string.Empty;
-    public int? VariantId { get; set; }
+    public string ProductBrand { get; set; } = string.Empty;
+    public string? ProductImageUrl { get; set; }
     public string? VariantAttributes { get; set; }
     public int Quantity { get; set; }
     public decimal Price { get; set; }
+}
+
+public class UpdateQuantityRequest
+{
+    public int CartDetailId { get; set; }
+    public int Quantity { get; set; }
+}
+
+public class RemoveFromCartRequest
+{
+    public int CartDetailId { get; set; }
 }
 
 // API Response Models
 public class CartResponseDto
 {
-    [JsonPropertyName("success")]
     public bool Success { get; set; }
-    
-    [JsonPropertyName("message")]
     public string Message { get; set; } = string.Empty;
-    
-    [JsonPropertyName("cart")]
     public CartDto? Cart { get; set; }
-    
-    [JsonPropertyName("summary")]
     public CartSummaryDto? Summary { get; set; }
 }
 
 public class CartDto
 {
-    [JsonPropertyName("cartId")]
     public int CartId { get; set; }
-    
-    [JsonPropertyName("customerId")]
     public int CustomerId { get; set; }
-    
-    [JsonPropertyName("totalQuantity")]
     public int TotalQuantity { get; set; }
-    
-    [JsonPropertyName("amountDue")]
     public decimal AmountDue { get; set; }
-    
-    [JsonPropertyName("createdAt")]
     public DateTime CreatedAt { get; set; }
-    
-    [JsonPropertyName("updatedAt")]
     public DateTime UpdatedAt { get; set; }
-    
-    [JsonPropertyName("cartDetails")]
     public List<CartDetailDto>? CartDetails { get; set; }
 }
 
 public class CartDetailDto
 {
-    [JsonPropertyName("cartDetailId")]
     public int CartDetailId { get; set; }
-    
-    [JsonPropertyName("cartId")]
     public int CartId { get; set; }
-    
-    [JsonPropertyName("productId")]
     public int ProductId { get; set; }
-    
-    [JsonPropertyName("productName")]
     public string ProductName { get; set; } = string.Empty;
-    
-    [JsonPropertyName("variantId")]
-    public int? VariantId { get; set; }
-    
-    [JsonPropertyName("variantAttributes")]
+    public string ProductBrand { get; set; } = string.Empty;
+    public string? ProductImageUrl { get; set; }
+    public string? VariantId { get; set; }
     public string? VariantAttributes { get; set; }
-    
-    [JsonPropertyName("quantity")]
     public int Quantity { get; set; }
-    
-    [JsonPropertyName("price")]
     public decimal Price { get; set; }
-    
-    [JsonPropertyName("productImage")]
-    public string? ProductImage { get; set; }
-    
-    [JsonPropertyName("productDescription")]
-    public string? ProductDescription { get; set; }
 }
 
 public class CartSummaryDto
 {
-    [JsonPropertyName("totalItems")]
     public int TotalItems { get; set; }
-    
-    [JsonPropertyName("totalAmount")]
     public decimal TotalAmount { get; set; }
-    
-    [JsonPropertyName("cartItemCount")]
     public int CartItemCount { get; set; }
 } 

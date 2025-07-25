@@ -16,7 +16,6 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
-builder.Services.AddControllers();
 
 // Register HTTP client services
 var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"];
@@ -28,18 +27,6 @@ builder.Services.AddHttpClient("MyAPI", client =>
 {
     client.BaseAddress = new Uri(apiBaseUrl);
     Console.WriteLine($"Configured BaseAddress for MyAPI: {apiBaseUrl}"); // Debug log
-});
-
-// Add BackendAPI HttpClient
-var backendApiUrl = builder.Configuration["BackendAPI:BaseUrl"];
-if (string.IsNullOrEmpty(backendApiUrl))
-{
-    throw new ArgumentNullException("BackendAPI:BaseUrl is not configured in appsettings.json");
-}
-builder.Services.AddHttpClient("BackendAPI", client =>
-{
-    client.BaseAddress = new Uri(backendApiUrl);
-    Console.WriteLine($"Configured BaseAddress for BackendAPI: {backendApiUrl}"); // Debug log
 });
 
 //Tri
@@ -91,13 +78,12 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Error");
     app.UseHsts();
 }
-app.UseCors("AllowAll");
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthorization();
 app.MapRazorPages();
-app.MapControllers();
 app.MapBlazorHub();
 
 app.Run();
