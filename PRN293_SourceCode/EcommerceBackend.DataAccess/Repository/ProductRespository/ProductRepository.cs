@@ -52,7 +52,7 @@ namespace EcommerceBackend.DataAccess.Repository
       decimal? minPrice = null,
       decimal? maxPrice = null,
       int page = 1,
-      int pageSize = 100)
+      int pageSize = 10)
         {
             var query = _context.Products
                 .Include(p => p.ProductCategory)

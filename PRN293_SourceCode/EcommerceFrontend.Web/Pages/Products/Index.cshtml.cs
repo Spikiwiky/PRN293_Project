@@ -52,8 +52,8 @@ public class IndexModel : PageModel
                 Page = page,
                 PageSize = PageSize
             };
-             // search b�ng  parameter
-           
+            // search b�ng  parameter
+
             Products = await _productService.SearchProductsAsync(SearchParams);
 
             CurrentPage = page;
@@ -94,7 +94,7 @@ public class IndexModel : PageModel
     {
         try
         {
-           
+
             return RedirectToPage();
         }
         catch (Exception ex)
@@ -104,4 +104,4 @@ public class IndexModel : PageModel
             return Page();
         }
     }
-} 
+}
