@@ -43,7 +43,7 @@ namespace EcommerceBackend.DataAccess.Repository.SaleRepository.CategoryRepo
             var category = await _context.ProductCategories.FindAsync(id);
             if (category != null)
             {
-                _context.ProductCategories.Remove(category);
+                category.IsDelete = true;
                 await _context.SaveChangesAsync();
             }
         }

@@ -14,8 +14,10 @@ namespace EcommerceBackend.DataAccess.Repository.SaleRepository.ProductRepo
         Task UpdateProductAsync(Product product);
         Task DeleteProductAsync(int id);
         Task SaveChangesAsync();
-        void UpdateProductImages(Product product, List<ProductImage> images);
-        void UpdateProductVariants(Product product, List<ProductVariant> variants);
+/*        void UpdateProductImages(Product product, List<ProductImage> images);
+        void UpdateProductVariants(Product product, List<ProductVariant> variants);*/
         Task<ProductVariant> GetProductVariantAsync(int productId, string variantId);
+        void UpdateProductImages(Product product, List<ProductImage> updatedImages);
+        void UpdateProductVariants(Product product, List<ProductVariant> updatedVariants);
     }
 }

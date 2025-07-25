@@ -42,9 +42,9 @@ namespace EcommerceBackend.DataAccess.Repository.SaleRepository.ProductRepo
 
         public async Task UpdateProductAsync(Product product)
         {
-            _context.Products.Update(product);
             await _context.SaveChangesAsync();
         }
+
 
         public async Task DeleteProductAsync(int id)
         {
@@ -60,26 +60,64 @@ namespace EcommerceBackend.DataAccess.Repository.SaleRepository.ProductRepo
         {
             return _context.SaveChangesAsync();
         }
-        public void UpdateProductImages(Product product, List<ProductImage> images)
+        public void UpdateProductImages(Product product, List<ProductImage> updatedImages)
         {
-            _context.ProductImages.RemoveRange(product.ProductImages);
-            if (images != null)
+            _context.Entry(product).Collection(p => p.ProductImages).Load();
+
+            var removedImages = product.ProductImages
+                .Where(pi => !updatedImages.Any(ui => ui.ProductImageId == pi.ProductImageId))
+                .ToList();
+            _context.ProductImages.RemoveRange(removedImages);
+
+            foreach (var updatedImage in updatedImages)
             {
-                product.ProductImages = images;
-                _context.ProductImages.AddRange(images);
+                if (updatedImage.ProductImageId > 0)
+                {
+                    var existingImage = _context.ProductImages
+                        .FirstOrDefault(i => i.ProductImageId == updatedImage.ProductImageId);
+
+                    if (existingImage != null)
+                    {
+                        existingImage.ImageUrl = updatedImage.ImageUrl; 
+                    }
+                }
+                else
+                {
+                    updatedImage.ProductId = product.ProductId;
+                    _context.ProductImages.Add(updatedImage);
+                }
             }
         }
 
-        public void UpdateProductVariants(Product product, List<ProductVariant> variants)
+        public void UpdateProductVariants(Product product, List<ProductVariant> updatedVariants)
         {
-            _context.ProductVariants.RemoveRange(product.Variants);
-            if (variants != null)
+            _context.Entry(product).Collection(p => p.Variants).Load();
+
+            var removedVariants = product.Variants
+                .Where(v => !updatedVariants.Any(uv => uv.VariantId == v.VariantId))
+                .ToList();
+            _context.ProductVariants.RemoveRange(removedVariants);
+
+            foreach (var updatedVariant in updatedVariants)
             {
-                product.Variants = variants;
-                _context.ProductVariants.AddRange(variants);
+                var existingVariant = product.Variants
+                    .FirstOrDefault(v => v.VariantId == updatedVariant.VariantId);
+
+                if (existingVariant != null)
+                {
+                    existingVariant.Attributes = updatedVariant.Attributes;
+                    existingVariant.Variants = updatedVariant.Variants;
+                    existingVariant.UpdatedAt = DateTime.UtcNow;
+                }
+                else
+                {
+                    updatedVariant.ProductId = product.ProductId;
+                    updatedVariant.CreatedAt = DateTime.UtcNow;
+                    updatedVariant.UpdatedAt = DateTime.UtcNow;
+                    _context.ProductVariants.Add(updatedVariant);
+                }
             }
         }
-
         public async Task<ProductVariant> GetProductVariantAsync(int productId, string variantId)
         {
             return await _context.ProductVariants
