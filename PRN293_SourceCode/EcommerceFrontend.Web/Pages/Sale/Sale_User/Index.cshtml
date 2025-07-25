@@ -1,4 +1,43 @@
-﻿@page
+﻿
+@page
 @model EcommerceFrontend.Web.Pages.Sale.Sale_User.IndexModel
 @{
+    ViewData["Title"] = "Quản lý User";
 }
+<h2>Quản lý User</h2>
+
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <div class="alert alert-danger">@Model.ErrorMessage</div>
+}
+
+<a href="/Sale/Sale_User/Create" class="btn btn-primary mb-3">Tạo user mới</a>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>User ID</th>
+            <th>Email</th>
+            <th>UserName</th>
+            <th>Phone</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model.Users)
+        {
+            <tr>
+                <td>@user.UserId</td>
+                <td>@user.Email</td>
+                <td>@user.UserName</td>
+                <td>@user.Phone</td>
+                <td>
+                    <a asp-page="/Sale/Sale_User/Edit" asp-route-id="@user.UserId" class="btn btn-warning btn-sm">Sửa</a>
+                    <form method="post" asp-page-handler="Delete" asp-route-id="@user.UserId" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xoá user này?');">
+                        <button type="submit" class="btn btn-danger btn-sm">Xoá</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
