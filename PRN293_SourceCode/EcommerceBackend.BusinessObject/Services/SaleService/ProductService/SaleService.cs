@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EcommerceBackend.BusinessObject.Services.SaleService
+namespace EcommerceBackend.BusinessObject.Services.SaleService.ProductService
 {
     public class SaleService : ISaleService
     {

@@ -1,7 +1,7 @@
 ﻿using EcommerceBackend.API.Dtos;
 using EcommerceBackend.BusinessObject.dtos.SaleDto;
 using EcommerceBackend.BusinessObject.Services;
-using EcommerceBackend.BusinessObject.Services.SaleService;
+using EcommerceBackend.BusinessObject.Services.SaleService.ProductService;
 using EcommerceBackend.DataAccess.Models;
 using EcommerceBackend.DataAccess.Repository;
 using EcommerceBackend.DataAccess.Repository.SaleRepository.SaleCategory;

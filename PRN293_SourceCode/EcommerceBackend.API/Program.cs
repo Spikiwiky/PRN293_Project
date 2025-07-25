@@ -21,11 +21,11 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 
 using EcommerceBackend.DataAccess.Repository;
 using EcommerceBackend.DataAccess.Models;
-
-using EcommerceBackend.BusinessObject.Services.SaleService;
 using EcommerceBackend.DataAccess.Abstract;
 using EcommerceBackend.DataAccess.Repository;
 using EcommerceBackend.DataAccess.Repository.SaleRepository.SaleCategory;
+using EcommerceBackend.BusinessObject.Services.SaleService.CategoryService;
+using EcommerceBackend.BusinessObject.Services.SaleService.ProductService;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -54,7 +54,7 @@ builder.Services.AddScoped<IProductService, ProductService>();
 //builder.Services.AddScoped<ISaleProductService, SaleProductService>();
 builder.Services.AddScoped<ISaleService, SaleService>(); 
 builder.Services.AddScoped<EcommerceBackend.DataAccess.Repository.SaleRepository.SaleProduct.IProductRepository, EcommerceBackend.DataAccess.Repository.SaleRepository.SaleProduct.ProductRepository>();
-builder.Services.AddScoped<EcommerceBackend.BusinessObject.Services.SaleService.ICategoryService, EcommerceBackend.BusinessObject.Services.SaleService.CategoryService>();
+builder.Services.AddScoped<CategoryService.ICategoryService, CategoryService>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 
 // Config Authentication Jwt
