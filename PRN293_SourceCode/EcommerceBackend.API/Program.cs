@@ -1,32 +1,22 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using Serilog;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Authorization;
-using PdfSharp.Fonts;
+﻿using Microsoft.EntityFrameworkCore;
 using EcommerceBackend.API.Configurations;
 using EcommerceBackend.API.Hubs;
 using EcommerceBackend.BusinessObject.Services;
-
 using EcommerceBackend.DataAccess.Abstract.BlogAbstract;
 using EcommerceBackend.DataAccess.Repository.BlogRepository;
-
-
 using EcommerceBackend.BusinessObject.Services.UserService;
 using EcommerceBackend.DataAccess.Repository.UserRepository;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.Cookies;
-
-using EcommerceBackend.DataAccess.Repository;
 using EcommerceBackend.DataAccess.Models;
-using EcommerceBackend.DataAccess.Abstract;
-using EcommerceBackend.DataAccess.Repository;
 using EcommerceBackend.DataAccess.Repository.SaleRepository.SaleCategory;
 using EcommerceBackend.BusinessObject.Services.SaleService.CategoryService;
 using EcommerceBackend.BusinessObject.Services.SaleService.ProductService;
-
+using EcommerceBackend.DataAccess.Repository.SaleRepository.OrderRepo;
+using EcommerceBackend.BusinessObject.Services.SaleService.OrderService;
+using EcommerceBackend.BusinessObject.Services.SaleService.UserService;
+using EcommerceBackend.DataAccess.Repository.SaleRepository.UserRepo;
+using EcommerceBackend.BusinessObject.Services.SaleService.CategoryService.CategoryService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -52,11 +42,14 @@ builder.Services.AddScoped<IProductService, ProductService>();
 
 
 //builder.Services.AddScoped<ISaleProductService, SaleProductService>();
-builder.Services.AddScoped<ISaleService, SaleService>(); 
-builder.Services.AddScoped<EcommerceBackend.DataAccess.Repository.SaleRepository.SaleProduct.IProductRepository, EcommerceBackend.DataAccess.Repository.SaleRepository.SaleProduct.ProductRepository>();
-builder.Services.AddScoped<CategoryService.ICategoryService, CategoryService>();
+builder.Services.AddScoped<ISaleService, SaleService>();
+builder.Services.AddScoped<EcommerceBackend.DataAccess.Repository.SaleRepository.ProductRepo.IProductRepository, EcommerceBackend.DataAccess.Repository.SaleRepository.ProductRepo.ProductRepository>();
+builder.Services.AddScoped<ISaleCategoryService, SaleCategoryService>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
-
+builder.Services.AddScoped<ISaleOrderService, SaleOrderService>();
+builder.Services.AddScoped<ISaleOrderRepository, SaleOrderRepository>();
+builder.Services.AddScoped<ISaleUserService, SaleUserService>();
+builder.Services.AddScoped<ISaleUserRepository, SaleUserRepository>();
 // Config Authentication Jwt
 JwtConfig.ConfigureJwtAuthentication(builder.Services, builder.Configuration);
 JwtConfig.ConfigureSwagger(builder.Services);
@@ -89,14 +82,23 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 
-builder.Services.AddCorsPolicy(builder.Configuration);
+//builder.Services.AddCorsPolicy(builder.Configuration);
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 
 builder.Services.AddSignalR();
 
 var app = builder.Build();
 
-app.MapHub<SignalrHub>("/SignalrHub");  
- 
+app.MapHub<SignalrHub>("/SignalrHub");
+
 app.UseSwagger();
 app.UseSwaggerUI();
 app.UseSession();

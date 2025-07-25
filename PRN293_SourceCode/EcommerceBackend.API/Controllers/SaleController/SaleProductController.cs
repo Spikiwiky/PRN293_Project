@@ -1,6 +1,7 @@
 ﻿using EcommerceBackend.API.Dtos;
 using EcommerceBackend.BusinessObject.dtos.SaleDto;
 using EcommerceBackend.BusinessObject.Services;
+using EcommerceBackend.BusinessObject.Services.SaleService.CategoryService.CategoryService;
 using EcommerceBackend.BusinessObject.Services.SaleService.ProductService;
 using EcommerceBackend.DataAccess.Models;
 using EcommerceBackend.DataAccess.Repository;
@@ -15,16 +16,16 @@ namespace EcommerceBackend.API.Controllers.SaleController
     [ApiController]
     public class SaleProductController : ControllerBase
     {
-        private readonly DataAccess.Repository.SaleRepository.SaleProduct.IProductRepository _productRepository;
+        private readonly IProductRepository _productRepository;
         private readonly ISaleService _saleService;
         private readonly ICategoryRepository _categoryRepository;
-        private readonly ICategoryService _categoryService;
+        private readonly ISaleCategoryService _categoryService;
 
         public SaleProductController(
-            DataAccess.Repository.SaleRepository.SaleProduct.IProductRepository productRepository,
+            IProductRepository productRepository,
             ISaleService saleService,
             ICategoryRepository categoryRepository,
-            ICategoryService categoryService)
+            ISaleCategoryService categoryService)
         {
             _productRepository = productRepository;
             _saleService = saleService;
