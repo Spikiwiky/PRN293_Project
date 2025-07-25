@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EcommerceBackend.DataAccess.Repository.SaleRepository
+namespace EcommerceBackend.DataAccess.Repository.SaleRepository.SaleProduct
 {
     public class ProductRepository : IProductRepository
     {
@@ -51,7 +51,7 @@ namespace EcommerceBackend.DataAccess.Repository.SaleRepository
             if (product != null)
             {
                 product.IsDelete = true;
-                product.UpdatedAt = DateTime.UtcNow; 
+                product.UpdatedAt = DateTime.UtcNow;
                 await _context.SaveChangesAsync();
             }
         }
