@@ -1,0 +1,51 @@
+﻿@page
+@model EcommerceFrontend.Web.Pages.Sale.Sale_Order.IndexModel
+@{
+    ViewData["Title"] = "Quản lý đơn hàng";
+}
+
+<h2>Quản lý đơn hàng</h2>
+
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <div class="alert alert-danger">@Model.ErrorMessage</div>
+}
+
+<a href="/Sale/Sale_Order/Create" class="btn btn-primary mb-3">Tạo đơn hàng mới</a>
+
+<table class="table mt-4">
+    <thead>
+        <tr>
+            <th>Order ID</th>
+            <th>Customer ID</th>
+            <th>Total Quantity</th>
+            <th>Amount Due</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var order in Model.Orders)
+        {
+            <tr>
+                <td>@order.OrderId</td>
+                <td>@order.CustomerId</td>
+                <td>@order.TotalQuantity</td>
+                <td>@order.AmountDue</td>
+                <td>@order.OrderStatusId</td>
+                <td>
+                    <a asp-page-handler="Details" asp-route-id="@order.OrderId" class="btn btn-info btn-sm">Chi tiết</a>
+                    <a asp-page="/Sale/Sale_Order/Edit" asp-route-id="@order.OrderId" class="btn btn-warning btn-sm">Sửa</a>
+                    <form method="post" asp-page-handler="Delete" asp-route-id="@order.OrderId" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xóa đơn hàng này?');">
+                        <button type="submit" class="btn btn-danger btn-sm">Xóa</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+}
