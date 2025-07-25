@@ -1,4 +1,4 @@
-﻿namespace EcommerceBackend.API.Dtos
+﻿namespace EcommerceBackend.API.Dtos.Sale
 {
     public class SaleProductDto
     {

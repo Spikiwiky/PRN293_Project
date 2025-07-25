@@ -1,12 +1,12 @@
 ﻿using EcommerceBackend.DataAccess.Models;
-using EcommerceBackend.DataAccess.Repository.SaleRepository;
+using EcommerceBackend.DataAccess.Repository.SaleRepository.CategoryRepo;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EcommerceBackend.BusinessObject.Services.SaleService
+namespace EcommerceBackend.BusinessObject.Services.SaleService.CategoryService
 {
     public class CategoryService : ICategoryService
     {

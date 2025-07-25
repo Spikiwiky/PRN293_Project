@@ -1,28 +1,27 @@
 ﻿using EcommerceBackend.API.Dtos;
 using EcommerceBackend.BusinessObject.dtos.SaleDto;
-using EcommerceBackend.BusinessObject.Services;
-using EcommerceBackend.BusinessObject.Services.SaleService;
 using EcommerceBackend.DataAccess.Models;
-using EcommerceBackend.DataAccess.Repository;
-using EcommerceBackend.DataAccess.Repository.SaleRepository;
-
+using EcommerceBackend.DataAccess.Repository.SaleRepository.ProductRepo;
+using EcommerceBackend.DataAccess.Repository.SaleRepository.CategoryRepo;
 using Microsoft.AspNetCore.Mvc;
 using ProductImageDto = EcommerceBackend.API.Dtos.ProductImageDto;
 using ProductVariantDto = EcommerceBackend.API.Dtos.ProductVariantDto;
+using EcommerceBackend.BusinessObject.Services.SaleService.CategoryService;
+using EcommerceBackend.BusinessObject.Services.SaleService.ProductService;
 
 namespace EcommerceBackend.API.Controllers.SaleController
 {
-    [Route("api/sale")]
+    [Route("api/[controller]")]
     [ApiController]
     public class SaleProductController : ControllerBase
     {
-        private readonly DataAccess.Repository.SaleRepository.IProductRepository _productRepository;
+        private readonly IProductRepository _productRepository;
         private readonly ISaleService _saleService;
         private readonly ICategoryRepository _categoryRepository;
         private readonly ICategoryService _categoryService;
 
         public SaleProductController(
-            DataAccess.Repository.SaleRepository.IProductRepository productRepository,
+            IProductRepository productRepository,
             ISaleService saleService,
             ICategoryRepository categoryRepository,
             ICategoryService categoryService)

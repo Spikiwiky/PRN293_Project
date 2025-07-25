@@ -10,24 +10,26 @@ using EcommerceBackend.API.Configurations;
 using EcommerceBackend.API.Hubs;
 using EcommerceBackend.BusinessObject.Services;
 
-
-using EcommerceBackend.DataAccess.Repository.SaleRepository;
-
 using EcommerceBackend.DataAccess.Abstract.BlogAbstract;
 using EcommerceBackend.DataAccess.Repository.BlogRepository;
-
+using EcommerceBackend.DataAccess.Repository.SaleRepository.ProductRepo;
 
 using EcommerceBackend.BusinessObject.Services.UserService;
 using EcommerceBackend.DataAccess.Repository.UserRepository;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.Cookies;
-
 using EcommerceBackend.DataAccess.Repository;
 using EcommerceBackend.DataAccess.Models;
-
-using EcommerceBackend.BusinessObject.Services.SaleService;
 using EcommerceBackend.DataAccess.Abstract;
+using EcommerceBackend.BusinessObject.Services.OrderService;
+using EcommerceBackend.DataAccess.Repository.SaleRepository.CategoryRepo;
+using EcommerceBackend.BusinessObject.Services.SaleService.CategoryService;
+using EcommerceBackend.BusinessObject.Services.SaleService.ProductService;
+using EcommerceBackend.DataAccess.Repository.SaleRepository.OrderRepo;
+using EcommerceBackend.BusinessObject.Services.SaleService.OrderService;
 using EcommerceBackend.DataAccess.Repository;
+using EcommerceBackend.BusinessObject.Services.SaleService.UserService;
+using EcommerceBackend.DataAccess.Repository.SaleRepository.UserRepo;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -55,10 +57,13 @@ builder.Services.AddScoped<IProductService, ProductService>();
 
 //builder.Services.AddScoped<ISaleProductService, SaleProductService>();
 builder.Services.AddScoped<ISaleService, SaleService>(); 
-builder.Services.AddScoped<EcommerceBackend.DataAccess.Repository.SaleRepository.IProductRepository, EcommerceBackend.DataAccess.Repository.SaleRepository.ProductRepository>();
-builder.Services.AddScoped<EcommerceBackend.BusinessObject.Services.SaleService.ICategoryService, EcommerceBackend.BusinessObject.Services.SaleService.CategoryService>();
-builder.Services.AddScoped<EcommerceBackend.DataAccess.Repository.SaleRepository.ICategoryRepository, EcommerceBackend.DataAccess.Repository.SaleRepository.CategoryRepository>();
-
+builder.Services.AddScoped<EcommerceBackend.DataAccess.Repository.SaleRepository.ProductRepo.IProductRepository, EcommerceBackend.DataAccess.Repository.SaleRepository.ProductRepo.ProductRepository>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<ISaleOrderService, SaleOrderService>();
+builder.Services.AddScoped<ISaleOrderRepository, SaleOrderRepository>();  
+builder.Services.AddScoped<ISaleUserService, SaleUserService>();  
+builder.Services.AddScoped<ISaleUserRepository, SaleUserRepository>();  
 // Config Authentication Jwt
 JwtConfig.ConfigureJwtAuthentication(builder.Services, builder.Configuration);
 JwtConfig.ConfigureSwagger(builder.Services);
