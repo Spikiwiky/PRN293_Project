@@ -1,0 +1,126 @@
+@{
+    var userName = Context.Request.Cookies["UserName"];
+    var isAuthenticated = !string.IsNullOrEmpty(Context.Request.Cookies["Token"]);
+}
+
+@if (isAuthenticated && !string.IsNullOrEmpty(userName))
+{
+    <div class="user-greeting">
+        <div class="greeting-text">
+            <i class="fa fa-user-circle me-2"></i>
+            Hello, <span class="user-name">@userName</span>!
+        </div>
+        <div class="user-actions">
+            <a href="/Products" class="btn btn-sm btn-outline-success me-2">
+                <i class="fa fa-shopping-bag"></i> Sản phẩm
+            </a>
+            <a href="/Cart" class="btn btn-sm btn-outline-primary me-2">
+                <i class="fa fa-shopping-cart"></i> Giỏ hàng
+            </a>
+            <a href="/OrderPage" class="btn btn-sm btn-outline-info me-2">
+                <i class="fa fa-list"></i> Đơn hàng
+            </a>
+            <button onclick="logout()" class="btn btn-sm btn-outline-danger">
+                <i class="fa fa-sign-out"></i> Đăng xuất
+            </button>
+        </div>
+    </div>
+}
+else
+{
+    <div class="user-greeting">
+        <div class="greeting-text">
+            <i class="fa fa-user-circle me-2"></i>
+            Chào mừng bạn đến với cửa hàng!
+        </div>
+        <div class="user-actions">
+            <a href="/LoginPage/Login" class="btn btn-sm btn-primary me-2">
+                <i class="fa fa-sign-in"></i> Đăng nhập
+            </a>
+            <a href="/LoginPage/Register" class="btn btn-sm btn-outline-primary">
+                <i class="fa fa-user-plus"></i> Đăng ký
+            </a>
+        </div>
+    </div>
+}
+
+<style>
+    .user-greeting {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 15px 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        animation: slideInDown 0.5s ease-out;
+    }
+
+    .greeting-text {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+
+    .user-name {
+        color: #ffd700;
+        font-weight: bold;
+        text-transform: capitalize;
+    }
+
+    .user-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .user-actions .btn {
+        border-radius: 20px;
+        font-size: 0.85rem;
+        padding: 6px 12px;
+        transition: all 0.3s ease;
+    }
+
+    .user-actions .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+
+    @@keyframes slideInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .user-actions {
+            flex-direction: column;
+        }
+        
+        .user-actions .btn {
+            width: 100%;
+            margin-bottom: 5px;
+        }
+    }
+</style>
+
+<script>
+    function logout() {
+        // Xóa cookies
+        document.cookie = "Token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        document.cookie = "UserName=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        document.cookie = "RoleName=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        
+        // Xóa localStorage
+        localStorage.removeItem('token');
+        localStorage.removeItem('userName');
+        localStorage.removeItem('roleName');
+        
+        // Chuyển hướng về trang Homepage
+        window.location.href = '/CommonPage/Homepage';
+    }
+</script> 

@@ -37,6 +37,31 @@ namespace EcommerceFrontend.Web.Pages.LoginPage
         {
             if (!string.IsNullOrEmpty(token))
             {
+                // Set cookies for user authentication
+                Response.Cookies.Append("Token", token, new CookieOptions
+                {
+                    HttpOnly = false,
+                    Secure = false, // Set to true in production with HTTPS
+                    SameSite = SameSiteMode.Lax,
+                    Expires = DateTime.Now.AddDays(7)
+                });
+
+                Response.Cookies.Append("UserName", userName, new CookieOptions
+                {
+                    HttpOnly = false,
+                    Secure = false, // Set to true in production with HTTPS
+                    SameSite = SameSiteMode.Lax,
+                    Expires = DateTime.Now.AddDays(7)
+                });
+
+                Response.Cookies.Append("RoleName", roleName, new CookieOptions
+                {
+                    HttpOnly = false,
+                    Secure = false, // Set to true in production with HTTPS
+                    SameSite = SameSiteMode.Lax,
+                    Expires = DateTime.Now.AddDays(7)
+                });
+
                 ViewData["Token"] = token;
                 ViewData["UserName"] = userName;
                 ViewData["RoleName"] = roleName;
@@ -70,6 +95,31 @@ namespace EcommerceFrontend.Web.Pages.LoginPage
                     ErrorMessage = response?.message ?? "Đăng nhập thất bại. Vui lòng thử lại.";
                     return Page();
                 }
+
+                // Set cookies for user authentication
+                Response.Cookies.Append("Token", response.token, new CookieOptions
+                {
+                    HttpOnly = false,
+                    Secure = false, // Set to true in production with HTTPS
+                    SameSite = SameSiteMode.Lax,
+                    Expires = DateTime.Now.AddDays(7)
+                });
+
+                Response.Cookies.Append("UserName", response.userName, new CookieOptions
+                {
+                    HttpOnly = false,
+                    Secure = false, // Set to true in production with HTTPS
+                    SameSite = SameSiteMode.Lax,
+                    Expires = DateTime.Now.AddDays(7)
+                });
+
+                Response.Cookies.Append("RoleName", response.roleName, new CookieOptions
+                {
+                    HttpOnly = false,
+                    Secure = false, // Set to true in production with HTTPS
+                    SameSite = SameSiteMode.Lax,
+                    Expires = DateTime.Now.AddDays(7)
+                });
 
                 // Provide token and info for frontend JavaScript to handle
                 ViewData["Token"] = response.token;

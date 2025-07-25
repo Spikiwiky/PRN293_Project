@@ -3,6 +3,7 @@ using BusinessCartDto = EcommerceBackend.BusinessObject.dtos.CartDto;
 using ApiCartDto = EcommerceBackend.API.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace EcommerceBackend.API.Controllers.CartController
 {
@@ -73,6 +74,38 @@ namespace EcommerceBackend.API.Controllers.CartController
                 };
 
                 var result = await _cartService.AddToCartAsync(userId, businessRequest);
+
+                return Ok(MapToApiResponseDto(result));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ApiCartDto.CartResponseDto
+                {
+                    Success = false,
+                    Message = $"Error adding item to cart: {ex.Message}"
+                });
+            }
+        }
+
+        [HttpPost("add-guest")]
+        [AllowAnonymous]
+        public async Task<ActionResult<ApiCartDto.CartResponseDto>> AddToCartGuest([FromBody] ApiCartDto.AddToCartDto request)
+        {
+            try
+            {
+                // For guest users, we'll use a temporary user ID or session-based approach
+                // For now, using a hardcoded guest user ID
+                var guestUserId = 999; // Temporary guest user ID
+                
+                var businessRequest = new BusinessCartDto.AddToCartRequestDto
+                {
+                    ProductId = request.ProductId,
+                    VariantId = request.VariantId,
+                    VariantAttributes = request.VariantAttributes,
+                    Quantity = request.Quantity
+                };
+
+                var result = await _cartService.AddToCartAsync(guestUserId, businessRequest);
 
                 return Ok(MapToApiResponseDto(result));
             }
@@ -265,9 +298,8 @@ namespace EcommerceBackend.API.Controllers.CartController
         // Helper methods
         private int GetCurrentUserId()
         {
-            // This should be implemented based on your JWT authentication system
-            // For now, returning a placeholder
-            var userIdClaim = User.FindFirst("UserId")?.Value;
+            // Get UserId from JWT token claims
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (int.TryParse(userIdClaim, out int userId))
                 return userId;
             

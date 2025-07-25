@@ -91,16 +91,7 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 
-//builder.Services.AddCorsPolicy(builder.Configuration);
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAll", policy =>
-    {
-        policy.AllowAnyOrigin()
-              .AllowAnyHeader()
-              .AllowAnyMethod();
-    });
-});
+builder.Services.AddCorsPolicy(builder.Configuration);
 
 builder.Services.AddSignalR();
 

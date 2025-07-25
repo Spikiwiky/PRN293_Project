@@ -12,7 +12,13 @@
                 options.AddPolicy("AllowFrontendApp",
                     policy =>
                     {
-                        policy.WithOrigins(frontendAppUrl ?? "https://localhost:7107")
+                        policy.WithOrigins(
+                                frontendAppUrl ?? "https://localhost:7107",
+                                "https://localhost:7107",
+                                "http://localhost:5107",
+                                "https://localhost:44321",
+                                "http://localhost:44321"
+                              )
                               .AllowAnyHeader()
                               .AllowAnyMethod()
                               .AllowCredentials();
