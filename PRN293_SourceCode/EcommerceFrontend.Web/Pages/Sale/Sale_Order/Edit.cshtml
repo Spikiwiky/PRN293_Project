@@ -1,4 +1,54 @@
-﻿@page
+﻿@page "{id:int}"
 @model EcommerceFrontend.Web.Pages.Sale.Sale_Order.EditModel
 @{
+    ViewData["Title"] = "Chỉnh sửa đơn hàng";
 }
+
+<h2>Chỉnh sửa đơn hàng</h2>
+
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <div class="alert alert-danger">@Model.ErrorMessage</div>
+}
+
+<form method="post">
+    <div class="form-group">
+        <label>Customer ID</label>
+        <input asp-for="OrderDto.CustomerId" class="form-control" readonly />
+    </div>
+
+    <div class="form-group">
+        <label>Payment Method ID</label>
+        <input asp-for="OrderDto.PaymentMethodId" class="form-control" />
+    </div>
+
+    <h4>Order Details</h4>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Product ID</th>
+                <th>Variant ID</th>
+                <th>Quantity</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (int i = 0; i < Model.OrderDto.OrderDetails.Count; i++)
+            {
+                <tr>
+                    <td>
+                        <input asp-for="OrderDto.OrderDetails[@i].ProductId" class="form-control" />
+                    </td>
+                    <td>
+                        <input asp-for="OrderDto.OrderDetails[@i].VariantId" class="form-control" />
+                    </td>
+                    <td>
+                        <input asp-for="OrderDto.OrderDetails[@i].Quantity" class="form-control" />
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <button type="submit" class="btn btn-success">Lưu thay đổi</button>
+    <a asp-page="/Sale/Sale_Order/Index" class="btn btn-secondary">Hủy</a>
+</form>
