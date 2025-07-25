@@ -23,6 +23,7 @@
   <ItemGroup>
     <ProjectReference Include="..\EcommerceBackend.BusinessObject\EcommerceBackend.BusinessObject.csproj" />
     <ProjectReference Include="..\EcommerceBackend.DataAccess\EcommerceBackend.DataAccess.csproj" />
+    <ProjectReference Include="..\EcommerceFrontend.Web\EcommerceFrontend.Web.csproj" />
   </ItemGroup>
 
 </Project>

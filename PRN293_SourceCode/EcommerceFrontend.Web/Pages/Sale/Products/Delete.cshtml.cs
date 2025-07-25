@@ -22,7 +22,7 @@ namespace EcommerceFrontend.Web.Pages.Sale.Products
         public async Task<IActionResult> OnGetAsync(int id)
         {
             var client = _httpClientFactory.CreateClient();
-            var response = await client.GetAsync($"{_apiSettings.BaseUrl}/products/{id}");
+            var response = await client.GetAsync($"{_apiSettings.BaseUrl}/api/SaleProduct/products/{id}");
             if (response.IsSuccessStatusCode)
             {
                 Product = await response.Content.ReadFromJsonAsync<ProductModel>();
@@ -34,7 +34,7 @@ namespace EcommerceFrontend.Web.Pages.Sale.Products
         public async Task<IActionResult> OnPostDeleteAsync(int id)
         {
             var client = _httpClientFactory.CreateClient();
-            var response = await client.DeleteAsync($"{_apiSettings.BaseUrl}/products/{id}");
+            var response = await client.DeleteAsync($"{_apiSettings.BaseUrl}/api/SaleProduct/products/{id}");
 
             if (response.IsSuccessStatusCode)
             {

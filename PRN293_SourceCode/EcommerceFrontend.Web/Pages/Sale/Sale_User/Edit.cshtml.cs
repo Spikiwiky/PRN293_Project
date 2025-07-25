@@ -21,7 +21,7 @@ namespace EcommerceFrontend.Web.Pages.Sale.Sale_User
 
         public async Task<IActionResult> OnGetAsync(int id)
         {
-            var response = await _httpClient.GetAsync($"api/saleuser/{id}");
+            var response = await _httpClient.GetAsync($"api/SaleUser/{id}");
             if (response.IsSuccessStatusCode)
             {
                 var json = await response.Content.ReadAsStringAsync();
@@ -66,7 +66,7 @@ namespace EcommerceFrontend.Web.Pages.Sale.Sale_User
             var json = JsonSerializer.Serialize(UserDto);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PutAsync($"api/saleuser/{id}", content);
+            var response = await _httpClient.PutAsync($"api/SaleUser/{id}", content);
             if (response.IsSuccessStatusCode)
             {
                 return RedirectToPage("/Sale/Sale_User/Index");

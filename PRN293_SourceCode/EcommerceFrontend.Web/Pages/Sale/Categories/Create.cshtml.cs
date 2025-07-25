@@ -35,7 +35,7 @@ namespace EcommerceFrontend.Web.Pages.Sale.Categories
 
             var client = _httpClientFactory.CreateClient();
             var content = new StringContent(JsonSerializer.Serialize(Category), Encoding.UTF8, "application/json");
-            var response = await client.PostAsync($"{_apiSettings.BaseUrl}/api/sale/categories", content);
+            var response = await client.PostAsync($"{_apiSettings.BaseUrl}/api/SaleProduct/categories", content);
 
             if (response.IsSuccessStatusCode)
             {

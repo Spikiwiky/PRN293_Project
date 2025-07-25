@@ -171,7 +171,7 @@ namespace EcommerceBackend.API.Controllers.SaleController
                         Quantity = (int)od.Quantity,
                         Price = (decimal)od.Price,
                         ProductName = od.ProductName,
-                        VariantAttributes = od.VariantAttributes  
+                        VariantAttributes = od.VariantAttributes
                     }).ToList()
                 }).ToList();
 
@@ -201,7 +201,7 @@ namespace EcommerceBackend.API.Controllers.SaleController
                 AmountDue = order.AmountDue,
                 PaymentMethodId = order.PaymentMethodId,
                 OrderNote = order.OrderNote,
-                OrderStatusId = order.OrderStatusId, 
+                OrderStatusId = order.OrderStatusId,
                 CreatedAt = order.CreatedAt,
                 UpdatedAt = order.UpdatedAt,
                 ShippingAddress = order.ShippingAddress,
@@ -331,7 +331,7 @@ namespace EcommerceBackend.API.Controllers.SaleController
                     AmountDue = existingOrder.AmountDue,
                     PaymentMethodId = existingOrder.PaymentMethodId,
                     OrderNote = existingOrder.OrderNote,
-                    OrderStatusId = existingOrder.OrderStatusId, 
+                    OrderStatusId = existingOrder.OrderStatusId,
                     ShippingAddress = existingOrder.ShippingAddress,
                     CreatedAt = existingOrder.CreatedAt,
                     UpdatedAt = existingOrder.UpdatedAt,
@@ -383,8 +383,8 @@ namespace EcommerceBackend.API.Controllers.SaleController
             try
             {
                 var details = await _saleService.GetOrderDetailsByOrderIdAsync(id);
-                 
-                var order = await _orderRepository.GetOrderByIdAsync(id); 
+
+                var order = await _orderRepository.GetOrderByIdAsync(id);
 
                 var response = details.Select(od => new OrderDetailResponseDto
                 {
@@ -394,7 +394,7 @@ namespace EcommerceBackend.API.Controllers.SaleController
                     Price = (decimal)od.Price,
                     ProductName = od.ProductName,
                     VariantAttributes = od.VariantAttributes,
-                    OrderStatusId = order.OrderStatusId  
+                    OrderStatusId = order.OrderStatusId
                 }).ToList();
 
                 return Ok(response);

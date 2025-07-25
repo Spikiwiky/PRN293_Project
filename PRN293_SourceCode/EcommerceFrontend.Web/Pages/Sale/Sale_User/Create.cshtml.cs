@@ -29,7 +29,7 @@ namespace EcommerceFrontend.Web.Pages.Sale.Sale_User
 
             var json = JsonSerializer.Serialize(UserDto);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
-            var response = await _httpClient.PostAsync("api/saleuser", content);
+            var response = await _httpClient.PostAsync("api/SaleUser", content);
 
             if (response.IsSuccessStatusCode)
             {

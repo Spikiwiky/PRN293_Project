@@ -22,7 +22,7 @@ namespace EcommerceFrontend.Web.Pages.Sale.Categories
         public async Task<IActionResult> OnGetAsync(int id)
         {
             var client = _httpClientFactory.CreateClient();
-            var response = await client.GetAsync($"{_apiSettings.BaseUrl}/categories/{id}");
+            var response = await client.GetAsync($"{_apiSettings.BaseUrl}/api/SaleProduct/categories/{id}");
             if (response.IsSuccessStatusCode)
             {
                 Category = await response.Content.ReadFromJsonAsync<CategoryModel>();
@@ -34,7 +34,7 @@ namespace EcommerceFrontend.Web.Pages.Sale.Categories
         public async Task<IActionResult> OnPostDeleteAsync(int id)
         {
             var client = _httpClientFactory.CreateClient();
-            var response = await client.DeleteAsync($"{_apiSettings.BaseUrl}/categories/{id}");
+            var response = await client.DeleteAsync($"{_apiSettings.BaseUrl}/api/SaleProduct/categories/{id}");
 
             if (response.IsSuccessStatusCode)
             {

@@ -19,7 +19,7 @@ namespace EcommerceFrontend.Web.Pages.Sale.Sale_User
 
         public async Task OnGetAsync()
         {
-            var response = await _httpClient.GetAsync("api/saleuser");
+            var response = await _httpClient.GetAsync("api/SaleUser");
             if (response.IsSuccessStatusCode)
             {
                 var json = await response.Content.ReadAsStringAsync();
@@ -32,7 +32,7 @@ namespace EcommerceFrontend.Web.Pages.Sale.Sale_User
         }
         public async Task<IActionResult> OnPostDeleteAsync(int id)
         {
-            var response = await _httpClient.DeleteAsync($"api/saleuser/{id}");
+            var response = await _httpClient.DeleteAsync($"api/SaleUser/{id}");
             if (response.IsSuccessStatusCode)
             {
                 return RedirectToPage();
