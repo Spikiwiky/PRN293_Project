@@ -22,16 +22,21 @@ namespace EcommerceBackend.API.Controllers.SaleController
             var users = _userService.GetAll().Select(u => new UserResponseDto
             {
                 UserId = u.UserId,
-                RoleId = (int)u.RoleId,
+                // If u.RoleId is null, it will default to 0. Adjust default as needed.
+                RoleId = u.RoleId ?? 0,
                 Email = u.Email,
                 Password = u.Password,
                 Phone = u.Phone,
                 UserName = u.UserName,
-                DateOfBirth = (DateTime)u.DateOfBirth,
+                // If u.DateOfBirth is null, it will default to DateTime.MinValue. Adjust default as needed.
+                DateOfBirth = u.DateOfBirth ?? DateTime.MinValue,
                 Address = u.Address,
-                CreateDate = (DateTime)u.CreateDate,
-                Status = (int)u.Status,
-                IsDelete = (bool)u.IsDelete
+                // If u.CreateDate is null, it will default to DateTime.MinValue. Adjust default as needed.
+                CreateDate = u.CreateDate ?? DateTime.MinValue,
+                // If u.Status is null, it will default to 0. Adjust default as needed.
+                Status = u.Status ?? 0,
+                // If u.IsDelete is null, it will default to false. Adjust default as needed.
+                IsDelete = u.IsDelete ?? false
             });
             return Ok(users);
         }

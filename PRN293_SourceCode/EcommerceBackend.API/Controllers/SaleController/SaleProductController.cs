@@ -4,7 +4,7 @@ using EcommerceBackend.BusinessObject.Services;
 using EcommerceBackend.BusinessObject.Services.SaleService.CategoryService.CategoryService;
 using EcommerceBackend.BusinessObject.Services.SaleService.ProductService;
 using EcommerceBackend.DataAccess.Models;
-using EcommerceBackend.DataAccess.Repository;
+using EcommerceBackend.DataAccess.Repository.SaleRepository.ProductRepo;
 using EcommerceBackend.DataAccess.Repository.SaleRepository.SaleCategory;
 using Microsoft.AspNetCore.Mvc;
 using ProductImageDto = EcommerceBackend.API.Dtos.ProductImageDto;

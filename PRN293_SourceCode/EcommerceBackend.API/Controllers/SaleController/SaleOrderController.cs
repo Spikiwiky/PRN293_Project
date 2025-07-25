@@ -8,24 +8,24 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace EcommerceBackend.API.Controllers.SaleController
+namespace EcommerceBackend.API.SaleController
 {
     [Route("api/[controller]")]
     [ApiController]
     public class SaleOrderController : ControllerBase
     {
-        private readonly ISaleOrderRepository _saleOrderRepository;
-        private readonly ISaleOrderService _saleOrderService;
-        private readonly IProductRepository _saleProductRepository;
+        private readonly ISaleOrderRepository _orderRepository;
+        private readonly ISaleOrderService _saleService;
+        private readonly IProductRepository _productRepository;
 
         public SaleOrderController(
             ISaleOrderRepository orderRepository,
             ISaleOrderService saleService,
             IProductRepository productRepository)
         {
-            _saleOrderRepository = orderRepository ?? throw new ArgumentNullException(nameof(orderRepository));
-            _saleOrderService = saleService ?? throw new ArgumentNullException(nameof(saleService));
-            _saleProductRepository = productRepository ?? throw new ArgumentNullException(nameof(productRepository));
+            _orderRepository = orderRepository ?? throw new ArgumentNullException(nameof(orderRepository));
+            _saleService = saleService ?? throw new ArgumentNullException(nameof(saleService));
+            _productRepository = productRepository ?? throw new ArgumentNullException(nameof(productRepository));
         }
 
         [HttpPost]
