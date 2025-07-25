@@ -68,6 +68,7 @@ builder.Services.AddScoped<IBlogService, BlogService>();
 
 // Register admin services
 builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<ICartService, CartService>();
 
 
 var app = builder.Build();

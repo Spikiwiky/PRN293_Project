@@ -314,9 +314,9 @@
                             <i class="zmdi zmdi-search"></i>
                         </div>
 
-                        <div class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 icon-header-noti js-show-cart" data-notify="2">
+                        <a href="/Cart" class="dis-block icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 icon-header-noti" data-notify="0">
                             <i class="zmdi zmdi-shopping-cart"></i>
-                        </div>
+                        </a>
 
                         <a href="#" class="dis-block icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 icon-header-noti" data-notify="0">
                             <i class="zmdi zmdi-favorite-outline"></i>
@@ -339,9 +339,9 @@
                     <i class="zmdi zmdi-search"></i>
                 </div>
 
-                <div class="icon-header-item cl2 hov-cl1 trans-04 p-r-11 p-l-10 icon-header-noti js-show-cart" data-notify="2">
+                <a href="/Cart" class="dis-block icon-header-item cl2 hov-cl1 trans-04 p-r-11 p-l-10 icon-header-noti" data-notify="0">
                     <i class="zmdi zmdi-shopping-cart"></i>
-                </div>
+                </a>
 
                 <a href="#" class="dis-block icon-header-item cl2 hov-cl1 trans-04 p-r-11 p-l-10 icon-header-noti" data-notify="0">
                     <i class="zmdi zmdi-favorite-outline"></i>
@@ -527,6 +527,7 @@
     <!-- Product Section -->
     <section class="bg0 p-t-23 p-b-140">
         <div class="container">
+            @Html.AntiForgeryToken()
             <div class="p-b-10">
                 <h3 class="ltext-103 cl5">
                     Sản phẩm
@@ -721,8 +722,8 @@
                                                                 }
 
                                                                 <div class="selected-price mt-4 p-3 bg-light rounded" id="selected-price-@product.ProductId" data-base-price="@product.BasePrice.ToString("N2")">
-                                                                    <h5 class="text-success mb-0">
-                                                                        <i class="fa fa-tag me-2"></i>Giá: $@product.BasePrice.ToString("N2")
+                                                                    <h5 class="text-warning mb-0">
+                                                                        <i class="fa fa-tag me-2"></i>Giá cơ bản: $@product.BasePrice.ToString("N2")
                                                                     </h5>
                                                                 </div>
 
@@ -756,12 +757,38 @@
                                             }
                                         </div>
                                         <div class="modal-footer bg-light">
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                                <i class="fa fa-times me-2"></i>Đóng
-                                            </button>
-                                            <a asp-page="./Details" asp-route-id="@product.ProductId" class="btn btn-primary">
-                                                <i class="fa fa-eye me-2"></i>Xem chi tiết
-                                            </a>
+                                            <div class="d-flex justify-content-between align-items-center w-100">
+                                                <div class="quantity-controls d-flex align-items-center">
+                                                    <label class="me-2 fw-bold">Số lượng:</label>
+                                                    <button type="button" class="btn btn-sm btn-outline-secondary quantity-btn" 
+                                                            onclick="decreaseModalQuantity(@product.ProductId)" 
+                                                            data-product-id="@product.ProductId">
+                                                        <i class="fa fa-minus"></i>
+                                                    </button>
+                                                    <input type="number" class="form-control quantity-input mx-2" 
+                                                           id="quantity-@product.ProductId" 
+                                                           value="1" min="1" max="99" 
+                                                           style="width: 60px; text-align: center;">
+                                                    <button type="button" class="btn btn-sm btn-outline-secondary quantity-btn" 
+                                                            onclick="increaseModalQuantity(@product.ProductId)" 
+                                                            data-product-id="@product.ProductId">
+                                                        <i class="fa fa-plus"></i>
+                                                    </button>
+                                                </div>
+                                                <div>
+                                                    <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">
+                                                        <i class="fa fa-times me-2"></i>Đóng
+                                                    </button>
+                                                    <button type="button" class="btn btn-success me-2" 
+                                                            onclick="addToCart(@product.ProductId)" 
+                                                            data-product-id="@product.ProductId">
+                                                        <i class="fa fa-shopping-cart me-2"></i>Thêm vào giỏ
+                                                    </button>
+                                                    <a asp-page="./Details" asp-route-id="@product.ProductId" class="btn btn-primary">
+                                                        <i class="fa fa-eye me-2"></i>Chi tiết
+                                                    </a>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -1383,6 +1410,120 @@
                             }
                         }
                     });
+                });
+
+                // Modal quantity controls
+                function increaseModalQuantity(productId) {
+                    const input = document.getElementById(`quantity-${productId}`);
+                    const currentValue = parseInt(input.value);
+                    if (currentValue < 99) {
+                        input.value = currentValue + 1;
+                    }
+                }
+
+                function decreaseModalQuantity(productId) {
+                    const input = document.getElementById(`quantity-${productId}`);
+                    const currentValue = parseInt(input.value);
+                    if (currentValue > 1) {
+                        input.value = currentValue - 1;
+                    }
+                }
+
+                // Add to cart functionality
+                async function addToCart(productId) {
+                    const quantityInput = document.getElementById(`quantity-${productId}`);
+                    const quantity = parseInt(quantityInput.value);
+                    
+                    if (quantity < 1) {
+                        swal("Lỗi!", "Số lượng phải lớn hơn 0", "error");
+                        return;
+                    }
+
+                    // Get selected variant attributes if any
+                    const modal = document.getElementById(`variantModal-${productId}`);
+                    const variantSelects = modal.querySelectorAll('.variant-select');
+                    let variantAttributes = null;
+                    
+                    // Check if all variant attributes are selected
+                    let allSelected = true;
+                    const selectedAttributes = {};
+                    
+                    variantSelects.forEach(select => {
+                        if (select.value && select.value !== '') {
+                            selectedAttributes[select.dataset.attribute] = select.value;
+                        } else {
+                            allSelected = false;
+                        }
+                    });
+
+                    // If variants exist but not all are selected, show warning
+                    if (variantSelects.length > 0 && !allSelected) {
+                        swal("Thông báo!", "Vui lòng chọn đầy đủ các thuộc tính sản phẩm trước khi thêm vào giỏ hàng", "warning");
+                        return;
+                    }
+
+                    // If all attributes are selected, create variant attributes string
+                    if (Object.keys(selectedAttributes).length > 0) {
+                        variantAttributes = JSON.stringify(selectedAttributes);
+                    }
+
+                    try {
+                        const response = await fetch('/Products?handler=AddToCart', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                            },
+                            body: JSON.stringify({
+                                productId: productId,
+                                variantId: null,
+                                variantAttributes: variantAttributes,
+                                quantity: quantity
+                            })
+                        });
+
+                        if (response.ok) {
+                            swal("Thành công!", "Sản phẩm đã được thêm vào giỏ hàng", "success");
+                            
+                            // Close modal
+                            const modal = bootstrap.Modal.getInstance(document.getElementById(`variantModal-${productId}`));
+                            if (modal) {
+                                modal.hide();
+                            }
+                            
+                            // Reset quantity
+                            quantityInput.value = 1;
+                            
+                            // Update cart count in header (if you have a cart counter)
+                            updateCartCount();
+                        } else {
+                            const error = await response.text();
+                            swal("Lỗi!", error || "Không thể thêm sản phẩm vào giỏ hàng", "error");
+                        }
+                    } catch (error) {
+                        swal("Lỗi!", "Có lỗi xảy ra khi thêm sản phẩm vào giỏ hàng", "error");
+                    }
+                }
+
+                // Update cart count in header
+                async function updateCartCount() {
+                    try {
+                        const response = await fetch('/Cart?handler=GetCartCount');
+                        if (response.ok) {
+                            const count = await response.text();
+                            const cartIcons = document.querySelectorAll('.icon-header-noti[data-notify]');
+                            cartIcons.forEach(icon => {
+                                icon.setAttribute('data-notify', count);
+                            });
+                        }
+                    } catch (error) {
+                        console.error('Error updating cart count:', error);
+                    }
+                }
+
+                // Initialize cart count on page load
+                document.addEventListener('DOMContentLoaded', function() {
+                    updateCartCount();
                 });
             });
         </script>

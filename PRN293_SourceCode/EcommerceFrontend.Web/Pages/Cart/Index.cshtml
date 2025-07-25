@@ -1,0 +1,878 @@
+@page
+@model EcommerceFrontend.Web.Pages.Cart.IndexModel
+@{
+    ViewData["Title"] = "Giỏ hàng";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Giỏ hàng</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/png" href="images/icons/favicon.png" />
+    <link rel="stylesheet" type="text/css" href="vendor/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="fonts/font-awesome-4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="fonts/iconic/css/material-design-iconic-font.min.css">
+    <link rel="stylesheet" type="text/css" href="fonts/linearicons-v1.0.0/icon-font.min.css">
+    <link rel="stylesheet" type="text/css" href="vendor/animate/animate.css">
+    <link rel="stylesheet" type="text/css" href="vendor/css-hamburgers/hamburgers.min.css">
+    <link rel="stylesheet" type="text/css" href="vendor/animsition/css/animsition.min.css">
+    <link rel="stylesheet" type="text/css" href="vendor/select2/select2.min.css">
+    <link rel="stylesheet" type="text/css" href="vendor/daterangepicker/daterangepicker.css">
+    <link rel="stylesheet" type="text/css" href="vendor/slick/slick.css">
+    <link rel="stylesheet" type="text/css" href="vendor/MagnificPopup/magnific-popup.css">
+    <link rel="stylesheet" type="text/css" href="vendor/perfect-scrollbar/perfect-scrollbar.css">
+    <link rel="stylesheet" type="text/css" href="css/util.css">
+    <link rel="stylesheet" type="text/css" href="css/main.css">
+    
+    <style>
+        .cart-container {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+            padding: 40px 0;
+        }
+        
+        .cart-header {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+            padding: 30px 0;
+            margin-bottom: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .cart-item {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .cart-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        .cart-item-image {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .quantity-btn {
+            width: 35px;
+            height: 35px;
+            border: none;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .quantity-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0,123,255,0.4);
+        }
+        
+        .quantity-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .quantity-input {
+            width: 60px;
+            text-align: center;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            padding: 5px;
+            font-weight: bold;
+        }
+        
+        .remove-btn {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            padding: 8px 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .remove-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(220,53,69,0.4);
+        }
+        
+        .cart-summary {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 20px;
+        }
+        
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding: 10px 0;
+            border-bottom: 1px solid #f8f9fa;
+        }
+        
+        .summary-total {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #007bff;
+            border-top: 2px solid #007bff;
+            padding-top: 15px;
+        }
+        
+        .checkout-btn {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+        
+        .checkout-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(40,167,69,0.4);
+        }
+        
+        .empty-cart {
+            text-align: center;
+            padding: 60px 20px;
+        }
+        
+        .empty-cart-icon {
+            font-size: 5rem;
+            color: #6c757d;
+            margin-bottom: 20px;
+        }
+        
+        .continue-shopping-btn {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            padding: 12px 25px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .continue-shopping-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,123,255,0.4);
+        }
+        
+        .variant-info {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .alert {
+            border-radius: 10px;
+            border: none;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        @media (max-width: 768px) {
+            .cart-item {
+                padding: 15px;
+            }
+            
+            .cart-item-image {
+                width: 80px;
+                height: 80px;
+            }
+            
+            .quantity-controls {
+                flex-direction: column;
+                gap: 5px;
+            }
+            
+            .cart-summary {
+                margin-top: 20px;
+                position: static;
+            }
+        }
+    </style>
+</head>
+<body class="animsition">
+
+    <!-- Header -->
+    <header class="header-v4">
+        <!-- Header desktop -->
+        <div class="container-menu-desktop">
+            <!-- Topbar -->
+            <div class="top-bar">
+                <div class="content-topbar flex-sb-m h-full container">
+                    <div class="left-top-bar">
+                        Miễn phí vận chuyển cho đơn từ 1tr vnđ
+                    </div>
+
+                    <div class="right-top-bar flex-w h-full">
+                        <a href="#" class="flex-c-m trans-04 p-lr-25">
+                            Trợ giúp
+                        </a>
+
+                        <a href="#" class="flex-c-m trans-04 p-lr-25">
+                            Tài khoản của tôi
+                        </a>
+
+                        <a href="#" class="flex-c-m trans-04 p-lr-25">
+                            VN
+                        </a>
+
+                        <a href="#" class="flex-c-m trans-04 p-lr-25">
+                            VND
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="wrap-menu-desktop">
+                <nav class="limiter-menu-desktop container">
+                    <!-- Logo desktop -->
+                    <a href="/" class="logo">
+                        <img src="images/icons/logo-01.png" alt="IMG-LOGO">
+                    </a>
+
+                    <!-- Menu desktop -->
+                    <div class="menu-desktop">
+                        <ul class="main-menu">
+                            <li>
+                                <a href="/">Trang chủ</a>
+                            </li>
+
+                            <li>
+                                <a href="/Products">Cửa hàng</a>
+                            </li>
+
+                            <li class="active-menu">
+                                <a href="/Cart">Giỏ hàng</a>
+                            </li>
+
+                            <li>
+                                <a href="/Blog">Bài viết</a>
+                            </li>
+
+                            <li>
+                                <a href="/About">Về chúng tôi</a>
+                            </li>
+
+                            <li>
+                                <a href="/Contact">Liên hệ</a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Icon header -->
+                    <div class="wrap-icon-header flex-w flex-r-m">
+                        <div class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 js-show-modal-search">
+                            <i class="zmdi zmdi-search"></i>
+                        </div>
+
+                        <a href="/Cart" class="dis-block icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 icon-header-noti" data-notify="@Model.CartItemCount">
+                            <i class="zmdi zmdi-shopping-cart"></i>
+                        </a>
+
+                        <a href="#" class="dis-block icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 icon-header-noti" data-notify="0">
+                            <i class="zmdi zmdi-favorite-outline"></i>
+                        </a>
+                    </div>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Header Mobile -->
+        <div class="wrap-header-mobile">
+            <!-- Logo moblie -->
+            <div class="logo-mobile">
+                <a href="/"><img src="images/icons/logo-01.png" alt="IMG-LOGO"></a>
+            </div>
+
+            <!-- Icon header -->
+            <div class="wrap-icon-header flex-w flex-r-m m-r-15">
+                <div class="icon-header-item cl2 hov-cl1 trans-04 p-r-11 js-show-modal-search">
+                    <i class="zmdi zmdi-search"></i>
+                </div>
+
+                <a href="/Cart" class="dis-block icon-header-item cl2 hov-cl1 trans-04 p-r-11 p-l-10 icon-header-noti" data-notify="@Model.CartItemCount">
+                    <i class="zmdi zmdi-shopping-cart"></i>
+                </a>
+
+                <a href="#" class="dis-block icon-header-item cl2 hov-cl1 trans-04 p-r-11 p-l-10 icon-header-noti" data-notify="0">
+                    <i class="zmdi zmdi-favorite-outline"></i>
+                </a>
+            </div>
+
+            <!-- Button show menu -->
+            <div class="btn-show-menu-mobile hamburger hamburger--squeeze">
+                <span class="hamburger-box">
+                    <span class="hamburger-inner"></span>
+                </span>
+            </div>
+        </div>
+
+        <!-- Menu Mobile -->
+        <div class="menu-mobile">
+            <ul class="topbar-mobile">
+                <li>
+                    <div class="left-top-bar">
+                        Miễn phí vận chuyển cho đơn từ 1tr vnđ
+                    </div>
+                </li>
+
+                <li>
+                    <div class="right-top-bar flex-w h-full">
+                        <a href="#" class="flex-c-m p-lr-10 trans-04">
+                            Trợ giúp
+                        </a>
+
+                        <a href="#" class="flex-c-m p-lr-10 trans-04">
+                            Tài khoản của tôi
+                        </a>
+
+                        <a href="#" class="flex-c-m p-lr-10 trans-04">
+                            VN
+                        </a>
+
+                        <a href="#" class="flex-c-m p-lr-10 trans-04">
+                            VND
+                        </a>
+                    </div>
+                </li>
+            </ul>
+
+            <ul class="main-menu-m">
+                <li>
+                    <a href="/">Trang chủ</a>
+                </li>
+
+                <li>
+                    <a href="/Products">Cửa hàng</a>
+                </li>
+
+                <li>
+                    <a href="/Cart" class="label1 rs1">Giỏ hàng</a>
+                </li>
+
+                <li>
+                    <a href="/Blog">Bài viết</a>
+                </li>
+
+                <li>
+                    <a href="/About">Về chúng tôi</a>
+                </li>
+
+                <li>
+                    <a href="/Contact">Liên hệ</a>
+                </li>
+            </ul>
+        </div>
+    </header>
+
+    <!-- Cart Section -->
+    <section class="cart-container">
+        <div class="container">
+            @Html.AntiForgeryToken()
+            <!-- Cart Header -->
+            <div class="cart-header text-center">
+                <h1 class="mtext-105 cl0">
+                    <i class="zmdi zmdi-shopping-cart me-3"></i>Giỏ hàng của bạn
+                </h1>
+                <p class="stext-102 cl0 mt-2">
+                    Quản lý sản phẩm trong giỏ hàng
+                </p>
+            </div>
+
+            <!-- Alert Messages -->
+            @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fa fa-check-circle me-2"></i>@Model.SuccessMessage
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fa fa-exclamation-circle me-2"></i>@Model.ErrorMessage
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            <!-- Loading Spinner -->
+            <div class="loading-spinner" id="loadingSpinner">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2">Đang xử lý...</p>
+            </div>
+
+            <div class="row">
+                <!-- Cart Items -->
+                <div class="col-lg-8">
+                    @if (Model.CartItems != null && Model.CartItems.Any())
+                    {
+                        @foreach (var item in Model.CartItems)
+                        {
+                            <div class="cart-item" data-cart-detail-id="@item.CartDetailId">
+                                <div class="row align-items-center">
+                                    <div class="col-md-2 col-4">
+                                        <img src="@(item.ProductImageUrl ?? "~/images/product-min-01.jpg")" 
+                                             class="cart-item-image" 
+                                             alt="@item.ProductName">
+                                    </div>
+                                    
+                                    <div class="col-md-4 col-8">
+                                        <h5 class="mb-1">@item.ProductName</h5>
+                                        <p class="text-muted mb-1">@item.ProductBrand</p>
+                                        @if (!string.IsNullOrEmpty(item.VariantAttributes))
+                                        {
+                                            <div class="variant-info">
+                                                <small><strong>Biến thể:</strong> @item.VariantAttributes</small>
+                                            </div>
+                                        }
+                                    </div>
+                                    
+                                    <div class="col-md-2 col-6">
+                                        <div class="quantity-controls">
+                                            <button class="quantity-btn" onclick="decreaseQuantity(@item.CartDetailId)" 
+                                                    @(item.Quantity <= 1 ? "disabled" : "")>
+                                                <i class="fa fa-minus"></i>
+                                            </button>
+                                            <input type="number" class="quantity-input" 
+                                                   value="@item.Quantity" 
+                                                   min="1" 
+                                                   onchange="updateQuantity(@item.CartDetailId, this.value)">
+                                            <button class="quantity-btn" onclick="increaseQuantity(@item.CartDetailId)">
+                                                <i class="fa fa-plus"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-2 col-3">
+                                        <h6 class="text-primary mb-0">$@item.Price.ToString("N2")</h6>
+                                    </div>
+                                    
+                                    <div class="col-md-2 col-3">
+                                        <button class="remove-btn" onclick="removeFromCart(@item.CartDetailId)">
+                                            <i class="fa fa-trash me-1"></i>Xóa
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="empty-cart">
+                            <div class="empty-cart-icon">
+                                <i class="zmdi zmdi-shopping-cart"></i>
+                            </div>
+                            <h3 class="text-muted">Giỏ hàng trống</h3>
+                            <p class="text-muted mb-4">Bạn chưa có sản phẩm nào trong giỏ hàng.</p>
+                            <a href="/Products" class="continue-shopping-btn">
+                                <i class="fa fa-shopping-bag me-2"></i>Tiếp tục mua sắm
+                            </a>
+                        </div>
+                    }
+                </div>
+
+                <!-- Cart Summary -->
+                <div class="col-lg-4">
+                    <div class="cart-summary">
+                        <h4 class="mb-4">
+                            <i class="fa fa-calculator me-2"></i>Tổng quan giỏ hàng
+                        </h4>
+                        
+                        <div class="summary-item">
+                            <span>Số lượng sản phẩm:</span>
+                            <span>@Model.CartItemCount</span>
+                        </div>
+                        
+                        <div class="summary-item">
+                            <span>Tổng số lượng:</span>
+                            <span>@Model.TotalQuantity</span>
+                        </div>
+                        
+                        <div class="summary-item summary-total">
+                            <span>Tổng tiền:</span>
+                            <span>$@Model.TotalAmount.ToString("N2")</span>
+                        </div>
+                        
+                        @if (Model.CartItems != null && Model.CartItems.Any())
+                        {
+                            <button class="checkout-btn mt-4" onclick="proceedToCheckout()">
+                                <i class="fa fa-credit-card me-2"></i>Tiến hành thanh toán
+                            </button>
+                            
+                            <button class="btn btn-outline-danger w-100 mt-3" onclick="clearCart()">
+                                <i class="fa fa-trash me-2"></i>Xóa tất cả
+                            </button>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg3 p-t-75 p-b-32">
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-6 col-lg-3 p-b-50">
+                    <h4 class="stext-301 cl0 p-b-30">
+                        Thể loại
+                    </h4>
+
+                    <ul>
+                        <li class="p-b-10">
+                            <a href="#" class="stext-107 cl7 hov-cl1 trans-04">
+                                Nữ
+                            </a>
+                        </li>
+
+                        <li class="p-b-10">
+                            <a href="#" class="stext-107 cl7 hov-cl1 trans-04">
+                                Nam
+                            </a>
+                        </li>
+
+                        <li class="p-b-10">
+                            <a href="#" class="stext-107 cl7 hov-cl1 trans-04">
+                                Giày
+                            </a>
+                        </li>
+
+                        <li class="p-b-10">
+                            <a href="#" class="stext-107 cl7 hov-cl1 trans-04">
+                                Đồng hồ
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="col-sm-6 col-lg-3 p-b-50">
+                    <h4 class="stext-301 cl0 p-b-30">
+                        Trợ giúp
+                    </h4>
+
+                    <ul>
+                        <li class="p-b-10">
+                            <a href="#" class="stext-107 cl7 hov-cl1 trans-04">
+                                Đặt hàng
+                            </a>
+                        </li>
+
+                        <li class="p-b-10">
+                            <a href="#" class="stext-107 cl7 hov-cl1 trans-04">
+                                Phản hồi
+                            </a>
+                        </li>
+
+                        <li class="p-b-10">
+                            <a href="#" class="stext-107 cl7 hov-cl1 trans-04">
+                                Giao hàng
+                            </a>
+                        </li>
+
+                        <li class="p-b-10">
+                            <a href="#" class="stext-107 cl7 hov-cl1 trans-04">
+                                Câu hỏi
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="col-sm-6 col-lg-3 p-b-50">
+                    <h4 class="stext-301 cl0 p-b-30">
+                        Liên lạc
+                    </h4>
+
+                    <p class="stext-107 cl7 size-201">
+                        Bạn có câu hỏi nào cho cửa hàng không? Nếu cần sự trợ giúp vui lòng liên hệ 0388888888
+                    </p>
+
+                    <div class="p-t-27">
+                        <a href="#" class="fs-18 cl7 hov-cl1 trans-04 m-r-16">
+                            <i class="fa fa-facebook"></i>
+                        </a>
+
+                        <a href="#" class="fs-18 cl7 hov-cl1 trans-04 m-r-16">
+                            <i class="fa fa-instagram"></i>
+                        </a>
+
+                        <a href="#" class="fs-18 cl7 hov-cl1 trans-04 m-r-16">
+                            <i class="fa fa-pinterest-p"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 col-lg-3 p-b-50">
+                    <h4 class="stext-301 cl0 p-b-30">
+                        Bản tin
+                    </h4>
+
+                    <form>
+                        <div class="wrap-input1 w-full p-b-4">
+                            <input class="input1 bg-none plh1 stext-107 cl7" type="text" name="email" placeholder="email@example.com">
+                            <div class="focus-input1 trans-04"></div>
+                        </div>
+
+                        <div class="p-t-18">
+                            <button class="flex-c-m stext-101 cl0 size-103 bg1 bor1 hov-btn2 p-lr-15 trans-04">
+                                Đặt mua
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="p-t-40">
+                <div class="flex-c-m flex-w p-b-18">
+                    <a href="#" class="m-all-1">
+                        <img src="images/icons/icon-pay-01.png" alt="ICON-PAY">
+                    </a>
+
+                    <a href="#" class="m-all-1">
+                        <img src="images/icons/icon-pay-02.png" alt="ICON-PAY">
+                    </a>
+
+                    <a href="#" class="m-all-1">
+                        <img src="images/icons/icon-pay-03.png" alt="ICON-PAY">
+                    </a>
+
+                    <a href="#" class="m-all-1">
+                        <img src="images/icons/icon-pay-04.png" alt="ICON-PAY">
+                    </a>
+
+                    <a href="#" class="m-all-1">
+                        <img src="images/icons/icon-pay-05.png" alt="ICON-PAY">
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Back to top -->
+    <div class="btn-back-to-top" id="myBtn">
+        <span class="symbol-btn-back-to-top">
+            <i class="zmdi zmdi-chevron-up"></i>
+        </span>
+    </div>
+
+    <!-- Scripts -->
+    <script src="vendor/jquery/jquery-3.2.1.min.js"></script>
+    <script src="vendor/animsition/js/animsition.min.js"></script>
+    <script src="vendor/bootstrap/js/popper.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.min.js"></script>
+    <script src="vendor/select2/select2.min.js"></script>
+    <script src="vendor/daterangepicker/moment.min.js"></script>
+    <script src="vendor/daterangepicker/daterangepicker.js"></script>
+    <script src="vendor/slick/slick.min.js"></script>
+    <script src="js/slick-custom.js"></script>
+    <script src="vendor/parallax100/parallax100.js"></script>
+    <script src="vendor/MagnificPopup/jquery.magnific-popup.min.js"></script>
+    <script src="vendor/isotope/isotope.pkgd.min.js"></script>
+    <script src="vendor/sweetalert/sweetalert.min.js"></script>
+    <script src="vendor/perfect-scrollbar/perfect-scrollbar.min.js"></script>
+    <script src="js/main.js"></script>
+
+    <!-- Cart JavaScript -->
+    <script>
+        function showLoading() {
+            document.getElementById('loadingSpinner').style.display = 'block';
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingSpinner').style.display = 'none';
+        }
+
+        function showSuccess(message) {
+            swal("Thành công!", message, "success");
+        }
+
+        function showError(message) {
+            swal("Lỗi!", message, "error");
+        }
+
+        function showConfirm(title, message, callback) {
+            swal({
+                title: title,
+                text: message,
+                icon: "warning",
+                buttons: true,
+                dangerMode: true,
+            }).then((willDelete) => {
+                if (willDelete) {
+                    callback();
+                }
+            });
+        }
+
+        async function updateQuantity(cartDetailId, quantity) {
+            if (quantity < 1) return;
+            
+            showLoading();
+            try {
+                const response = await fetch('/Cart?handler=UpdateQuantity', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: JSON.stringify({
+                        cartDetailId: cartDetailId,
+                        quantity: parseInt(quantity)
+                    })
+                });
+
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    const error = await response.text();
+                    showError('Cập nhật số lượng thất bại: ' + error);
+                }
+            } catch (error) {
+                showError('Có lỗi xảy ra: ' + error.message);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function increaseQuantity(cartDetailId) {
+            const input = document.querySelector(`[data-cart-detail-id="${cartDetailId}"] .quantity-input`);
+            const newQuantity = parseInt(input.value) + 1;
+            updateQuantity(cartDetailId, newQuantity);
+        }
+
+        function decreaseQuantity(cartDetailId) {
+            const input = document.querySelector(`[data-cart-detail-id="${cartDetailId}"] .quantity-input`);
+            const newQuantity = parseInt(input.value) - 1;
+            if (newQuantity >= 1) {
+                updateQuantity(cartDetailId, newQuantity);
+            }
+        }
+
+        function removeFromCart(cartDetailId) {
+            showConfirm(
+                "Xóa sản phẩm",
+                "Bạn có chắc chắn muốn xóa sản phẩm này khỏi giỏ hàng?",
+                () => {
+                    showLoading();
+                    fetch('/Cart?handler=RemoveFromCart', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                        },
+                        body: JSON.stringify({
+                            cartDetailId: cartDetailId
+                        })
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            location.reload();
+                        } else {
+                            return response.text();
+                        }
+                    })
+                    .then(error => {
+                        if (error) {
+                            showError('Xóa sản phẩm thất bại: ' + error);
+                        }
+                    })
+                    .catch(error => {
+                        showError('Có lỗi xảy ra: ' + error.message);
+                    })
+                    .finally(() => {
+                        hideLoading();
+                    });
+                }
+            );
+        }
+
+        function clearCart() {
+            showConfirm(
+                "Xóa tất cả",
+                "Bạn có chắc chắn muốn xóa tất cả sản phẩm khỏi giỏ hàng?",
+                () => {
+                    showLoading();
+                    fetch('/Cart?handler=ClearCart', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                        }
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            location.reload();
+                        } else {
+                            return response.text();
+                        }
+                    })
+                    .then(error => {
+                        if (error) {
+                            showError('Xóa giỏ hàng thất bại: ' + error);
+                        }
+                    })
+                    .catch(error => {
+                        showError('Có lỗi xảy ra: ' + error.message);
+                    })
+                    .finally(() => {
+                        hideLoading();
+                    });
+                }
+            );
+        }
+
+        function proceedToCheckout() {
+            // Redirect to checkout page
+            window.location.href = '/Checkout';
+        }
+
+        // Auto-hide alerts after 5 seconds
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+    </script>
+</body>
+</html> 

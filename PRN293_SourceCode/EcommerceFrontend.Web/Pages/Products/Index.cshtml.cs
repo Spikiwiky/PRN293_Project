@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Net.Http.Json;
+using System.Text;
 
 namespace EcommerceFrontend.Web.Pages.Products;
 
@@ -104,4 +105,44 @@ public class IndexModel : PageModel
             return Page();
         }
     }
+
+    public async Task<IActionResult> OnPostAddToCartAsync([FromBody] AddToCartRequest request)
+    {
+        try
+        {
+            if (request.Quantity <= 0)
+            {
+                return BadRequest("Số lượng phải lớn hơn 0");
+            }
+
+            var client = _httpClientFactory.CreateClient("MyAPI");
+            var json = System.Text.Json.JsonSerializer.Serialize(request);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await client.PostAsync($"{_apiSettings.BaseUrl}/api/cart/add", content);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return Ok("Sản phẩm đã được thêm vào giỏ hàng");
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                return BadRequest(error);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error adding product to cart");
+            return BadRequest("Có lỗi xảy ra khi thêm sản phẩm vào giỏ hàng");
+        }
+    }
+}
+
+public class AddToCartRequest
+{
+    public int ProductId { get; set; }
+    public string? VariantId { get; set; }
+    public string? VariantAttributes { get; set; }
+    public int Quantity { get; set; }
 }
