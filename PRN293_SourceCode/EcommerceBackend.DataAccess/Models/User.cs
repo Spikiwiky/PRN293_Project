@@ -7,6 +7,8 @@ namespace EcommerceBackend.DataAccess.Models
     {
         public User()
         {
+            Carts = new HashSet<Cart>();
+            Orders = new HashSet<Order>();
         }
 
         public int UserId { get; set; }
@@ -20,5 +22,11 @@ namespace EcommerceBackend.DataAccess.Models
         public DateTime? CreateDate { get; set; }
         public int? Status { get; set; }
         public bool? IsDelete { get; set; }
+
+        public virtual UserRole? Role { get; set; }
+        public virtual ICollection<Cart> Carts { get; set; }
+        public virtual ICollection<Order> Orders { get; set; }
+        public virtual ICollection<Review> Reviews { get; set; }
+        public virtual ICollection<Rating> Ratings { get; set; }
     }
 }
