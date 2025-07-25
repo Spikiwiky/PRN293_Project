@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EcommerceBackend.DataAccess.Migrations
 {
     [DbContext(typeof(EcommerceDBContext))]
-    [Migration("20250725085248_InitialCreate31")]
-    partial class InitialCreate31
+    [Migration("20250725152433_newDb6")]
+    partial class newDb6
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -219,7 +219,6 @@ namespace EcommerceBackend.DataAccess.Migrations
                         .HasColumnName("Quantity");
 
                     b.Property<string>("VariantAttributes")
-
                         .ValueGeneratedOnAdd()
                         .HasColumnType("nvarchar(max)")
                         .HasDefaultValue("[]")

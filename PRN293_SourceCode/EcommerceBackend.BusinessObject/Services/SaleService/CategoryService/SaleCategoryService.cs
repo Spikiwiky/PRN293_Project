@@ -1,18 +1,19 @@
-﻿using EcommerceBackend.DataAccess.Models;
-using EcommerceBackend.DataAccess.Repository.SaleRepository;
+﻿using EcommerceBackend.BusinessObject.Services.SaleService.CategoryService.CategoryService;
+using EcommerceBackend.DataAccess.Models;
+using EcommerceBackend.DataAccess.Repository.SaleRepository.SaleCategory;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EcommerceBackend.BusinessObject.Services.SaleService
+namespace EcommerceBackend.BusinessObject.Services.SaleService.CategoryService
 {
-    public class CategoryService : ICategoryService
+    public class SaleCategoryService : ISaleCategoryService
     {
         private readonly ICategoryRepository _categoryRepository;
 
-        public CategoryService(ICategoryRepository categoryRepository)
+        public SaleCategoryService(ICategoryRepository categoryRepository)
         {
             _categoryRepository = categoryRepository;
         }

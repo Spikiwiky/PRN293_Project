@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EcommerceBackend.DataAccess.Migrations
 {
     [DbContext(typeof(EcommerceDBContext))]
-    [Migration("20250725085248_InitialCreate31")]
-    partial class InitialCreate31
+    [Migration("20250725151350_newDb2")]
+    partial class newDb2
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -219,7 +219,6 @@ namespace EcommerceBackend.DataAccess.Migrations
                         .HasColumnName("Quantity");
 
                     b.Property<string>("VariantAttributes")
-
                         .ValueGeneratedOnAdd()
                         .HasColumnType("nvarchar(max)")
                         .HasDefaultValue("[]")
@@ -764,15 +763,13 @@ namespace EcommerceBackend.DataAccess.Migrations
                         .WithMany("CartDetails")
                         .HasForeignKey("CartId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK__Cart_deta__Cart___3C69FB99");
+                        .IsRequired();
 
                     b.HasOne("EcommerceBackend.DataAccess.Models.Product", "Product")
                         .WithMany("CartDetails")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK__Cart_deta__Produ__3D5E1FD2");
+                        .IsRequired();
 
                     b.Navigation("Cart");
 

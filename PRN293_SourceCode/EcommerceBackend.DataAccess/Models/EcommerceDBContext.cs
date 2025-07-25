@@ -126,6 +126,11 @@ namespace EcommerceBackend.DataAccess.Models
                 entity.Property(e => e.VariantId)
                     .HasColumnName("Variant_id");
 
+                entity.Property(e => e.VariantAttributes)
+                    .HasColumnName("Variant_attributes")
+                    .HasDefaultValue("[]")
+                    .IsRequired(false);  
+
                 entity.HasOne(d => d.Cart)
                     .WithMany(p => p.CartDetails)
                     .HasForeignKey(d => d.CartId)
