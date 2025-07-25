@@ -25,9 +25,5 @@ namespace EcommerceFrontend.Web.Models.User
         public int Status { get; set; }
 
         public bool IsDelete { get; set; }
-
-        // public object Role { get; set; }
-        // public List<object> Carts { get; set; }
-        // public List<object> Orders { get; set; }
     }
 }

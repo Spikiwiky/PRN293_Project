@@ -22,20 +22,15 @@ namespace EcommerceBackend.API.Controllers.SaleController
             var users = _userService.GetAll().Select(u => new UserResponseDto
             {
                 UserId = u.UserId,
-                // If u.RoleId is null, it will default to 0. Adjust default as needed.
                 RoleId = u.RoleId ?? 0,
                 Email = u.Email,
                 Password = u.Password,
                 Phone = u.Phone,
                 UserName = u.UserName,
-                // If u.DateOfBirth is null, it will default to DateTime.MinValue. Adjust default as needed.
                 DateOfBirth = u.DateOfBirth ?? DateTime.MinValue,
                 Address = u.Address,
-                // If u.CreateDate is null, it will default to DateTime.MinValue. Adjust default as needed.
                 CreateDate = u.CreateDate ?? DateTime.MinValue,
-                // If u.Status is null, it will default to 0. Adjust default as needed.
                 Status = u.Status ?? 0,
-                // If u.IsDelete is null, it will default to false. Adjust default as needed.
                 IsDelete = u.IsDelete ?? false
             });
             return Ok(users);
@@ -79,7 +74,6 @@ namespace EcommerceBackend.API.Controllers.SaleController
             {
                 _userService.Add(userDto);
 
-                // Lấy user vừa tạo để trả về UserId
                 var createdUser = _userService.GetAll().OrderByDescending(u => u.UserId).FirstOrDefault(u => u.Email == userDto.Email);
                 if (createdUser == null)
                 {
@@ -116,7 +110,6 @@ namespace EcommerceBackend.API.Controllers.SaleController
             {
                 return BadRequest("User data is invalid or ID mismatch");
             }
-
             try
             {
                 _userService.Update(userDto);

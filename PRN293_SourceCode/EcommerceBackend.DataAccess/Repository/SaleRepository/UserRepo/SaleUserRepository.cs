@@ -44,7 +44,6 @@ namespace EcommerceBackend.DataAccess.Repository.SaleRepository.UserRepo
             if (user != null)
             {
                 user.IsDelete = true;
-                //_context.Users.Remove(user);
                 _context.SaveChanges();
             }
         }
