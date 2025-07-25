@@ -24,12 +24,6 @@ namespace EcommerceBackend.DataAccess.Models
         [Precision(10, 2)]
         public decimal? AmountDue { get; set; }
 
-        [Column("created_at")]
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
-        [Column("updated_at")]
-        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-
         // Navigation properties
         [ForeignKey("CustomerId")]
         public virtual User Customer { get; set; }

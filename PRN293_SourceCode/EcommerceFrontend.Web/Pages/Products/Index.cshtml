@@ -434,6 +434,7 @@
                                                 var attributeNames = attributes?.Keys.ToList() ?? new List<string>();
                                                 var variantData = product.Variants.Select(v => new
                                                 {
+                                                    VariantId = v.VariantId,
                                                     Attributes = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, List<string>>>(v.Attributes),
                                                     Variants = v.Variants
                                                 }).ToList();
@@ -986,6 +987,15 @@
 
     <!-- Variant selection script -->
     <script>
+            // Helper function to get cookie
+            function getCookie(name) {
+                const value = `; ${document.cookie}`;
+                const parts = value.split(`; ${name}=`);
+                if (parts.length === 2) return parts.pop().split(';').shift();
+                return null;
+            }
+
+            // Product variant handling
             document.addEventListener('DOMContentLoaded', function() {
                 // Khởi tạo trạng thái ban đầu cho từng modal sản phẩm
                 document.querySelectorAll('[id^="variantModal-"]').forEach(modal => {
@@ -1239,18 +1249,93 @@
                         const priceMatch = priceText.match(/\$([\d,]+\.?\d*)/);
                         const price = priceMatch ? priceMatch[1] : '0';
                         
+                        // Find variant ID based on selected attributes
+                        let variantId = null;
+                        const variantDataElement = document.getElementById(`variant-data-${productId}`);
+                        if (variantDataElement) {
+                            const variantData = JSON.parse(variantDataElement.textContent);
+                            console.log('Variant data for product', productId, ':', variantData);
+                            console.log('Selected attributes:', selectedAttributes);
+                            
+                            // Find the matching variant
+                            for (let i = 0; i < variantData.length; i++) {
+                                const variantGroup = variantData[i];
+                                console.log('Processing variant group', i, ':', variantGroup);
+                                let variants;
+                                
+                                try {
+                                    // Check if variants is already an object or needs parsing
+                                    if (typeof variantGroup.variants === 'string') {
+                                        variants = JSON.parse(variantGroup.variants);
+                                    } else {
+                                        variants = variantGroup.variants;
+                                    }
+                                    console.log('Parsed variants:', variants);
+                                } catch (parseError) {
+                                    console.error('Error parsing variants:', parseError);
+                                    console.log('Raw variants data:', variantGroup.variants);
+                                    continue;
+                                }
+                                
+                                if (!Array.isArray(variants)) {
+                                    console.warn('Variants is not an array:', variants);
+                                    continue;
+                                }
+                                
+                                for (let j = 0; j < variants.length; j++) {
+                                    const variant = variants[j];
+                                    console.log('Checking variant', j, ':', variant);
+                                    let isMatch = true;
+                                    
+                                    // Check if all selected attributes match this variant
+                                    for (const [key, value] of Object.entries(selectedAttributes)) {
+                                        console.log(`Comparing ${key}: selected="${value}" vs variant="${variant[key]}"`);
+                                        if (variant[key] !== value) {
+                                            isMatch = false;
+                                            console.log(`Mismatch found: ${key} - selected: ${value}, variant: ${variant[key]}`);
+                                            break;
+                                        }
+                                    }
+                                    
+                                    if (isMatch) {
+                                        console.log('Found matching variant:', variant);
+                                        // Use VariantId from variantGroup instead of variant.id
+                                        if (variantGroup.variantId) {
+                                            variantId = parseInt(variantGroup.variantId);
+                                            console.log('Found matching variant ID:', variantId, 'for variant group:', variantGroup);
+                                        } else {
+                                            console.warn('Variant matched but variant group has no VariantId:', variantGroup);
+                                        }
+                                        break;
+                                    }
+                                }
+                                
+                                if (variantId !== null) break;
+                            }
+                        } else {
+                            console.warn('Variant data element not found for product', productId);
+                        }
+                        
+                        console.log('Final variant ID:', variantId);
+                        
                         // Create cart item data
                         const cartItem = {
                             productId: parseInt(productId),
-                            variantId: null, // Will be set based on selected attributes
+                            variantId: variantId,
                             variantAttributes: JSON.stringify(selectedAttributes),
                             quantity: 1
                         };
                         
                         console.log('Adding to cart:', cartItem);
                         
-                        // Send data to backend API
-                        fetch('https://localhost:7257/api/Cart/add-guest', {
+                        // Check if user is logged in
+                        const userId = getCookie('UserId');
+                        const endpoint = userId ? '/api/Cart/add' : '/api/Cart/add-guest';
+                        
+                        console.log('User ID:', userId, 'Using endpoint:', endpoint);
+                        
+                        // Send data to frontend API (which will proxy to backend)
+                        fetch(endpoint, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',

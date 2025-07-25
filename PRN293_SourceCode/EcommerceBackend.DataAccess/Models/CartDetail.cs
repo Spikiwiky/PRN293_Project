@@ -20,12 +20,11 @@ namespace EcommerceBackend.DataAccess.Models
         public int? ProductId { get; set; }
 
         [Column("Variant_id")]
-        [StringLength(50)]
-        public string VariantId { get; set; }
+        public int? VariantId { get; set; }
 
         [Column("Product_name")]
         [StringLength(255)]
-        public string ProductName { get; set; }
+        public required string ProductName { get; set; }
 
         [Column("Quantity")]
         public int? Quantity { get; set; }
@@ -34,7 +33,6 @@ namespace EcommerceBackend.DataAccess.Models
         [Precision(10, 2)]
         public decimal? Price { get; set; }
 
-        [Column("Variant_attributes")]
         public string VariantAttributes { get; set; }
 
         // Navigation properties

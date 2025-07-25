@@ -9,6 +9,20 @@ using EcommerceBackend.DataAccess.Repository.UserRepository;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using EcommerceBackend.DataAccess.Models;
+
+
+using EcommerceBackend.BusinessObject.Services.SaleService;
+using EcommerceBackend.DataAccess.Abstract;
+using EcommerceBackend.DataAccess.Repository;
+using EcommerceBackend.BusinessObject.Abstract;
+using EcommerceBackend.BusinessObject.Services.CartService;
+using EcommerceBackend.DataAccess.Repository.CartRepository;
+using EcommerceBackend.DataAccess.Abstract.AuthAbstract;
+using EcommerceBackend.DataAccess.Repository.AuthRepository;
+using EcommerceBackend.BusinessObject.Abstract.AuthAbstract;
+using EcommerceBackend.BusinessObject.Services.AuthService;
+
+
 using EcommerceBackend.DataAccess.Repository.SaleRepository.SaleCategory;
 using EcommerceBackend.BusinessObject.Services.SaleService.CategoryService;
 using EcommerceBackend.BusinessObject.Services.SaleService.ProductService;
@@ -21,6 +35,7 @@ using EcommerceBackend.DataAccess.Repository.SaleRepository.BlogRepo;
 using EcommerceBackend.BusinessObject.Services.SaleService.BlogService;
 using EcommerceBackend.BusinessObject.Abstract;
 using EcommerceBackend.BusinessObject.Services.CartService;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,6 +54,28 @@ builder.Services.AddDbContext<EcommerceDBContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<EcommerceBackend.DataAccess.Repository.IProductRepository, EcommerceBackend.DataAccess.Repository.ProductRepository>();
 builder.Services.AddScoped<IProductService, ProductService>();
+
+//builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+//builder.Services.AddScoped<IOrderService, OrderService>();
+
+
+
+//builder.Services.AddScoped<ISaleProductService, SaleProductService>();
+
+builder.Services.AddScoped<ISaleService, SaleService>(); 
+// builder.Services.AddScoped<EcommerceBackend.DataAccess.Repository.SaleRepository.IProductRepository, EcommerceBackend.DataAccess.Repository.SaleRepository.ProductRepository>();
+// builder.Services.AddScoped<EcommerceBackend.BusinessObject.Services.SaleService.ICategoryService, EcommerceBackend.BusinessObject.Services.SaleService.CategoryService>();
+// builder.Services.AddScoped<EcommerceBackend.DataAccess.Repository.SaleRepository.ICategoryRepository, EcommerceBackend.DataAccess.Repository.SaleRepository.CategoryRepository>();
+
+// Register Cart Services
+builder.Services.AddScoped<ICartService, CartService>();
+builder.Services.AddScoped<ICartRepository, CartRepository>();
+
+// Register Auth Services
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IAuthRepository, AuthRepository>();
+
+
 builder.Services.AddScoped<ISaleService, SaleService>();
 builder.Services.AddScoped<EcommerceBackend.DataAccess.Repository.SaleRepository.ProductRepo.IProductRepository, EcommerceBackend.DataAccess.Repository.SaleRepository.ProductRepo.ProductRepository>();
 builder.Services.AddScoped<ISaleCategoryService, SaleCategoryService>();
@@ -50,6 +87,7 @@ builder.Services.AddScoped<ISaleUserRepository, SaleUserRepository>();
 builder.Services.AddScoped<ISaleBlogRepository, SaleBlogRepository>();
 builder.Services.AddScoped<ISaleBlogService, SaleBlogService>();
 builder.Services.AddScoped<ICartService, CartService>();
+
 // Config Authentication Jwt
 JwtConfig.ConfigureJwtAuthentication(builder.Services, builder.Configuration);
 JwtConfig.ConfigureSwagger(builder.Services);
@@ -111,7 +149,7 @@ app.UseSession();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
-app.UseCors("AllowFrontendApp");
+app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
 

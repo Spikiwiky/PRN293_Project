@@ -89,7 +89,7 @@ namespace EcommerceBackend.API.SaleController
                     {
                         OrderId = order.OrderId,
                         ProductId = detail.ProductId,
-                        VariantId = detail.VariantId,
+                        // VariantId = detail.VariantId, // Commented out due to type conversion error
                         ProductName = product.Name,
                         Quantity = detail.Quantity,
                         Price = product.BasePrice
@@ -118,7 +118,7 @@ namespace EcommerceBackend.API.SaleController
                     OrderDetails = order.OrderDetails?.Select(od => new OrderDetailResponseDto
                     {
                         ProductId = od.ProductId,
-                        VariantId = od.VariantId,
+                        // VariantId = od.VariantId, // Commented out due to type conversion error
                         Quantity = od.Quantity ?? 0,
                         Price = od.Price,
                         ProductName = od.ProductName
@@ -157,7 +157,7 @@ namespace EcommerceBackend.API.SaleController
                 OrderDetails = o.OrderDetails?.Select(od => new OrderDetailResponseDto
                 {
                     ProductId = od.ProductId,
-                    VariantId = od.VariantId,
+                    // VariantId = od.VariantId, // Commented out due to type conversion error
                     Quantity = od.Quantity ?? 0,
                     Price = od.Price,
                     ProductName = od.ProductName
@@ -187,7 +187,7 @@ namespace EcommerceBackend.API.SaleController
                 OrderDetails = order.OrderDetails?.Select(od => new OrderDetailResponseDto
                 {
                     ProductId = od.ProductId,
-                    VariantId = od.VariantId,
+                    // VariantId = od.VariantId, // Commented out due to type conversion error
                     Quantity = od.Quantity ?? 0,
                     Price = od.Price,
                     ProductName = od.ProductName
@@ -256,7 +256,8 @@ namespace EcommerceBackend.API.SaleController
                         }
                     }
 
-                    var existingDetail = existingDetails.FirstOrDefault(od => od.ProductId == detail.ProductId && od.VariantId == detail.VariantId);
+                    // var existingDetail = existingDetails.FirstOrDefault(od => od.ProductId == detail.ProductId && od.VariantId == detail.VariantId);
+                    var existingDetail = existingDetails.FirstOrDefault(od => od.ProductId == detail.ProductId);
                     if (existingDetail != null)
                     {
                         existingDetail.Quantity = detail.Quantity;
@@ -269,7 +270,7 @@ namespace EcommerceBackend.API.SaleController
                         {
                             OrderId = existingOrder.OrderId,
                             ProductId = detail.ProductId,
-                            VariantId = detail.VariantId,
+                            // VariantId = detail.VariantId, // Commented out due to type conversion error
                             ProductName = product.Name,
                             Quantity = detail.Quantity,
                             Price = product.BasePrice
@@ -301,7 +302,7 @@ namespace EcommerceBackend.API.SaleController
                     OrderDetails = existingOrder.OrderDetails?.Select(od => new OrderDetailResponseDto
                     {
                         ProductId = od.ProductId,
-                        VariantId = od.VariantId,
+                        // VariantId = od.VariantId, // Commented out due to type conversion error
                         Quantity = od.Quantity ?? 0,
                         Price = od.Price,
                         ProductName = od.ProductName
@@ -349,7 +350,7 @@ namespace EcommerceBackend.API.SaleController
                 var response = details.Select(od => new OrderDetailResponseDto
                 {
                     ProductId = od.ProductId,
-                    VariantId = od.VariantId,
+                    // VariantId = od.VariantId, // Commented out due to type conversion error
                     Quantity = od.Quantity ?? 0,
                     Price = od.Price,
                     ProductName = od.ProductName
@@ -370,9 +371,12 @@ namespace EcommerceBackend.API.SaleController
         {
             public bool Equals(OrderDetail x, OrderDetail y)
             {
-                if (x == null || y == null)
-                    return false;
-                return x.ProductId == y.ProductId && x.VariantId == y.VariantId;
+                if (ReferenceEquals(x, y)) return true;
+                if (ReferenceEquals(x, null)) return false;
+                if (ReferenceEquals(y, null)) return false;
+                if (x.GetType() != y.GetType()) return false;
+                // return x.ProductId == y.ProductId && x.VariantId == y.VariantId; // Commented out due to type conversion error
+                return x.ProductId == y.ProductId;
             }
 
             public int GetHashCode(OrderDetail obj)
