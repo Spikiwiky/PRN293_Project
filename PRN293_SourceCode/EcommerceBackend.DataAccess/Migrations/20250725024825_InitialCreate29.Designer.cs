@@ -4,6 +4,7 @@ using EcommerceBackend.DataAccess.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EcommerceBackend.DataAccess.Migrations
 {
     [DbContext(typeof(EcommerceDBContext))]
-    partial class EcommerceDBContextModelSnapshot : ModelSnapshot
+    [Migration("20250725024825_InitialCreate29")]
+    partial class InitialCreate29
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -30,6 +32,9 @@ namespace EcommerceBackend.DataAccess.Migrations
                         .HasColumnName("Blog_id");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("BlogId"), 1L, 1);
+
+                    b.Property<string>("Author")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("BlogCategoryId")
                         .HasColumnType("int")
@@ -65,17 +70,12 @@ namespace EcommerceBackend.DataAccess.Migrations
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("UserId")
-                        .HasColumnType("int");
-
                     b.Property<int>("ViewCount")
                         .HasColumnType("int");
 
                     b.HasKey("BlogId");
 
                     b.HasIndex("BlogCategoryId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("Blog", (string)null);
                 });
@@ -703,13 +703,7 @@ namespace EcommerceBackend.DataAccess.Migrations
                         .HasForeignKey("BlogCategoryId")
                         .HasConstraintName("FK__Blog__Blog_categ__4F7CD00D");
 
-                    b.HasOne("EcommerceBackend.DataAccess.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId");
-
                     b.Navigation("BlogCategory");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("EcommerceBackend.DataAccess.Models.BlogComment", b =>

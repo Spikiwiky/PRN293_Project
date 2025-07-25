@@ -4,6 +4,7 @@ using EcommerceBackend.DataAccess.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EcommerceBackend.DataAccess.Migrations
 {
     [DbContext(typeof(EcommerceDBContext))]
-    partial class EcommerceDBContextModelSnapshot : ModelSnapshot
+    [Migration("20250725023854_InitialCreate28")]
+    partial class InitialCreate28
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -30,6 +32,9 @@ namespace EcommerceBackend.DataAccess.Migrations
                         .HasColumnName("Blog_id");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("BlogId"), 1L, 1);
+
+                    b.Property<string>("Author")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("BlogCategoryId")
                         .HasColumnType("int")
@@ -65,17 +70,12 @@ namespace EcommerceBackend.DataAccess.Migrations
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("UserId")
-                        .HasColumnType("int");
-
                     b.Property<int>("ViewCount")
                         .HasColumnType("int");
 
                     b.HasKey("BlogId");
 
                     b.HasIndex("BlogCategoryId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("Blog", (string)null);
                 });
@@ -102,42 +102,6 @@ namespace EcommerceBackend.DataAccess.Migrations
                     b.HasKey("BlogCategoryId");
 
                     b.ToTable("Blog_category", (string)null);
-                });
-
-            modelBuilder.Entity("EcommerceBackend.DataAccess.Models.BlogComment", b =>
-                {
-                    b.Property<int>("CommentId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CommentId"), 1L, 1);
-
-                    b.Property<int>("BlogId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("CommentContent")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CommenterEmail")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CommenterName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CommenterWebsite")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsApproved")
-                        .HasColumnType("bit");
-
-                    b.HasKey("CommentId");
-
-                    b.HasIndex("BlogId");
-
-                    b.ToTable("BlogComment");
                 });
 
             modelBuilder.Entity("EcommerceBackend.DataAccess.Models.Cart", b =>
@@ -703,24 +667,7 @@ namespace EcommerceBackend.DataAccess.Migrations
                         .HasForeignKey("BlogCategoryId")
                         .HasConstraintName("FK__Blog__Blog_categ__4F7CD00D");
 
-                    b.HasOne("EcommerceBackend.DataAccess.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId");
-
                     b.Navigation("BlogCategory");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("EcommerceBackend.DataAccess.Models.BlogComment", b =>
-                {
-                    b.HasOne("EcommerceBackend.DataAccess.Models.Blog", "Blog")
-                        .WithMany("Comments")
-                        .HasForeignKey("BlogId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Blog");
                 });
 
             modelBuilder.Entity("EcommerceBackend.DataAccess.Models.Cart", b =>
@@ -871,11 +818,6 @@ namespace EcommerceBackend.DataAccess.Migrations
                         .HasConstraintName("FK__User__Role_id__267ABA7A");
 
                     b.Navigation("Role");
-                });
-
-            modelBuilder.Entity("EcommerceBackend.DataAccess.Models.Blog", b =>
-                {
-                    b.Navigation("Comments");
                 });
 
             modelBuilder.Entity("EcommerceBackend.DataAccess.Models.BlogCategory", b =>

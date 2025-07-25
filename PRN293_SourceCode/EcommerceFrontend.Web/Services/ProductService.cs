@@ -27,6 +27,7 @@ namespace EcommerceFrontend.Web.Services
         Task<bool> UpdateProductAsync(int id, ProductDTO product);
         Task<bool> CreateProductAsync(ProductDTO product);
         Task<bool> AddProductImageAsync(int productId, string imageUrl);
+        Task<string?> UploadProductImageAsync(int productId, IFormFile imageFile);
     }
 
     public class ProductService : IProductService
@@ -275,5 +276,33 @@ namespace EcommerceFrontend.Web.Services
             var responseContent = await response.Content.ReadAsStringAsync();
             return JsonSerializer.Deserialize<bool>(responseContent, _jsonOptions);
         }
+
+        public async Task<string?> UploadProductImageAsync(int productId, IFormFile imageFile)
+        {
+            try
+            {
+                using var formData = new MultipartFormDataContent();
+                using var streamContent = new StreamContent(imageFile.OpenReadStream());
+                formData.Add(streamContent, "imageFile", imageFile.FileName);
+                formData.Add(new StringContent(productId.ToString()), "productId");
+
+                var response = await _httpClient.PostAsync("/api/product/upload-image", formData);
+                response.EnsureSuccessStatusCode();
+                
+                var responseContent = await response.Content.ReadAsStringAsync();
+                var result = JsonSerializer.Deserialize<UploadImageResponse>(responseContent, _jsonOptions);
+                return result?.ImageUrl;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error uploading product image");
+                return null;
+            }
+        }
+    }
+
+    public class UploadImageResponse
+    {
+        public string ImageUrl { get; set; } = string.Empty;
     }
 } 

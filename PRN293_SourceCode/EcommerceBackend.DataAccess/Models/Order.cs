@@ -17,6 +17,9 @@ namespace EcommerceBackend.DataAccess.Models
         public int? PaymentMethodId { get; set; }
         public int? OrderStatusId { get; set; }
         public string? OrderNote { get; set; }
+        public string? ShippingAddress { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
 
         public virtual User? Customer { get; set; }
         public virtual OrderStatus? OrderStatus { get; set; }

@@ -32,6 +32,7 @@ public class IndexModel : PageModel
     public int TotalPages { get; set; }
     public string? ErrorMessage { get; set; }
     public List<CategoryModel> Categories { get; set; } = new();
+    public string ApiBaseUrl => _apiSettings.BaseUrl;
 
     public async Task<IActionResult> OnGetAsync(
         string? name = null,

@@ -4,12 +4,16 @@ using EcommerceFrontend.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using System.IO;
+using Microsoft.Extensions.Options;
+using EcommerceFrontend.Web.Models.Sale;
 
 namespace EcommerceFrontend.Web.Pages.Admin.Products
 {
     public class EditModel : PageModel
     {
         private readonly IProductService _productService;
+        private readonly ApiSettings _apiSettings;
+
         [BindProperty]
         public ProductDTO Product { get; set; } = new ProductDTO();
         [BindProperty]
@@ -18,10 +22,12 @@ namespace EcommerceFrontend.Web.Pages.Admin.Products
         public List<string> AttributeValues { get; set; } = new List<string>();
         public Dictionary<string, List<string>> Attributes { get; set; } = new();
         public string? Message { get; set; }
+        public string ApiBaseUrl => _apiSettings.BaseUrl;
 
-        public EditModel(IProductService productService)
+        public EditModel(IProductService productService, IOptions<ApiSettings> apiSettings)
         {
             _productService = productService;
+            _apiSettings = apiSettings.Value ?? throw new ArgumentNullException(nameof(apiSettings), "ApiSettings is not configured.");
         }
 
         public async Task<IActionResult> OnGetAsync(int id)
@@ -48,20 +54,19 @@ namespace EcommerceFrontend.Web.Pages.Admin.Products
             // Xử lý upload ảnh nếu có file
             if (imageFile != null && imageFile.Length > 0)
             {
-                var uploadsFolder = Path.Combine("wwwroot", "images", "products");
-                if (!Directory.Exists(uploadsFolder))
+                // Gọi API để upload ảnh thay vì lưu file trực tiếp
+                var imageUrl = await _productService.UploadProductImageAsync(id, imageFile);
+                if (!string.IsNullOrEmpty(imageUrl))
                 {
-                    Directory.CreateDirectory(uploadsFolder);
+                    // Ảnh đã được upload thành công, URL đã được trả về từ API
+                    // Không cần gọi AddProductImageAsync vì API đã tự động lưu vào DB
                 }
-                var fileName = $"product_{id}_{DateTime.Now.Ticks}{Path.GetExtension(imageFile.FileName)}";
-                var filePath = Path.Combine(uploadsFolder, fileName);
-                using (var stream = new FileStream(filePath, FileMode.Create))
+                else
                 {
-                    await imageFile.CopyToAsync(stream);
+                    Message = "Upload ảnh thất bại!";
+                    Attributes = await _productService.GetProductAttributesAsync(id);
+                    return Page();
                 }
-                var imageUrl = $"/images/products/{fileName}";
-                // Gọi service để thêm ảnh vào DB
-                await _productService.AddProductImageAsync(id, imageUrl);
             }
 
             var result = await _productService.UpdateProductAsync(id, Product);

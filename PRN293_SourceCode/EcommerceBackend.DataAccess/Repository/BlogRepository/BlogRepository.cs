@@ -19,10 +19,10 @@ namespace EcommerceBackend.DataAccess.Repository.BlogRepository
         }
 
         public async Task<IEnumerable<Blog>> GetAllAsync() =>
-            await _context.Blogs.Include(b => b.BlogCategory).ToListAsync();
+            await _context.Blogs.Include(b => b.BlogCategory).Include(b => b.User).ToListAsync();
 
         public async Task<Blog?> GetByIdAsync(int id) =>
-            await _context.Blogs.Include(b => b.BlogCategory).FirstOrDefaultAsync(b => b.BlogId == id);
+            await _context.Blogs.Include(b => b.BlogCategory).Include(b => b.User).FirstOrDefaultAsync(b => b.BlogId == id);
 
         public async Task AddAsync(Blog blog)
         {
@@ -51,18 +51,14 @@ namespace EcommerceBackend.DataAccess.Repository.BlogRepository
             throw new NotImplementedException();
         }
 
-        public Task DeleteAsync(Blog blog)
-        {
-            throw new NotImplementedException();
-        }
         public async Task<IEnumerable<Blog>> GetPagedAsync(int page, int pageSize)
         {
             return await _context.Blogs
-                .OrderByDescending(b => b.BlogId)
+                .Include(b => b.BlogCategory)
+                .Include(b => b.User)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
         }
-
     }
 }

@@ -61,6 +61,100 @@
 <link rel="stylesheet" type="text/css" href="~/vendor/slick/slick.css" />
 <link rel="stylesheet" type="text/css" href="~/vendor/slick/slick-theme.css" />
 
+@section Styles {
+    <link rel="stylesheet" type="text/css" href="~/vendor/slick/slick-theme.css" />
+    <style>
+        /* Slick Slider Styles */
+        .wrap-slick2 {
+            position: relative;
+        }
+        
+        .slick2 {
+            margin: 0 -15px;
+        }
+        
+        .item-slick2 {
+            padding: 0 15px;
+        }
+        
+        .block2 {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .block2:hover {
+            transform: translateY(-5px);
+        }
+        
+        .block2-pic {
+            position: relative;
+            height: 300px;
+            overflow: hidden;
+        }
+        
+        .block2-pic img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .block2-btn {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .block2-pic:hover .block2-btn {
+            opacity: 1;
+        }
+        
+        .block2-txt {
+            padding: 15px;
+        }
+        
+        .stext-104 {
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 8px;
+            display: block;
+        }
+        
+        .stext-105 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #e65540;
+        }
+        
+        .btn-addwish-b2 {
+            position: relative;
+            display: block;
+        }
+        
+        .icon-heart1, .icon-heart2 {
+            width: 20px;
+            height: 20px;
+        }
+        
+        .icon-heart2 {
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0;
+        }
+        
+        .btn-addwish-b2:hover .icon-heart2 {
+            opacity: 1;
+        }
+    </style>
+}
+
 <!-- ===== HEADER, SLIDER, BANNER từ trang home gốc ===== -->
 <header class="header-v2">
     <!-- Header desktop -->
@@ -287,359 +381,566 @@
     </div>
 </div>
 
-<!-- ===== PHẦN SẢN PHẨM từ Products/Index.cshtml ===== -->
-<section class="bg0 p-t-23 p-b-140">
+<!-- ===== PHẦN SẢN PHẨM MỚI - STORE OVERVIEW ===== -->
+<section class="sec-product bg0 p-t-100 p-b-50">
     <div class="container">
-        <div class="p-b-10">
-            <h3 class="ltext-103 cl5">
-                Sản phẩm
+        <div class="p-b-32">
+            <h3 class="ltext-105 cl5 txt-center respon1">
+                Store Overview
             </h3>
         </div>
-        <div class="flex-w flex-sb-m p-b-52">
-            <div class="flex-w flex-l-m filter-tope-group m-tb-10">
-                <a asp-page="/CommonPage/Homepage" class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5 how-active1" asp-route-category="">Tất cả sản phẩm</a>
-                @if (Model.Categories != null && Model.Categories.Any())
-                {
-                    foreach (var cat in Model.Categories)
-                    {
-                        <a asp-page="/CommonPage/Homepage" asp-route-category="@cat.ProductCategoryTitle" class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5">
-                            @cat.ProductCategoryTitle
-                        </a>
-                    }
-                }
-                <form method="get" class="d-flex align-items-center ms-4">
-                    <input type="hidden" name="category" value="@Model.SearchParams.Category" />
-                    <input type="number" name="minPrice" class="form-control form-control-sm me-2" placeholder="Giá từ" value="@Model.SearchParams.MinPrice" style="width: 100px;" min="0" />
-                    <input type="number" name="maxPrice" class="form-control form-control-sm me-2" placeholder="Đến" value="@Model.SearchParams.MaxPrice" style="width: 100px;" min="0" />
-                    <button type="submit" class="btn btn-sm btn-primary">Lọc giá</button>
-                </form>
+
+        <!-- Tab01 -->
+        <div class="tab01">
+            <!-- Nav tabs -->
+            <ul class="nav nav-tabs" role="tablist">
+                <li class="nav-item p-b-10">
+                    <a class="nav-link active" data-toggle="tab" href="#best-seller" role="tab">Best Seller</a>
+                </li>
+                <li class="nav-item p-b-10">
+                    <a class="nav-link" data-toggle="tab" href="#featured" role="tab">Featured</a>
+                </li>
+                <li class="nav-item p-b-10">
+                    <a class="nav-link" data-toggle="tab" href="#sale" role="tab">Sale</a>
+                </li>
+                <li class="nav-item p-b-10">
+                    <a class="nav-link" data-toggle="tab" href="#top-rate" role="tab">Top Rate</a>
+                </li>
+            </ul>
+
+            <!-- Tab panes -->
+            <div class="tab-content p-t-50">
+                <!-- Best Seller -->
+                <div class="tab-pane fade show active" id="best-seller" role="tabpanel">
+                    <div class="wrap-slick2">
+                        <div class="slick2">
+                            @foreach (var product in Model.Products.Take(8))
+                            {
+                                <div class="item-slick2 p-l-15 p-r-15 p-t-15 p-b-15">
+                                    <div class="block2">
+                                        <div class="block2-pic hov-img0">
+                                            <img src="@(product.Images.Any() ? product.GetFirstImageUrl(Model.ApiBaseUrl) : Url.Content("~/images/product-min-01.jpg"))" alt="IMG-PRODUCT">
+                                            <a href="/Products/Details/@product.ProductId" class="block2-btn flex-c-m stext-103 cl2 size-102 bg0 bor2 hov-btn1 p-lr-15 trans-04">
+                                                Quick View
+                                            </a>
+                                        </div>
+                                        <div class="block2-txt flex-w flex-t p-t-14">
+                                            <div class="block2-txt-child1 flex-col-l ">
+                                                <a href="/Products/Details/@product.ProductId" class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6">
+                                                    @product.Name
+                                                </a>
+                                                <span class="stext-105 cl3">
+                                                    $@product.BasePrice.ToString("N2")
+                                                </span>
+                                            </div>
+                                            <div class="block2-txt-child2 flex-r p-t-3">
+                                                <a href="/Products/Details/@product.ProductId" class="btn-addwish-b2 dis-block pos-relative">
+                                                    <img class="icon-heart1 dis-block trans-04" src="~/images/icons/icon-heart-01.png" alt="ICON">
+                                                    <img class="icon-heart2 dis-block trans-04 ab-t-l" src="~/images/icons/icon-heart-02.png" alt="ICON">
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Featured -->
+                <div class="tab-pane fade" id="featured" role="tabpanel">
+                    <div class="wrap-slick2">
+                        <div class="slick2">
+                            @if (Model.FeaturedProducts != null && Model.FeaturedProducts.Any())
+                            {
+                                @foreach (var product in Model.FeaturedProducts)
+                                {
+                                    <div class="item-slick2 p-l-15 p-r-15 p-t-15 p-b-15">
+                                        <div class="block2">
+                                            <div class="block2-pic hov-img0">
+                                                <img src="@(product.Images.Any() ? product.GetFirstImageUrl(Model.ApiBaseUrl) : Url.Content("~/images/product-min-01.jpg"))" alt="IMG-PRODUCT">
+                                                <a href="/Products/Details/@product.ProductId" class="block2-btn flex-c-m stext-103 cl2 size-102 bg0 bor2 hov-btn1 p-lr-15 trans-04">
+                                                    Quick View
+                                                </a>
+                                            </div>
+                                            <div class="block2-txt flex-w flex-t p-t-14">
+                                                <div class="block2-txt-child1 flex-col-l ">
+                                                    <a href="/Products/Details/@product.ProductId" class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6">
+                                                        @product.Name
+                                                    </a>
+                                                    <span class="stext-105 cl3">
+                                                        $@product.BasePrice.ToString("N2")
+                                                    </span>
+                                                </div>
+                                                <div class="block2-txt-child2 flex-r p-t-3">
+                                                    <a href="/Products/Details/@product.ProductId" class="btn-addwish-b2 dis-block pos-relative">
+                                                        <img class="icon-heart1 dis-block trans-04" src="~/images/icons/icon-heart-01.png" alt="ICON">
+                                                        <img class="icon-heart2 dis-block trans-04 ab-t-l" src="~/images/icons/icon-heart-02.png" alt="ICON">
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <div class="col-12 text-center">
+                                    <p>No featured products available.</p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sale -->
+                <div class="tab-pane fade" id="sale" role="tabpanel">
+                    <div class="wrap-slick2">
+                        <div class="slick2">
+                            @if (Model.SaleProducts != null && Model.SaleProducts.Any())
+                            {
+                                @foreach (var product in Model.SaleProducts)
+                                {
+                                    <div class="item-slick2 p-l-15 p-r-15 p-t-15 p-b-15">
+                                        <div class="block2">
+                                            <div class="block2-pic hov-img0">
+                                                <img src="@(product.Images.Any() ? product.GetFirstImageUrl(Model.ApiBaseUrl) : Url.Content("~/images/product-min-01.jpg"))" alt="IMG-PRODUCT">
+                                                <a href="/Products/Details/@product.ProductId" class="block2-btn flex-c-m stext-103 cl2 size-102 bg0 bor2 hov-btn1 p-lr-15 trans-04">
+                                                    Quick View
+                                                </a>
+                                            </div>
+                                            <div class="block2-txt flex-w flex-t p-t-14">
+                                                <div class="block2-txt-child1 flex-col-l ">
+                                                    <a href="/Products/Details/@product.ProductId" class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6">
+                                                        @product.Name
+                                                    </a>
+                                                    <span class="stext-105 cl3">
+                                                        $@product.BasePrice.ToString("N2")
+                                                    </span>
+                                                </div>
+                                                <div class="block2-txt-child2 flex-r p-t-3">
+                                                    <a href="/Products/Details/@product.ProductId" class="btn-addwish-b2 dis-block pos-relative">
+                                                        <img class="icon-heart1 dis-block trans-04" src="~/images/icons/icon-heart-01.png" alt="ICON">
+                                                        <img class="icon-heart2 dis-block trans-04 ab-t-l" src="~/images/icons/icon-heart-02.png" alt="ICON">
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <div class="col-12 text-center">
+                                    <p>No sale products available.</p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top Rate -->
+                <div class="tab-pane fade" id="top-rate" role="tabpanel">
+                    <div class="wrap-slick2">
+                        <div class="slick2">
+                            @if (Model.TopRateProducts != null && Model.TopRateProducts.Any())
+                            {
+                                @foreach (var product in Model.TopRateProducts)
+                                {
+                                    <div class="item-slick2 p-l-15 p-r-15 p-t-15 p-b-15">
+                                        <div class="block2">
+                                            <div class="block2-pic hov-img0">
+                                                <img src="@(product.Images.Any() ? product.GetFirstImageUrl(Model.ApiBaseUrl) : Url.Content("~/images/product-min-01.jpg"))" alt="IMG-PRODUCT">
+                                                <a href="/Products/Details/@product.ProductId" class="block2-btn flex-c-m stext-103 cl2 size-102 bg0 bor2 hov-btn1 p-lr-15 trans-04">
+                                                    Quick View
+                                                </a>
+                                            </div>
+                                            <div class="block2-txt flex-w flex-t p-t-14">
+                                                <div class="block2-txt-child1 flex-col-l ">
+                                                    <a href="/Products/Details/@product.ProductId" class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6">
+                                                        @product.Name
+                                                    </a>
+                                                    <span class="stext-105 cl3">
+                                                        $@product.BasePrice.ToString("N2")
+                                                    </span>
+                                                </div>
+                                                <div class="block2-txt-child2 flex-r p-t-3">
+                                                    <a href="/Products/Details/@product.ProductId" class="btn-addwish-b2 dis-block pos-relative">
+                                                        <img class="icon-heart1 dis-block trans-04" src="~/images/icons/icon-heart-01.png" alt="ICON">
+                                                        <img class="icon-heart2 dis-block trans-04 ab-t-l" src="~/images/icons/icon-heart-02.png" alt="ICON">
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <div class="col-12 text-center">
+                                    <p>No top rate products available.</p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="container mt-4">
-            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    </div>
+</section>
+
+<!-- OUR BLOG SECTION -->
+<section class="sec-blog bg0 p-t-60 p-b-90">
+    <div class="container">
+        <div class="p-b-66">
+            <h3 class="ltext-105 cl5 txt-center respon1">
+                Our Blogs
+            </h3>
+        </div>
+        <div class="row">
+            @if (Model.Blogs != null && Model.Blogs.Any())
             {
-                <div class="alert alert-danger" role="alert">
-                    @Model.ErrorMessage
-                </div>
-            }
-            <div class="card mb-4">
-                <div class="card-body">
-                    <form method="get" class="row g-3 align-items-end">
-                        <div class="col-md-4">
-                            <label for="name" class="form-label">Product Name</label>
-                            <input type="text" class="form-control" id="name" name="name" value="@Model.SearchParams.Name">
-                        </div>
-                        <div class="col-md-4">
-                            <label for="category" class="form-label">Category</label>
-                            <input type="text" class="form-control" id="category" name="category" value="@Model.SearchParams.Category">
-                        </div>
-                        <div class="col-md-2">
-                            <label for="minPrice" class="form-label">Min Price</label>
-                            <input type="number" class="form-control" id="minPrice" name="minPrice" value="@Model.SearchParams.MinPrice">
-                        </div>
-                        <div class="col-md-2">
-                            <label for="maxPrice" class="form-label">Max Price</label>
-                            <input type="number" class="form-control" id="maxPrice" name="maxPrice" value="@Model.SearchParams.MaxPrice">
-                        </div>
-                        <div class="col-md-2">
-                            <label for="pageSize" class="form-label">Page Size</label>
-                            <select class="form-select" id="pageSize" name="pageSize" onchange="this.form.submit()">
-                                @foreach (var size in new int[] { 8, 12, 16, 20, 32, 50, 100 })
-                                {
-                                    if (Model.PageSize == size)
-                                    {
-                                        <option value="@size" selected>@size</option>
-                                    }
-                                    else
-                                    {
-                                        <option value="@size">@size</option>
-                                    }
-                                }
-                            </select>
-                        </div>
-                        <div class="col-12">
-                            <button type="submit" class="btn btn-primary">Search</button>
-                            <a asp-page="/CommonPage/Homepage" class="btn btn-secondary">Clear</a>
-                        </div>
-                    </form>
-                </div>
-            </div>
-            @{
-                int productsCount = Model.Products.Count;
-                int cols = 4;
-                int remainder = productsCount % cols;
-                int emptyCols = remainder == 0 ? 0 : cols - remainder;
-            }
-            <div class="row row-cols-1 row-cols-md-4 g-4">
-                @foreach (var product in Model.Products)
+                foreach (var blog in Model.Blogs)
                 {
-                    <div class="col h-100">
-                        <div class="card h-100">
-                            <img src="@(product.Images.Any() ? product.Images.First() : Url.Content("~/images/product-min-01.jpg"))" class="card-img-top" alt="@product.Name">
-                            <div class="card-body">
-                                <h5 class="card-title">@product.Name</h5>
-                                <p class="card-text">@product.Description</p>
-                                <p class="card-text">
-                                    <small class="text-muted">Brand: @product.Brand</small><br>
-                                    <small class="text-muted">Category: @product.CategoryName</small>
-                                </p>
-                                <p class="card-text" id="selected-price-card-@product.ProductId" data-base-price="@product.BasePrice">
-                                    <strong>Base Price: $@product.BasePrice.ToString("N2")</strong>
-                                </p>
-                                <div id="variant-details-@product.ProductId" style="display:none;">
-                                    <span class="supplier-info"></span><br />
-                                    <span class="material-info"></span>
-                                </div>
+                    <div class="col-sm-6 col-md-4 p-b-40">
+                        <div class="blog-item">
+                            <div class="hov-img0">
+                                <a href="/Blog/Details/@blog.BlogId">
+                                    <img src="@(string.IsNullOrEmpty(blog.BlogImage) ? Url.Content("~/images/blog-01.jpg") : blog.BlogImage)" alt="IMG-BLOG">
+                                </a>
                             </div>
-                            <div class="card-footer">
-                                <div class="btn-group w-100">
-                                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#variantModal-@product.ProductId">View Details</button>
+                            <div class="p-t-15">
+                                <div class="stext-107 flex-w p-b-14">
+                                    <span class="m-r-3">
+                                        <span class="cl4">By</span> @(string.IsNullOrEmpty(blog.UserName) ? "Admin" : blog.UserName)
+                                        <span class="cl12 m-l-4 m-r-6">|</span>
+                                    </span>
+                                    <span>
+                                        <span class="cl4">@(blog.PublishedDate?.ToString("dd MMM yyyy") ?? blog.CreatedDate?.ToString("dd MMM yyyy") ?? "N/A")</span>
+                                    </span>
                                 </div>
-                            </div>
-                        </div>
-                        <!-- Variant Selection Modal -->
-                        <div class="modal fade" id="variantModal-@product.ProductId" tabindex="-1" aria-labelledby="variantModalLabel-@product.ProductId" aria-hidden="true">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="variantModalLabel-@product.ProductId">@product.Name - Select Variants</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        @if (product.Variants.Any())
-                                        {
-                                            var firstVariant = product.Variants.First();
-                                            var attributes = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, List<string>>>(firstVariant.Attributes);
-                                            var attributeNames = attributes?.Keys.ToList() ?? new List<string>();
-                                            var variantData = product.Variants.Select(v => new
-                                            {
-                                                Attributes = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, List<string>>>(v.Attributes),
-                                                Variants = v.Variants
-                                            }).ToList();
-                                            <div class="variant-selection">
-                                                @for (int i = 0; i < attributeNames.Count; i++)
-                                                {
-                                                    var attrName = attributeNames[i];
-                                                    <div class="mb-2 variant-option"
-                                                         data-product-id="@product.ProductId"
-                                                         data-attribute="@attrName"
-                                                         style="display: @(i == 0 ? "block" : "none")">
-                                                        <label class="form-label">@attrName:</label>
-                                                        <select class="form-select variant-select"
-                                                                data-product-id="@product.ProductId"
-                                                                data-attribute="@attrName"
-                                                                data-index="@i">
-                                                            <option value="">Select @attrName</option>
-                                                            @foreach (var value in attributes[attrName].Distinct())
-                                                            {
-                                                                <option value="@value">@value</option>
-                                                            }
-                                                        </select>
-                                                    </div>
-                                                }
-                                                <div class="selected-price mt-3" id="selected-price-@product.ProductId" data-base-price="@product.BasePrice.ToString("N2")">
-                                                    <strong>Base Price: $@product.BasePrice.ToString("N2")</strong>
-                                                </div>
-                                                <div class="variant-details mt-2" id="variant-details-@product.ProductId" style="display: none;">
-                                                    <small class="text-muted">
-                                                        <span class="supplier-info"></span><br>
-                                                        <span class="material-info"></span>
-                                                    </small>
-                                                </div>
-                                                <script type="application/json" id="variant-data-@product.ProductId">
-                                                    @Html.Raw(System.Text.Json.JsonSerializer.Serialize(variantData, new System.Text.Json.JsonSerializerOptions
-                                                    {
-                                                        WriteIndented = false,
-                                                        PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase
-                                                    }))
-                                                </script>
-                                            </div>
-                                        }
-                                    </div>
+                                <h4 class="p-b-12">
+                                    <a href="/Blog/Details/@blog.BlogId" class="mtext-101 cl2 hov-cl1 trans-04">
+                                        @(string.IsNullOrEmpty(blog.BlogTittle) ? "Blog Title" : blog.BlogTittle)
+                                    </a>
+                                </h4>
+                                <p class="stext-108 cl6">
+                                    @(string.IsNullOrEmpty(blog.BlogSummary) ? "Click to read more about this interesting blog post..." : blog.BlogSummary)
+                                </p>
+                                <div class="flex-w flex-sb-m p-t-18">
+                                    <span class="stext-107 cl6 p-r-3">
+                                        <i class="fa fa-eye"></i> @blog.ViewCount views
+                                    </span>
+                                    <a href="/Blog/Details/@blog.BlogId" class="stext-101 cl2 hov-cl1 trans-04 m-t-10">
+                                        Read More
+                                        <i class="fa fa-long-arrow-right m-l-9"></i>
+                                    </a>
                                 </div>
                             </div>
                         </div>
                     </div>
                 }
-                @for (int i = 0; i < emptyCols; i++)
-                {
-                    <div class="col h-100 invisible"></div>
-                }
-            </div>
-            <!-- Phân trang nếu có -->
-            <nav aria-label="Page navigation">
-                <ul class="pagination justify-content-center">
-                    @if (Model.PageIndex > 1)
-                    {
-                        <li class="page-item">
-                            <a class="page-link" asp-page="/CommonPage/Homepage" asp-route-pageIndex="@(Model.PageIndex - 1)" asp-route-category="@Model.SearchParams.Category" asp-route-name="@Model.SearchParams.Name" asp-route-minPrice="@Model.SearchParams.MinPrice" asp-route-maxPrice="@Model.SearchParams.MaxPrice">Previous</a>
-                        </li>
-                    }
-                    @for (int i = 1; i <= Model.TotalPages; i++)
-                    {
-                        <li class="page-item @(i == Model.PageIndex ? "active" : "")">
-                            <a class="page-link" asp-page="/CommonPage/Homepage" asp-route-pageIndex="@i" asp-route-category="@Model.SearchParams.Category" asp-route-name="@Model.SearchParams.Name" asp-route-minPrice="@Model.SearchParams.MinPrice" asp-route-maxPrice="@Model.SearchParams.MaxPrice">@i</a>
-                        </li>
-                    }
-                    @if (Model.PageIndex < Model.TotalPages)
-                    {
-                        <li class="page-item">
-                            <a class="page-link" asp-page="/CommonPage/Homepage" asp-route-pageIndex="@(Model.PageIndex + 1)" asp-route-category="@Model.SearchParams.Category" asp-route-name="@Model.SearchParams.Name" asp-route-minPrice="@Model.SearchParams.MinPrice" asp-route-maxPrice="@Model.SearchParams.MaxPrice">Next</a>
-                        </li>
-                    }
-                </ul>
-            </nav>
+            }
+            else
+            {
+                @* Dữ liệu mẫu cho blog khi không có blog nào *@
+                <div class="col-sm-6 col-md-4 p-b-40">
+                    <div class="blog-item">
+                        <div class="hov-img0">
+                            <a href="#">
+                                <img src="~/images/blog-01.jpg" alt="IMG-BLOG">
+                            </a>
+                        </div>
+                        <div class="p-t-15">
+                            <div class="stext-107 flex-w p-b-14">
+                                <span class="m-r-3">
+                                    <span class="cl4">By</span> Admin
+                                    <span class="cl12 m-l-4 m-r-6">|</span>
+                                </span>
+                                <span>
+                                    <span class="cl4">22 Jan 2024</span>
+                                </span>
+                            </div>
+                            <h4 class="p-b-12">
+                                <a href="#" class="mtext-101 cl2 hov-cl1 trans-04">
+                                    8 Inspiring Ways to Wear Dresses in the Winter
+                                </a>
+                            </h4>
+                            <p class="stext-108 cl6">
+                                Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Fusce quis tempus elit...
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 col-md-4 p-b-40">
+                    <div class="blog-item">
+                        <div class="hov-img0">
+                            <a href="#">
+                                <img src="~/images/blog-02.jpg" alt="IMG-BLOG">
+                            </a>
+                        </div>
+                        <div class="p-t-15">
+                            <div class="stext-107 flex-w p-b-14">
+                                <span class="m-r-3">
+                                    <span class="cl4">By</span> Admin
+                                    <span class="cl12 m-l-4 m-r-6">|</span>
+                                </span>
+                                <span>
+                                    <span class="cl4">18 Jan 2024</span>
+                                </span>
+                            </div>
+                            <h4 class="p-b-12">
+                                <a href="#" class="mtext-101 cl2 hov-cl1 trans-04">
+                                    The Great Big List of Men's Gifts for the Holidays
+                                </a>
+                            </h4>
+                            <p class="stext-108 cl6">
+                                Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Fusce quis tempus elit...
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 col-md-4 p-b-40">
+                    <div class="blog-item">
+                        <div class="hov-img0">
+                            <a href="#">
+                                <img src="~/images/blog-03.jpg" alt="IMG-BLOG">
+                            </a>
+                        </div>
+                        <div class="p-t-15">
+                            <div class="stext-107 flex-w p-b-14">
+                                <span class="m-r-3">
+                                    <span class="cl4">By</span> Admin
+                                    <span class="cl12 m-l-4 m-r-6">|</span>
+                                </span>
+                                <span>
+                                    <span class="cl4">16 Jan 2024</span>
+                                </span>
+                            </div>
+                            <h4 class="p-b-12">
+                                <a href="#" class="mtext-101 cl2 hov-cl1 trans-04">
+                                    5 Winter-to-Spring Fashion Trends to Try Now
+                                </a>
+                            </h4>
+                            <p class="stext-108 cl6">
+                                Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Fusce quis tempus elit...
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            }
         </div>
     </div>
 </section>
 
+<!-- FOOTER -->
+<footer class="bg3 p-t-75 p-b-32">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-6 col-lg-3 p-b-50">
+                <h4 class="stext-301 cl0 p-b-30">
+                    Categories
+                </h4>
+                <ul>
+                    <li class="p-b-10">
+                        <a href="#" class="stext-107 cl7 hov-cl1 trans-04">
+                            Women
+                        </a>
+                    </li>
+                    <li class="p-b-10">
+                        <a href="#" class="stext-107 cl7 hov-cl1 trans-04">
+                            Men
+                        </a>
+                    </li>
+                    <li class="p-b-10">
+                        <a href="#" class="stext-107 cl7 hov-cl1 trans-04">
+                            Shoes
+                        </a>
+                    </li>
+                    <li class="p-b-10">
+                        <a href="#" class="stext-107 cl7 hov-cl1 trans-04">
+                            Watches
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="col-sm-6 col-lg-3 p-b-50">
+                <h4 class="stext-301 cl0 p-b-30">
+                    Help
+                </h4>
+                <ul>
+                    <li class="p-b-10">
+                        <a href="#" class="stext-107 cl7 hov-cl1 trans-04">
+                            Track Order
+                        </a>
+                    </li>
+                    <li class="p-b-10">
+                        <a href="#" class="stext-107 cl7 hov-cl1 trans-04">
+                            Returns
+                        </a>
+                    </li>
+                    <li class="p-b-10">
+                        <a href="#" class="stext-107 cl7 hov-cl1 trans-04">
+                            Shipping
+                        </a>
+                    </li>
+                    <li class="p-b-10">
+                        <a href="#" class="stext-107 cl7 hov-cl1 trans-04">
+                            FAQs
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="col-sm-6 col-lg-3 p-b-50">
+                <h4 class="stext-301 cl0 p-b-30">
+                    GET IN TOUCH
+                </h4>
+                <p class="stext-107 cl7 size-201">
+                    Any questions? Let us know in store at 8th floor, 379 Hudson St, New York, NY 10018 or call us on (+1) 96 716 6879
+                </p>
+                <div class="p-t-27">
+                    <a href="#" class="fs-18 cl7 hov-cl1 trans-04 m-r-16">
+                        <i class="fa fa-facebook"></i>
+                    </a>
+                    <a href="#" class="fs-18 cl7 hov-cl1 trans-04 m-r-16">
+                        <i class="fa fa-instagram"></i>
+                    </a>
+                    <a href="#" class="fs-18 cl7 hov-cl1 trans-04 m-r-16">
+                        <i class="fa fa-pinterest-p"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-sm-6 col-lg-3 p-b-50">
+                <h4 class="stext-301 cl0 p-b-30">
+                    Newsletter
+                </h4>
+                <form>
+                    <div class="wrap-input1 w-full p-b-4">
+                        <input class="input1 bg-none plh1 stext-107 cl7" type="text" name="email" placeholder="email@example.com">
+                        <div class="focus-input1 trans-04"></div>
+                    </div>
+                    <div class="p-t-18">
+                        <button class="flex-c-m stext-101 cl0 size-103 bg1 bor1 hov-btn2 p-lr-15 trans-04">
+                            Subscribe
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="p-t-40">
+            <div class="flex-c-m flex-w p-b-18">
+                <a href="#" class="m-all-1">
+                    <img src="~/images/icons/icon-pay-01.png" alt="ICON-PAY">
+                </a>
+                <a href="#" class="m-all-1">
+                    <img src="~/images/icons/icon-pay-02.png" alt="ICON-PAY">
+                </a>
+                <a href="#" class="m-all-1">
+                    <img src="~/images/icons/icon-pay-03.png" alt="ICON-PAY">
+                </a>
+                <a href="#" class="m-all-1">
+                    <img src="~/images/icons/icon-pay-04.png" alt="ICON-PAY">
+                </a>
+                <a href="#" class="m-all-1">
+                    <img src="~/images/icons/icon-pay-05.png" alt="ICON-PAY">
+                </a>
+            </div>
+            <p class="stext-107 cl6 txt-center">
+                Copyright &copy; 2024 All rights reserved | Made with <i class="fa fa-heart-o" aria-hidden="true"></i> by <a href="#" target="_blank">Your Company</a>
+            </p>
+        </div>
+    </div>
+</footer>
+
 @section Scripts {
+    <style>
+        /* Ensure tabs work properly */
+        .tab-content > .tab-pane {
+            display: none;
+        }
+        .tab-content > .active {
+            display: block;
+        }
+        .nav-tabs .nav-link {
+            cursor: pointer;
+        }
+        .nav-tabs .nav-link.active {
+            background-color: #e6e6e6;
+            border-color: #dee2e6 #dee2e6 #fff;
+        }
+    </style>
     <script src="~/vendor/slick/slick.min.js"></script>
     <script>
         $(document).ready(function(){
-            $('.slick1').slick({
-                slidesToShow: 1,
-                slidesToScroll: 1,
-                fade: true,
-                dots: true,
-                arrows: true,
-                autoplay: true,
-                autoplaySpeed: 4000
+            // Debug: Log tab click events
+            $('a[data-toggle="tab"]').on('click', function (e) {
+                console.log('Tab clicked:', $(this).text(), 'href:', $(this).attr('href'));
             });
-        });
-        document.addEventListener('DOMContentLoaded', function() {
-            document.querySelectorAll('.variant-select').forEach(select => {
-                select.addEventListener('change', function() {
-                    const productId = this.dataset.productId;
-                    const currentIndex = parseInt(this.dataset.index);
-                    const priceElement = document.getElementById(`selected-price-${productId}`);
-                    const cardPriceElement = document.getElementById(`selected-price-card-${productId}`);
-                    const detailsElement = document.getElementById(`variant-details-${productId}`);
-                    const basePrice = priceElement.dataset.basePrice;
-                    const variantData = JSON.parse(document.getElementById(`variant-data-${productId}`).textContent);
 
-                    // Get all variant options and selects for this product
-                    const allOptions = document.querySelectorAll(`.variant-option[data-product-id="${productId}"]`);
-                    const allSelects = document.querySelectorAll(`.variant-select[data-product-id="${productId}"]`);
+            // Initialize Bootstrap tabs
+            $('a[data-toggle="tab"]').on('click', function (e) {
+                e.preventDefault();
+                $(this).tab('show');
+            });
 
-                    // Collect all selected attributes
-                    const selectedAttributes = {};
-                    let allAttributesSelected = true;
-                    for (let i = 0; i < allSelects.length; i++) {
-                        const select = allSelects[i];
-                        const attrName = select.dataset.attribute;
-                        const value = select.value;
-                        if (value) {
-                            selectedAttributes[attrName] = value;
-                        } else {
-                            allAttributesSelected = false;
-                        }
-                    }
+            // Wait a bit for DOM to be fully ready
+            setTimeout(function() {
+                // Debug: Check if products exist
+                console.log('Featured products count:', $('.tab-pane#featured .item-slick2').length);
+                console.log('Sale products count:', $('.tab-pane#sale .item-slick2').length);
+                console.log('Top rate products count:', $('.tab-pane#top-rate .item-slick2').length);
 
-                    // Reset and enable all options for selects after the current one
-                    for (let i = currentIndex + 1; i < allSelects.length; i++) {
-                        const select = allSelects[i];
-                        select.value = '';
-                        Array.from(select.options).forEach(option => {
-                            if (option.value !== '') option.disabled = false;
-                        });
-                        allOptions[i].style.display = 'none';
-                    }
-
-                    // Show next attribute select if available
-                    if (currentIndex < allOptions.length - 1 && this.value) {
-                        const nextOption = allOptions[currentIndex + 1];
-                        nextOption.style.display = 'block';
-                        const nextSelect = nextOption.querySelector('select');
-                        const nextAttrName = nextSelect.dataset.attribute;
-
-                        // Tìm các giá trị hợp lệ cho dropdown tiếp theo dựa trên các thuộc tính đã chọn trước đó
-                        const availableValues = new Set();
-                        variantData.forEach(v => {
-                            v.variants.forEach(variant => {
-                                let match = true;
-                                for (let j = 0; j <= currentIndex; j++) {
-                                    const prevAttr = allSelects[j].dataset.attribute;
-                                    const prevValue = allSelects[j].value;
-                                    if (prevValue && variant[prevAttr] !== prevValue) {
-                                        match = false;
-                                        break;
+                // Initialize slick2 for each tab
+                $('.slick2').each(function(){
+                    if (!$(this).hasClass('slick-initialized')) {
+                        $(this).slick({
+                            slidesToShow: 4,
+                            slidesToScroll: 1,
+                            autoplay: false,
+                            infinite: true,
+                            speed: 300,
+                            dots: false,
+                            arrows: true,
+                            responsive: [
+                                {
+                                    breakpoint: 991,
+                                    settings: {
+                                        slidesToShow: 3,
+                                        slidesToScroll: 1
+                                    }
+                                },
+                                {
+                                    breakpoint: 767,
+                                    settings: {
+                                        slidesToShow: 2,
+                                        slidesToScroll: 1
+                                    }
+                                },
+                                {
+                                    breakpoint: 480,
+                                    settings: {
+                                        slidesToShow: 1,
+                                        slidesToScroll: 1
                                     }
                                 }
-                                if (match) {
-                                    availableValues.add(variant[nextAttrName]);
-                                }
-                            });
-                        });
-
-                        Array.from(nextSelect.options).forEach(option => {
-                            if (option.value === '') return;
-                            option.disabled = !availableValues.has(option.value);
+                            ]
                         });
                     }
-
-                    // Nếu chưa chọn đủ thuộc tính, luôn hiển thị giá gốc
-                    if (!allAttributesSelected) {
-                        priceElement.innerHTML = `<strong>Base Price: $${basePrice}</strong>`;
-                        if(cardPriceElement) cardPriceElement.innerHTML = `<strong>Base Price: $${basePrice}</strong>`;
-                        detailsElement.style.display = 'none';
-                        return;
-                    }
-
-                    // Find matching variant when all attributes are selected
-                    const matchingVariant = variantData.find(v => {
-                        return v.variants.some(variant =>
-                            Object.entries(selectedAttributes).every(([key, value]) =>
-                                variant[key] === value
-                            )
-                        );
-                    });
-
-                    if (matchingVariant) {
-                        const matchingVariantInfo = matchingVariant.variants.find(variant =>
-                            Object.entries(selectedAttributes).every(([key, value]) =>
-                                variant[key] === value
-                            )
-                        );
-
-                        if (matchingVariantInfo) {
-                            priceElement.innerHTML = `<strong>Price: $${parseFloat(matchingVariantInfo.price).toFixed(2)}</strong>`;
-                            if(cardPriceElement) cardPriceElement.innerHTML = `<strong>Price: $${parseFloat(matchingVariantInfo.price).toFixed(2)}</strong>`;
-
-                            if (matchingVariantInfo.supplier || matchingVariantInfo.material) {
-                                detailsElement.style.display = 'block';
-                                detailsElement.querySelector('.supplier-info').textContent =
-                                    matchingVariantInfo.supplier ? `Supplier: ${matchingVariantInfo.supplier}` : '';
-                                detailsElement.querySelector('.material-info').textContent =
-                                    matchingVariantInfo.material ? `Material: ${matchingVariantInfo.material}` : '';
-                            } else {
-                                detailsElement.style.display = 'none';
-                            }
-                        }
-                    }
                 });
-            });
 
-            // Khởi tạo trạng thái ban đầu cho từng modal sản phẩm
-            document.querySelectorAll('[id^="variantModal-"]').forEach(modal => {
-                const productId = modal.id.replace('variantModal-', '');
-                const options = modal.querySelectorAll('.variant-option[data-product-id="' + productId + '"]');
-                options.forEach((option, idx) => {
-                    option.style.display = idx === 0 ? 'block' : 'none';
+                // Reinitialize slick2 when tab is shown
+                $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+                    var nameTab = $(e.target).attr('href'); 
+                    console.log('Tab shown:', nameTab);
+                    $(nameTab).find('.slick2').slick('reinit');          
                 });
-            });
-
-            // Khi đóng modal, reset lại giá ngoài card về base price
-            document.querySelectorAll('.modal').forEach(modal => {
-                modal.addEventListener('hidden.bs.modal', function(event) {
-                    const productId = modal.id.replace('variantModal-', '');
-                    const cardPriceElement = document.getElementById(`selected-price-card-${productId}`);
-                    const basePrice = cardPriceElement ? cardPriceElement.dataset.basePrice : null;
-                    if(cardPriceElement && basePrice) {
-                        cardPriceElement.innerHTML = `<strong>Base Price: $${basePrice}</strong>`;
-                    }
-                });
-            });
+            }, 100);
         });
     </script>
 }

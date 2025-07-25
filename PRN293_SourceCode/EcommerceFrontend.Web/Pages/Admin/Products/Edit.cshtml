@@ -8,7 +8,7 @@
     <div asp-validation-summary="All" class="text-danger"></div>
     <div class="form-group">
         <label>Ảnh sản phẩm</label>
-        <img id="product-image-preview" src="@(Model.Product.Images != null && Model.Product.Images.Any() ? Model.Product.Images.First() : "")" alt="Ảnh sản phẩm" style="max-width: 200px; display: block; margin-bottom: 10px;" />
+        <img id="product-image-preview" src="@(Model.Product.Images != null && Model.Product.Images.Any() ? Model.Product.GetFirstImageUrl(Model.ApiBaseUrl) : "")" alt="Ảnh sản phẩm" style="max-width: 200px; display: block; margin-bottom: 10px;" />
         <input type="file" name="imageFile" class="form-control" accept="image/*" onchange="previewProductImage(event)" />
     </div>
     <div class="form-group">

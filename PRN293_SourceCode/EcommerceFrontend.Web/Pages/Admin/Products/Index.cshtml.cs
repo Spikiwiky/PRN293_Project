@@ -26,7 +26,7 @@ namespace EcommerceFrontend.Web.Pages.Admin.Products
                 Name = name,
                 Category = category
             };
-            Products = await _productService.GetAllProductsAsync(page, pageSize, name, category);
+            Products = await _productService.GetAllProductsAsync(page, pageSize);
             CurrentPage = page;
             PageSize = pageSize;
             int totalProducts = await _productService.GetTotalProductsCountAsync(name, category);

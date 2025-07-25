@@ -26,6 +26,13 @@ namespace EcommerceBackend.API.Controllers.BlogController
             return Ok(blogs);
         }
 
+        [HttpGet("published")]
+        public async Task<IActionResult> GetPublishedBlogs()
+        {
+            var blogs = await _service.GetPublishedBlogsAsync();
+            return Ok(blogs);
+        }
+
         [HttpGet("load")]
         public async Task<IActionResult> LoadBlogs([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
@@ -38,6 +45,10 @@ namespace EcommerceBackend.API.Controllers.BlogController
         {
             var blog = await _service.GetByIdAsync(id);
             if (blog == null) return NotFound();
+            
+            // Increment view count when blog is viewed
+            await _service.IncrementViewCountAsync(id);
+            
             return Ok(blog);
         }
 
@@ -59,7 +70,7 @@ namespace EcommerceBackend.API.Controllers.BlogController
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id, [FromQuery] bool confirm = false)
         {
-            if (!confirm) return BadRequest("Delete not confirmed");
+            if (!confirm) return BadRequest("Confirmation required");
             await _service.DeleteAsync(id);
             return Ok();
         }

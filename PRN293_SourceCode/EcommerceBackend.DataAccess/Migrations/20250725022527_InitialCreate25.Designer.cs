@@ -4,6 +4,7 @@ using EcommerceBackend.DataAccess.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EcommerceBackend.DataAccess.Migrations
 {
     [DbContext(typeof(EcommerceDBContext))]
-    partial class EcommerceDBContextModelSnapshot : ModelSnapshot
+    [Migration("20250725022527_InitialCreate25")]
+    partial class InitialCreate25
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -39,43 +41,14 @@ namespace EcommerceBackend.DataAccess.Migrations
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("Blog_content");
 
-                    b.Property<string>("BlogImage")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("BlogSummary")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("BlogTittle")
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)")
                         .HasColumnName("Blog_tittle");
 
-                    b.Property<DateTime?>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsPublished")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("PublishedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Tags")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("UserId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ViewCount")
-                        .HasColumnType("int");
-
                     b.HasKey("BlogId");
 
                     b.HasIndex("BlogCategoryId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("Blog", (string)null);
                 });
@@ -102,42 +75,6 @@ namespace EcommerceBackend.DataAccess.Migrations
                     b.HasKey("BlogCategoryId");
 
                     b.ToTable("Blog_category", (string)null);
-                });
-
-            modelBuilder.Entity("EcommerceBackend.DataAccess.Models.BlogComment", b =>
-                {
-                    b.Property<int>("CommentId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CommentId"), 1L, 1);
-
-                    b.Property<int>("BlogId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("CommentContent")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CommenterEmail")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CommenterName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CommenterWebsite")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsApproved")
-                        .HasColumnType("bit");
-
-                    b.HasKey("CommentId");
-
-                    b.HasIndex("BlogId");
-
-                    b.ToTable("BlogComment");
                 });
 
             modelBuilder.Entity("EcommerceBackend.DataAccess.Models.Cart", b =>
@@ -200,9 +137,6 @@ namespace EcommerceBackend.DataAccess.Migrations
                     b.Property<int?>("Quantity")
                         .HasColumnType("int");
 
-                    b.Property<string>("VariantAttributes")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("VariantId")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)")
@@ -230,9 +164,6 @@ namespace EcommerceBackend.DataAccess.Migrations
                         .HasColumnType("decimal(18,2)")
                         .HasColumnName("Amount_due");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
                     b.Property<int?>("CustomerId")
                         .HasColumnType("int")
                         .HasColumnName("Customer_id");
@@ -250,15 +181,9 @@ namespace EcommerceBackend.DataAccess.Migrations
                         .HasColumnType("int")
                         .HasColumnName("Payment_method_id");
 
-                    b.Property<string>("ShippingAddress")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int?>("TotalQuantity")
                         .HasColumnType("int")
                         .HasColumnName("Total_quantity");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
 
                     b.HasKey("OrderId");
 
@@ -298,9 +223,6 @@ namespace EcommerceBackend.DataAccess.Migrations
 
                     b.Property<int?>("Quantity")
                         .HasColumnType("int");
-
-                    b.Property<string>("VariantAttributes")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("VariantId")
                         .HasMaxLength(50)
@@ -703,24 +625,7 @@ namespace EcommerceBackend.DataAccess.Migrations
                         .HasForeignKey("BlogCategoryId")
                         .HasConstraintName("FK__Blog__Blog_categ__4F7CD00D");
 
-                    b.HasOne("EcommerceBackend.DataAccess.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId");
-
                     b.Navigation("BlogCategory");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("EcommerceBackend.DataAccess.Models.BlogComment", b =>
-                {
-                    b.HasOne("EcommerceBackend.DataAccess.Models.Blog", "Blog")
-                        .WithMany("Comments")
-                        .HasForeignKey("BlogId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Blog");
                 });
 
             modelBuilder.Entity("EcommerceBackend.DataAccess.Models.Cart", b =>
@@ -871,11 +776,6 @@ namespace EcommerceBackend.DataAccess.Migrations
                         .HasConstraintName("FK__User__Role_id__267ABA7A");
 
                     b.Navigation("Role");
-                });
-
-            modelBuilder.Entity("EcommerceBackend.DataAccess.Models.Blog", b =>
-                {
-                    b.Navigation("Comments");
                 });
 
             modelBuilder.Entity("EcommerceBackend.DataAccess.Models.BlogCategory", b =>
