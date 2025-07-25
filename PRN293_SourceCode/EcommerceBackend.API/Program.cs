@@ -59,9 +59,9 @@ builder.Services.AddScoped<IProductService, ProductService>();
 //builder.Services.AddScoped<ISaleProductService, SaleProductService>();
 
 builder.Services.AddScoped<ISaleService, SaleService>(); 
-builder.Services.AddScoped<EcommerceBackend.DataAccess.Repository.SaleRepository.IProductRepository, EcommerceBackend.DataAccess.Repository.SaleRepository.ProductRepository>();
-builder.Services.AddScoped<EcommerceBackend.BusinessObject.Services.SaleService.ICategoryService, EcommerceBackend.BusinessObject.Services.SaleService.CategoryService>();
-builder.Services.AddScoped<EcommerceBackend.DataAccess.Repository.SaleRepository.ICategoryRepository, EcommerceBackend.DataAccess.Repository.SaleRepository.CategoryRepository>();
+// builder.Services.AddScoped<EcommerceBackend.DataAccess.Repository.SaleRepository.IProductRepository, EcommerceBackend.DataAccess.Repository.SaleRepository.ProductRepository>();
+// builder.Services.AddScoped<EcommerceBackend.BusinessObject.Services.SaleService.ICategoryService, EcommerceBackend.BusinessObject.Services.SaleService.CategoryService>();
+// builder.Services.AddScoped<EcommerceBackend.DataAccess.Repository.SaleRepository.ICategoryRepository, EcommerceBackend.DataAccess.Repository.SaleRepository.CategoryRepository>();
 
 // Register Cart Services
 builder.Services.AddScoped<ICartService, CartService>();

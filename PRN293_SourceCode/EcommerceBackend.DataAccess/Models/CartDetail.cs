@@ -24,7 +24,7 @@ namespace EcommerceBackend.DataAccess.Models
 
         [Column("Product_name")]
         [StringLength(255)]
-        public string ProductName { get; set; }
+        public required string ProductName { get; set; }
 
         [Column("Quantity")]
         public int? Quantity { get; set; }
