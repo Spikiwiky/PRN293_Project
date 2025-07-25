@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace EcommerceBackend.DataAccess.Repository.SaleRepository.UserRepo
 {
-    internal class UserRepository
+    internal class SaleUserRepository
     {
     }
 }
