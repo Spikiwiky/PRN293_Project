@@ -47,29 +47,29 @@
             max-height: 450px;
             transition: transform 0.2s ease-in-out;
         }
-        
-        .product-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-        
+
+            .product-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            }
+
         .product-image-container {
             height: 200px;
             overflow: hidden;
             position: relative;
         }
-        
+
         .product-image {
             height: 100%;
             width: 100%;
             object-fit: cover;
             transition: transform 0.3s ease;
         }
-        
+
         .product-card:hover .product-image {
             transform: scale(1.05);
         }
-        
+
         .product-title {
             font-size: 1rem;
             line-height: 1.2;
@@ -78,7 +78,7 @@
             text-overflow: ellipsis;
             white-space: nowrap;
         }
-        
+
         .product-description {
             font-size: 0.875rem;
             overflow: hidden;
@@ -89,18 +89,18 @@
             line-height: 1.4;
             margin-bottom: 0.5rem;
         }
-        
+
         .product-info {
             font-size: 0.8rem;
             margin-bottom: 0.5rem;
         }
-        
+
         .product-price {
             font-size: 1.1rem;
             font-weight: bold;
             color: #007bff;
         }
-        
+
         /* Responsive grid */
         @@media (max-width: 576px) {
             .row-cols-1 > * {
@@ -108,25 +108,127 @@
                 max-width: 100%;
             }
         }
-        
+
         @@media (min-width: 576px) and (max-width: 768px) {
             .row-cols-md-2 > * {
                 flex: 0 0 50%;
                 max-width: 50%;
             }
         }
-        
+
         @@media (min-width: 768px) and (max-width: 992px) {
             .row-cols-lg-3 > * {
                 flex: 0 0 33.333333%;
                 max-width: 33.333333%;
             }
         }
-        
+
         @@media (min-width: 992px) {
             .row-cols-xl-4 > * {
                 flex: 0 0 25%;
                 max-width: 25%;
+            }
+        }
+        
+        /* Modal Styles */
+        .modal-dialog-centered {
+            display: flex;
+            align-items: center;
+            min-height: calc(100% - 1rem);
+        }
+        
+        .product-modal-image-container {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 8px;
+            margin: 10px;
+        }
+        
+        .product-modal-image {
+            transition: transform 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .product-modal-image:hover {
+            transform: scale(1.05);
+        }
+        
+        .variant-select {
+            transition: all 0.3s ease;
+        }
+        
+        .variant-select:focus {
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+            border-color: #007bff;
+        }
+        
+        .variant-option {
+            transition: all 0.3s ease;
+        }
+        
+        .variant-option[style*="display: none"] {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            height: 0 !important;
+            overflow: hidden !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        
+        .selected-price {
+            border-left: 4px solid #28a745;
+            transition: all 0.3s ease;
+        }
+        
+        .selected-price:hover {
+            background-color: #f8f9fa !important;
+            transform: translateY(-2px);
+        }
+        
+        .variant-details {
+            border-left: 4px solid #17a2b8;
+            transition: all 0.3s ease;
+        }
+        
+        .modal-header {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            border-bottom: none;
+        }
+        
+        .modal-footer {
+            border-top: 1px solid #dee2e6;
+        }
+        
+        /* Animation for modal */
+        .modal.fade .modal-dialog {
+            transition: transform 0.3s ease-out;
+            transform: translate(0, -50px);
+        }
+        
+        .modal.show .modal-dialog {
+            transform: none;
+        }
+        
+        /* Loading state for variant selects */
+        .variant-select.loading {
+            background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3e%3cpath fill="%23ccc" d="M73,50c0-12.7-10.3-23-23-23S27,37.3,27,50 M30.9,50c0-10.5,8.5-19.1,19.1-19.1S69.1,39.5,69.1,50"%3e%3canimateTransform attributeName="transform" attributeType="XML" type="rotate" dur="1s" from="0 50 50" to="360 50 50" repeatCount="indefinite"/%3e%3c/path%3e%3c/svg%3e');
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 16px 12px;
+        }
+        
+        /* Responsive adjustments */
+        @@media (max-width: 768px) {
+            .modal-dialog-centered {
+                margin: 0.5rem;
+            }
+            
+            .product-modal-image-container {
+                margin: 5px;
+            }
+            
+            .product-modal-image {
+                max-height: 200px !important;
             }
         }
     </style>
@@ -554,13 +656,15 @@
 
                             <!-- Variant Selection Modal -->
                             <div class="modal fade" id="variantModal-@product.ProductId" tabindex="-1" aria-labelledby="variantModalLabel-@product.ProductId" aria-hidden="true">
-                                <div class="modal-dialog">
+                                <div class="modal-dialog modal-lg modal-dialog-centered">
                                     <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="variantModalLabel-@product.ProductId">@product.Name - Select Variants</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        <div class="modal-header bg-primary text-white">
+                                            <h5 class="modal-title" id="variantModalLabel-@product.ProductId">
+                                                <i class="fa fa-cube me-2"></i>@product.Name
+                                            </h5>
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
-                                        <div class="modal-body">
+                                        <div class="modal-body p-0">
                                             @if (product.Variants.Any())
                                             {
                                                 var firstVariant = product.Variants.First();
@@ -572,52 +676,92 @@
                                                     Variants = v.Variants
                                                 }).ToList();
 
-                                                <div class="variant-selection">
-                                                    @for (int i = 0; i < attributeNames.Count; i++)
-                                                    {
-                                                        var attrName = attributeNames[i];
-                                                        <div class="mb-2 variant-option"
-                                                             data-product-id="@product.ProductId"
-                                                             data-attribute="@attrName"
-                                                             style="display: @(i == 0 ? "block" : "none")">
-                                                            <label class="form-label">@attrName:</label>
-                                                            <select class="form-select variant-select"
-                                                                    data-product-id="@product.ProductId"
-                                                                    data-attribute="@attrName"
-                                                                    data-index="@i">
-                                                                <option value="">Select @attrName</option>
-                                                                @foreach (var value in attributes[attrName].Distinct())
-                                                                {
-                                                                    <option value="@value">@value</option>
-                                                                }
-                                                            </select>
+                                                <div class="row g-0">
+                                                    <!-- Product Image Column -->
+                                                    <div class="col-md-5">
+                                                        <div class="product-modal-image-container p-4 text-center">
+                                                            <img src="@(product.Images.Any() ? product.GetFirstImageUrl(Model.ApiBaseUrl) : Url.Content("~/images/product-min-01.jpg"))" 
+                                                                 class="img-fluid rounded product-modal-image" 
+                                                                 alt="@product.Name"
+                                                                 style="max-height: 300px; object-fit: cover;">
+                                                            <div class="mt-3">
+                                                                <h6 class="text-muted">@product.Brand</h6>
+                                                                <p class="text-muted small">@product.CategoryName</p>
+                                                            </div>
                                                         </div>
-                                                    }
-
-                                                    <div class="selected-price mt-3" id="selected-price-@product.ProductId" data-base-price="@product.BasePrice.ToString("N2")">
-                                                        <strong>Base Price: $@product.BasePrice.ToString("N2")</strong>
                                                     </div>
+                                                    
+                                                    <!-- Variant Selection Column -->
+                                                    <div class="col-md-7">
+                                                        <div class="p-4">
+                                                            <h6 class="mb-3 text-primary">
+                                                                <i class="fa fa-cogs me-2"></i>Chọn biến thể sản phẩm
+                                                            </h6>
+                                                            
+                                                            <div class="variant-selection">
+                                                                @for (int i = 0; i < attributeNames.Count; i++)
+                                                                {
+                                                                    var attrName = attributeNames[i];
+                                                                    <div class="mb-3 variant-option"
+                                                                         data-product-id="@product.ProductId"
+                                                                         data-attribute="@attrName"
+                                                                         style="display: @(i == 0 ? "block" : "none")">
+                                                                        <label class="form-label fw-bold text-dark">@attrName:</label>
+                                                                        <select class="form-select variant-select border-primary"
+                                                                                data-product-id="@product.ProductId"
+                                                                                data-attribute="@attrName"
+                                                                                data-index="@i">
+                                                                            <option value="">Chọn @attrName</option>
+                                                                            @foreach (var value in attributes[attrName].Distinct())
+                                                                            {
+                                                                                <option value="@value">@value</option>
+                                                                            }
+                                                                        </select>
+                                                                    </div>
+                                                                }
 
-                                                    <div class="variant-details mt-2" id="variant-details-@product.ProductId" style="display: none;">
-                                                        <small class="text-muted">
-                                                            <span class="supplier-info"></span><br>
-                                                            <span class="material-info"></span>
-                                                        </small>
+                                                                <div class="selected-price mt-4 p-3 bg-light rounded" id="selected-price-@product.ProductId" data-base-price="@product.BasePrice.ToString("N2")">
+                                                                    <h5 class="text-success mb-0">
+                                                                        <i class="fa fa-tag me-2"></i>Giá: $@product.BasePrice.ToString("N2")
+                                                                    </h5>
+                                                                </div>
+
+                                                                <div class="variant-details mt-3 p-3 bg-info bg-opacity-10 rounded" id="variant-details-@product.ProductId" style="display: none;">
+                                                                    <h6 class="text-info mb-2">
+                                                                        <i class="fa fa-info-circle me-2"></i>Thông tin biến thể
+                                                                    </h6>
+                                                                    <div class="supplier-info text-muted"></div>
+                                                                    <div class="material-info text-muted"></div>
+                                                                </div>
+
+                                                                <script type="application/json" id="variant-data-@product.ProductId">
+                                                                    @Html.Raw(System.Text.Json.JsonSerializer.Serialize(variantData, new System.Text.Json.JsonSerializerOptions
+                                                                    {
+                                                                        WriteIndented = false,
+                                                                        PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase
+                                                                    }))
+                                                                </script>
+                                                            </div>
+                                                        </div>
                                                     </div>
-
-                                                    <script type="application/json" id="variant-data-@product.ProductId">
-                                                        @Html.Raw(System.Text.Json.JsonSerializer.Serialize(variantData, new System.Text.Json.JsonSerializerOptions
-                                                        {
-                                                                WriteIndented = false,
-                                                                                                        PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase
-                                                                                                }))
-                                            </script>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <div class="p-4 text-center">
+                                                    <i class="fa fa-exclamation-triangle text-warning fa-3x mb-3"></i>
+                                                    <h5 class="text-muted">Không có biến thể cho sản phẩm này</h5>
+                                                    <p class="text-muted">Sản phẩm này không có các tùy chọn biến thể.</p>
+                                                </div>
+                                            }
                                         </div>
-                                                                                }
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                            <a asp-page="./Details" asp-route-id="@product.ProductId" class="btn btn-primary">Go to Details</a>
+                                        <div class="modal-footer bg-light">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                                <i class="fa fa-times me-2"></i>Đóng
+                                            </button>
+                                            <a asp-page="./Details" asp-route-id="@product.ProductId" class="btn btn-primary">
+                                                <i class="fa fa-eye me-2"></i>Xem chi tiết
+                                            </a>
                                         </div>
                                     </div>
                                 </div>
@@ -1072,39 +1216,68 @@
     <!--===============================================================================================-->
     <script src="js/main.js"></script>
 
-    <!-- Your existing script section -->
-    @section Scripts {
-        <script>
+    <!-- Variant selection script -->
+    <script>
             document.addEventListener('DOMContentLoaded', function() {
+                // Khởi tạo trạng thái ban đầu cho từng modal sản phẩm
+                document.querySelectorAll('[id^="variantModal-"]').forEach(modal => {
+                    const productId = modal.id.replace('variantModal-', '');
+                    const options = modal.querySelectorAll('.variant-option[data-product-id="' + productId + '"]');
+                    console.log('Initializing modal for product:', productId, 'with', options.length, 'options');
+                    options.forEach((option, idx) => {
+                        if (idx === 0) {
+                            option.style.display = 'block';
+                            option.style.visibility = 'visible';
+                            option.style.opacity = '1';
+                        } else {
+                            option.style.display = 'none';
+                            option.style.visibility = 'hidden';
+                            option.style.opacity = '0';
+                        }
+                        console.log('Option', idx, 'display:', option.style.display);
+                    });
+                });
+                
+                // Add modal show animation
+                document.querySelectorAll('[id^="variantModal-"]').forEach(modal => {
+                    modal.addEventListener('show.bs.modal', function () {
+                        this.querySelector('.modal-dialog').style.transform = 'scale(0.8)';
+                        setTimeout(() => {
+                            this.querySelector('.modal-dialog').style.transform = 'scale(1)';
+                        }, 50);
+                    });
+                });
+
+                // Add event listeners for variant selects
                 document.querySelectorAll('.variant-select').forEach(select => {
                     select.addEventListener('change', function() {
+                        console.log('Variant select changed:', this.value);
+                        
                         const productId = this.dataset.productId;
                         const currentIndex = parseInt(this.dataset.index);
                         const priceElement = document.getElementById(`selected-price-${productId}`);
                         const detailsElement = document.getElementById(`variant-details-${productId}`);
                         const basePrice = priceElement.dataset.basePrice;
-                        const variantData = JSON.parse(document.getElementById(`variant-data-${productId}`).textContent);
+                        
+                        // Get variant data
+                        const variantDataElement = document.getElementById(`variant-data-${productId}`);
+                        if (!variantDataElement) {
+                            console.error('Variant data element not found for product:', productId);
+                            return;
+                        }
+                        
+                        const variantData = JSON.parse(variantDataElement.textContent);
+                        console.log('Variant data:', variantData);
 
                         // Get all variant options and selects for this product
                         const allOptions = document.querySelectorAll(`.variant-option[data-product-id="${productId}"]`);
                         const allSelects = document.querySelectorAll(`.variant-select[data-product-id="${productId}"]`);
+                        
+                        console.log('All options count:', allOptions.length);
+                        console.log('Current index:', currentIndex);
 
-                        // Collect all selected attributes
-                        const selectedAttributes = {};
-                        let allAttributesSelected = true;
-                        for (let i = 0; i < allSelects.length; i++) {
-                            const select = allSelects[i];
-                            const attrName = select.dataset.attribute;
-                            const value = select.value;
-                            if (value) {
-                                selectedAttributes[attrName] = value;
-                            } else {
-                                allAttributesSelected = false;
-                            }
-                        }
-
-                        // Reset and enable all options for selects after the current one
-                        for (let i = currentIndex + 1; i < allSelects.length; i++) {
+                        // Reset and hide all options after current one
+                        for (let i = currentIndex + 1; i < allOptions.length; i++) {
                             const select = allSelects[i];
                             select.value = '';
                             Array.from(select.options).forEach(option => {
@@ -1113,14 +1286,19 @@
                             allOptions[i].style.display = 'none';
                         }
 
-                        // Show next attribute select if available
-                        if (currentIndex < allOptions.length - 1 && this.value) {
+                        // Show next attribute select if available and current value is selected
+                        if (currentIndex < allOptions.length - 1 && this.value && this.value !== '') {
+                            console.log('Showing next option at index:', currentIndex + 1);
                             const nextOption = allOptions[currentIndex + 1];
                             nextOption.style.display = 'block';
+                            nextOption.style.visibility = 'visible';
+                            nextOption.style.opacity = '1';
+                            
                             const nextSelect = nextOption.querySelector('select');
                             const nextAttrName = nextSelect.dataset.attribute;
+                            console.log('Next attribute name:', nextAttrName);
 
-                            // Tìm các giá trị hợp lệ cho dropdown tiếp theo dựa trên các thuộc tính đã chọn trước đó
+                            // Find available values for next dropdown based on selected attributes
                             const availableValues = new Set();
                             variantData.forEach(v => {
                                 v.variants.forEach(variant => {
@@ -1133,68 +1311,80 @@
                                             break;
                                         }
                                     }
-                                    if (match) {
+                                    if (match && variant[nextAttrName]) {
                                         availableValues.add(variant[nextAttrName]);
                                     }
                                 });
                             });
+                            
+                            console.log('Available values for next dropdown:', Array.from(availableValues));
 
+                            // Enable/disable options in next dropdown
                             Array.from(nextSelect.options).forEach(option => {
                                 if (option.value === '') return;
                                 option.disabled = !availableValues.has(option.value);
                             });
+                        } else {
+                            console.log('Not showing next option. Current index:', currentIndex, 'Total options:', allOptions.length, 'Current value:', this.value);
                         }
 
-                        // Nếu chưa chọn đủ thuộc tính, luôn hiển thị giá gốc
+                        // Collect all selected attributes
+                        const selectedAttributes = {};
+                        let allAttributesSelected = true;
+                        for (let i = 0; i < allSelects.length; i++) {
+                            const select = allSelects[i];
+                            const attrName = select.dataset.attribute;
+                            const value = select.value;
+                            if (value && value !== '') {
+                                selectedAttributes[attrName] = value;
+                            } else {
+                                allAttributesSelected = false;
+                            }
+                        }
+                        
+                        console.log('Selected attributes:', selectedAttributes);
+
+                        // Update price display
                         if (!allAttributesSelected) {
-                            priceElement.innerHTML = `<strong>Base Price: $${basePrice}</strong>`;
+                            // Hiển thị base price khi chưa chọn hết thuộc tính
+                            priceElement.innerHTML = `<h5 class="text-warning mb-0"><i class="fa fa-info-circle me-2"></i>Giá cơ bản: $${basePrice}</h5>`;
                             detailsElement.style.display = 'none';
-                            return;
-                        }
+                        } else {
+                            // Hiển thị price của variant khi đã chọn hết thuộc tính
+                            const matchingVariant = variantData.find(v => {
+                                return v.variants.some(variant =>
+                                    Object.entries(selectedAttributes).every(([key, value]) =>
+                                        variant[key] === value
+                                    )
+                                );
+                            });
 
-                        // Find matching variant when all attributes are selected
-                        const matchingVariant = variantData.find(v => {
-                            return v.variants.some(variant =>
-                                Object.entries(selectedAttributes).every(([key, value]) =>
-                                    variant[key] === value
-                                )
-                            );
-                        });
+                            if (matchingVariant) {
+                                const matchingVariantInfo = matchingVariant.variants.find(variant =>
+                                    Object.entries(selectedAttributes).every(([key, value]) =>
+                                        variant[key] === value
+                                    )
+                                );
 
-                        if (matchingVariant) {
-                            const matchingVariantInfo = matchingVariant.variants.find(variant =>
-                                Object.entries(selectedAttributes).every(([key, value]) =>
-                                    variant[key] === value
-                                )
-                            );
+                                if (matchingVariantInfo) {
+                                    const variantPrice = parseFloat(matchingVariantInfo.price).toFixed(2);
+                                    priceElement.innerHTML = `<h5 class="text-success mb-0"><i class="fa fa-tag me-2"></i>Giá: $${variantPrice}</h5>`;
 
-                            if (matchingVariantInfo) {
-                                priceElement.innerHTML = `<strong>Price: $${parseFloat(matchingVariantInfo.price).toFixed(2)}</strong>`;
-
-                                if (matchingVariantInfo.supplier || matchingVariantInfo.material) {
-                                    detailsElement.style.display = 'block';
-                                    detailsElement.querySelector('.supplier-info').textContent =
-                                        matchingVariantInfo.supplier ? `Supplier: ${matchingVariantInfo.supplier}` : '';
-                                    detailsElement.querySelector('.material-info').textContent =
-                                        matchingVariantInfo.material ? `Material: ${matchingVariantInfo.material}` : '';
-                                } else {
-                                    detailsElement.style.display = 'none';
+                                    if (matchingVariantInfo.supplier || matchingVariantInfo.material) {
+                                        detailsElement.style.display = 'block';
+                                        detailsElement.querySelector('.supplier-info').textContent =
+                                            matchingVariantInfo.supplier ? `Nhà cung cấp: ${matchingVariantInfo.supplier}` : '';
+                                        detailsElement.querySelector('.material-info').textContent =
+                                            matchingVariantInfo.material ? `Chất liệu: ${matchingVariantInfo.material}` : '';
+                                    } else {
+                                        detailsElement.style.display = 'none';
+                                    }
                                 }
                             }
                         }
                     });
                 });
-
-                // Khởi tạo trạng thái ban đầu cho từng modal sản phẩm
-                document.querySelectorAll('[id^="variantModal-"]').forEach(modal => {
-                    const productId = modal.id.replace('variantModal-', '');
-                    const options = modal.querySelectorAll('.variant-option[data-product-id="' + productId + '"]');
-                    options.forEach((option, idx) => {
-                        option.style.display = idx === 0 ? 'block' : 'none';
-                    });
-                });
             });
         </script>
-    }
 </body>
 </html>

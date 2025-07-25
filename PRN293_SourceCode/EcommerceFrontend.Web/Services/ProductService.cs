@@ -54,11 +54,16 @@ namespace EcommerceFrontend.Web.Services
 
         public async Task<List<ProductDTO>> GetAllProductsAsync(int page = 1, int pageSize = 10)
         {
+            // Đảm bảo PageSize luôn là 10
+            pageSize = 10;
             _logger.LogInformation($"minPrice={null}, maxPrice={null}, page={page}, pageSize={pageSize}");
             var response = await _httpClient.GetAsync($"/api/product?page={page}&pageSize={pageSize}");
             response.EnsureSuccessStatusCode();
             var content = await response.Content.ReadAsStringAsync();
-            return JsonSerializer.Deserialize<List<ProductDTO>>(content, _jsonOptions) ?? new List<ProductDTO>();
+            var products = JsonSerializer.Deserialize<List<ProductDTO>>(content, _jsonOptions) ?? new List<ProductDTO>();
+            
+            // Đảm bảo chỉ trả về tối đa 10 sản phẩm
+            return products.Take(10).ToList();
         }
 
         public async Task<ProductDTO?> GetProductByIdAsync(int id)
@@ -73,6 +78,9 @@ namespace EcommerceFrontend.Web.Services
 
         public async Task<List<ProductDTO>> SearchProductsAsync(ProductSearchParams searchParams)
         {
+            // Đảm bảo PageSize luôn là 10
+            searchParams.PageSize = 10;
+            
             var queryParams = new List<string>();
             if (!string.IsNullOrEmpty(searchParams.Name))
                 queryParams.Add($"name={Uri.EscapeDataString(searchParams.Name)}");
@@ -86,8 +94,7 @@ namespace EcommerceFrontend.Web.Services
                 queryParams.Add($"maxPrice={searchParams.MaxPrice}");
             if (searchParams.Page.HasValue)
                 queryParams.Add($"page={searchParams.Page}");
-            if (searchParams.PageSize.HasValue)
-                queryParams.Add($"pageSize={searchParams.PageSize}");
+            queryParams.Add($"pageSize={searchParams.PageSize}");
 
             var queryString = string.Join("&", queryParams);
             _logger.LogInformation($"name={searchParams.Name}, category={searchParams.Category}, minPrice={searchParams.MinPrice}, maxPrice={searchParams.MaxPrice}, page={searchParams.Page}, pageSize={searchParams.PageSize}");
@@ -96,6 +103,7 @@ namespace EcommerceFrontend.Web.Services
             var content = await response.Content.ReadAsStringAsync();
             var products = JsonSerializer.Deserialize<List<ProductDTO>>(content, _jsonOptions) ?? new List<ProductDTO>();
 
+            // Xử lý filter theo attributes nếu có
             if (searchParams.Attributes != null && searchParams.Attributes.Any())
             {
                 products = products.Where(p => p.Variants.Any(variant =>
@@ -114,16 +122,8 @@ namespace EcommerceFrontend.Web.Services
                 })).ToList();
             }
 
-            if (searchParams.Page < 1) searchParams.Page = 1;
-            if (searchParams.PageSize <= 0) searchParams.PageSize = 10;
-
-            products = products
-                .OrderByDescending(p => p.ProductId)
-                .Skip((int)((searchParams.Page - 1) * searchParams.PageSize))
-                .Take((int)searchParams.PageSize)
-                .ToList();
-
-            return products;
+            // Đảm bảo chỉ trả về tối đa 10 sản phẩm
+            return products.Take(10).ToList();
         }
 
         public async Task<int> GetTotalProductsCountAsync(string? name = null, string? category = null, decimal? minPrice = null, decimal? maxPrice = null)
