@@ -1,0 +1,29 @@
+﻿@page
+@model EcommerceFrontend.Web.Pages.Sale.Sale_Blog.Category.IndexModel
+@{
+    ViewData["Title"] = "Danh mục Blog";
+}
+<h1>Danh mục Blog</h1>
+<a asp-page="Create" class="btn btn-primary">Thêm mới</a>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Tên danh mục</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var cat in Model.Categories)
+        {
+            <tr>
+                <td>@cat.BlogCategoryTitle</td>
+                <td>
+                    <a asp-page="Edit" asp-route-id="@cat.BlogCategoryId" class="btn btn-sm btn-warning">Sửa</a>
+                    <form method="post" asp-page-handler="Delete" asp-route-id="@cat.BlogCategoryId" style="display:inline">
+                        <button type="submit" class="btn btn-sm btn-danger">Xóa</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -17,6 +17,10 @@ using EcommerceBackend.BusinessObject.Services.SaleService.OrderService;
 using EcommerceBackend.BusinessObject.Services.SaleService.UserService;
 using EcommerceBackend.DataAccess.Repository.SaleRepository.UserRepo;
 using EcommerceBackend.BusinessObject.Services.SaleService.CategoryService.CategoryService;
+using EcommerceBackend.DataAccess.Repository.SaleRepository.BlogRepo;
+using EcommerceBackend.BusinessObject.Services.SaleService.BlogService;
+using EcommerceBackend.BusinessObject.Abstract;
+using EcommerceBackend.BusinessObject.Services.CartService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,13 +39,6 @@ builder.Services.AddDbContext<EcommerceDBContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<EcommerceBackend.DataAccess.Repository.IProductRepository, EcommerceBackend.DataAccess.Repository.ProductRepository>();
 builder.Services.AddScoped<IProductService, ProductService>();
-
-//builder.Services.AddScoped<IOrderRepository, OrderRepository>();
-//builder.Services.AddScoped<IOrderService, OrderService>();
-
-
-
-//builder.Services.AddScoped<ISaleProductService, SaleProductService>();
 builder.Services.AddScoped<ISaleService, SaleService>();
 builder.Services.AddScoped<EcommerceBackend.DataAccess.Repository.SaleRepository.ProductRepo.IProductRepository, EcommerceBackend.DataAccess.Repository.SaleRepository.ProductRepo.ProductRepository>();
 builder.Services.AddScoped<ISaleCategoryService, SaleCategoryService>();
@@ -50,6 +47,9 @@ builder.Services.AddScoped<ISaleOrderService, SaleOrderService>();
 builder.Services.AddScoped<ISaleOrderRepository, SaleOrderRepository>();
 builder.Services.AddScoped<ISaleUserService, SaleUserService>();
 builder.Services.AddScoped<ISaleUserRepository, SaleUserRepository>();
+builder.Services.AddScoped<ISaleBlogRepository, SaleBlogRepository>();
+builder.Services.AddScoped<ISaleBlogService, SaleBlogService>();
+builder.Services.AddScoped<ICartService, CartService>();
 // Config Authentication Jwt
 JwtConfig.ConfigureJwtAuthentication(builder.Services, builder.Configuration);
 JwtConfig.ConfigureSwagger(builder.Services);
@@ -79,6 +79,11 @@ builder.Services.AddAuthentication(options =>
     options.ClientId = builder.Configuration["GoogleKeys:ClientId"];
     options.ClientSecret = builder.Configuration["GoogleKeys:ClientSecret"];
 });
+
+//builder.Services.AddControllers()
+//    .AddJsonOptions(x =>
+//        x.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve);
+
 
 builder.Services.AddAuthorization();
 

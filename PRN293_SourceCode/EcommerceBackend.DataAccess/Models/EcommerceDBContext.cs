@@ -19,6 +19,7 @@ namespace EcommerceBackend.DataAccess.Models
 
         public virtual DbSet<Blog> Blogs { get; set; } = null!;
         public virtual DbSet<BlogCategory> BlogCategories { get; set; } = null!;
+        public virtual DbSet<BlogComment> BlogComments { get; set; } = null!;
         public virtual DbSet<Cart> Carts { get; set; } = null!;
         public virtual DbSet<CartDetail> CartDetails { get; set; } = null!;
         public virtual DbSet<Order> Orders { get; set; } = null!;

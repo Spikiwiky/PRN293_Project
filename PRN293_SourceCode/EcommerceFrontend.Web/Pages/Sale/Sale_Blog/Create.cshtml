@@ -1,0 +1,36 @@
+﻿@page
+@model EcommerceFrontend.Web.Pages.Sale.Sale_Blog.CreateModel
+
+<h1>Thêm mới Blog</h1>
+<form method="post" enctype="multipart/form-data">
+    <div class="form-group">
+        <label>Tiêu đề</label>
+        <input asp-for="Blog.BlogTittle" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label>Tóm tắt</label>
+        <textarea asp-for="Blog.BlogSummary" class="form-control"></textarea>
+    </div>
+    <div class="form-group">
+        <label>Nội dung</label>
+        <textarea asp-for="Blog.BlogContent" class="form-control"></textarea>
+    </div>
+    <div class="form-group">
+        <label>URL Ảnh (nếu có)</label>
+        <input asp-for="Blog.BlogImage" class="form-control" placeholder="Nhập URL ảnh nếu không upload file" />
+    </div>
+    <div class="form-group">
+        <label>Hoặc upload ảnh mới</label>
+        <input asp-for="UploadImage" type="file" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label>Ngày đăng</label>
+        <input asp-for="Blog.PublishedDate" type="date" class="form-control" />
+    </div>
+    <div class="form-group form-check">
+        <input asp-for="Blog.IsPublished" type="checkbox" class="form-check-input" />
+        <label class="form-check-label" asp-for="Blog.IsPublished">Xuất bản</label>
+    </div>
+    <button type="submit" class="btn btn-primary">Lưu</button>
+    <a asp-page="Index" class="btn btn-secondary">Hủy</a>
+</form>
