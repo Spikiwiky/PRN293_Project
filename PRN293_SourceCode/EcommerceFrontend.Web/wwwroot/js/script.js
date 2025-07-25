@@ -58,10 +58,13 @@
   $(document).ready(function(){
     initScrollNav();
     
-    Chocolat(document.querySelectorAll('.image-link'), {
-        imageSize: 'contain',
-        loop: true,
-    })
+    // Check if Chocolat library is available before using it
+    if (typeof Chocolat !== 'undefined') {
+        Chocolat(document.querySelectorAll('.image-link'), {
+            imageSize: 'contain',
+            loop: true,
+        });
+    }
 
     $('#header-wrap').on('click', '.search-toggle', function(e) {
       var selector = $(this).data('selector');
@@ -81,16 +84,18 @@
       }
     });
 
-    $('.main-slider').slick({
-        autoplay: false,
-        autoplaySpeed: 4000,
-        fade: true,
-        dots: true,
-        prevArrow: $('.prev'),
-        nextArrow: $('.next'),
-    }); 
+    // Check if slick slider plugin is available before using it
+    if (typeof $.fn.slick !== 'undefined') {
+        $('.main-slider').slick({
+            autoplay: false,
+            autoplaySpeed: 4000,
+            fade: true,
+            dots: true,
+            prevArrow: $('.prev'),
+            nextArrow: $('.next'),
+        }); 
 
-    $('.product-grid').slick({
+        $('.product-grid').slick({
         slidesToShow: 4,
         slidesToScroll: 1,
         autoplay: false,
@@ -123,18 +128,25 @@
           // settings: "unslick"
           // instead of a settings object
         ]
-    });
+        });
+    }
 
-    AOS.init({
-      duration: 1200,
-      once: true,
-    })
+    // Check if AOS library is available before using it
+    if (typeof AOS !== 'undefined') {
+        AOS.init({
+            duration: 1200,
+            once: true,
+        });
+    }
 
-    jQuery('.stellarnav').stellarNav({
-      theme: 'plain',
-      closingDelay: 250,
-      // mobileMode: false,
-    });
+    // Check if stellarNav plugin is available before using it
+    if (typeof jQuery.fn.stellarNav !== 'undefined') {
+        jQuery('.stellarnav').stellarNav({
+            theme: 'plain',
+            closingDelay: 250,
+            // mobileMode: false,
+        });
+    }
 
   }); // End of a document
 

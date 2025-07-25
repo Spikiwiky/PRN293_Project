@@ -1,14 +1,29 @@
 using EcommerceBackend.DataAccess.Models;
-using System.Threading.Tasks;
 
 namespace EcommerceBackend.DataAccess.Abstract
 {
-    public interface ICartRepository : IGenericRepository<Cart>
+    public interface ICartRepository
     {
-        Task<Cart> GetCartByUserIdAsync(int userId);
-        Task AddOrUpdateCartItemAsync(int userId, int productId, int quantity);
-        Task AddToCartAsync(int userId, int productId, int variantId, int quantity, string variantAttributes);
-        Task UpdateCartItemAsync(int userId, int productId, int variantId, int quantity, string variantAttributes);
-        Task ClearCartAsync(int userId);
+        // Cart operations
+        Task<Cart?> GetCartByCustomerIdAsync(int customerId);
+        Task<Cart> CreateCartAsync(int customerId);
+        Task<bool> CartExistsAsync(int cartId);
+        
+        // Cart item operations
+        Task<CartDetail> AddItemToCartAsync(int cartId, int productId, string? variantId, string? variantAttributes, int quantity);
+        Task<CartDetail?> GetCartItemAsync(int cartDetailId);
+        Task<CartDetail?> UpdateCartItemAsync(int cartDetailId, int quantity);
+        Task<CartDetail?> IncreaseCartItemQuantityAsync(int cartDetailId, int quantityToAdd = 1);
+        Task<CartDetail?> DecreaseCartItemQuantityAsync(int cartDetailId, int quantityToRemove = 1);
+        Task<bool> RemoveCartItemAsync(int cartDetailId);
+        Task<bool> ClearCartAsync(int cartId);
+        
+        // Cart item queries
+        Task<List<CartDetail>> GetCartItemsAsync(int cartId);
+        Task<bool> CartItemExistsAsync(int cartId, int productId, string? variantId = null, string? variantAttributes = null);
+        Task<CartDetail?> GetCartItemByProductAndVariantAsync(int cartId, int productId, string? variantId = null, string? variantAttributes = null);
+        
+        // Cart summary
+        Task<(int TotalItems, decimal TotalAmount)> GetCartSummaryAsync(int cartId);
     }
 } 

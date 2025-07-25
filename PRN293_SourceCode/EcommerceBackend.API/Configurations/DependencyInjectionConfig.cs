@@ -6,17 +6,11 @@ using EcommerceBackend.BusinessObject.Abstract.AuthAbstract;
 using EcommerceBackend.BusinessObject.Services.AuthService;
 using EcommerceBackend.DataAccess.Abstract;
 using EcommerceBackend.DataAccess.Repository;
-
-//using EcommerceBackend.BusinessObject.Services.ProductService;
-
-
 using EcommerceBackend.BusinessObject.Services;
-
-using EcommerceBackend.DataAccess.Abstract;
 using EcommerceBackend.BusinessObject.Services.OrderService;
-
-
-
+using EcommerceBackend.BusinessObject.Abstract;
+using EcommerceBackend.BusinessObject.Services.CartService;
+using EcommerceBackend.DataAccess.Repository.CartRepository;
 
 namespace EcommerceBackend.API.Configurations
 {
@@ -33,7 +27,6 @@ namespace EcommerceBackend.API.Configurations
                 }
                 ));
 
-
             // Register Dependency injection
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.AddScoped<DataAccess.Repository.IProductRepository, ProductRepository>();
@@ -43,21 +36,18 @@ namespace EcommerceBackend.API.Configurations
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IAuthRepository, AuthRepository>();
 
-            //Register for order
+            //Register for cart
+            services.AddScoped<ICartService, CartService>();
+            services.AddScoped<ICartRepository, CartRepository>();
 
+            //Register for order
             //services.AddScoped<IOrderService, OrderService>();
             //services.AddScoped<IOrderRepository, OrderRepository>();
-
-
-
-
-
 
             // Register other services as needed
             //services.AddScoped<IUserService, UserService>();
             //services.AddScoped<IEmailService, EmailService>();
             //services.AddScoped<IOtpService, OtpService>();
-
         }
     }
 }
