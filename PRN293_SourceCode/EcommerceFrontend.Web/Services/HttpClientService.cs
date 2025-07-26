@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using System.Text.Json;
+using Microsoft.AspNetCore.Http;
 
 namespace EcommerceFrontend.Web.Services;
 
@@ -17,12 +18,14 @@ public class HttpClientService : IHttpClientService
     private readonly IConfiguration _configuration;
     private readonly ILogger<HttpClientService> _logger;
     private readonly JsonSerializerOptions _jsonOptions;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public HttpClientService(HttpClient httpClient, IConfiguration configuration, ILogger<HttpClientService> logger)
+    public HttpClientService(HttpClient httpClient, IConfiguration configuration, ILogger<HttpClientService> logger, IHttpContextAccessor httpContextAccessor)
     {
         _httpClient = httpClient;
         _configuration = configuration;
         _logger = logger;
+        _httpContextAccessor = httpContextAccessor;
 
         var baseUrl = _configuration["ApiSettings:BaseUrl"];
         _logger.LogInformation("Initializing HttpClientService with base URL: {BaseUrl}", baseUrl);
@@ -36,6 +39,10 @@ public class HttpClientService : IHttpClientService
         _httpClient.BaseAddress = new Uri(baseUrl);
         _logger.LogInformation("HttpClient BaseAddress set to: {BaseAddress}", _httpClient.BaseAddress);
 
+        // Add default headers for CORS
+        _httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
+        _httpClient.DefaultRequestHeaders.Add("User-Agent", "EcommerceFrontend/1.0");
+
         _jsonOptions = new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true,
@@ -47,17 +54,36 @@ public class HttpClientService : IHttpClientService
     {
         try
         {
-            // Remove any double slashes in the URL except after http:// or https://
-            var cleanEndpoint = endpoint.Replace("//", "/").Replace(":/", "://");
-            var fullUrl = new Uri(_httpClient.BaseAddress!, cleanEndpoint).ToString();
+            // Ensure endpoint starts with / but doesn't have double slashes
+            var cleanEndpoint = endpoint.TrimStart('/');
+            cleanEndpoint = "/" + cleanEndpoint;
             
-            _logger.LogInformation("Making GET request to {FullUrl}", fullUrl);
+            // Remove any double slashes that might occur
+            cleanEndpoint = cleanEndpoint.Replace("//", "/");
             
-            using var response = await _httpClient.GetAsync(cleanEndpoint);
+            _logger.LogInformation("Making GET request to {Endpoint}", cleanEndpoint);
+            
+            // Create request with cookies
+            var request = new HttpRequestMessage(HttpMethod.Get, cleanEndpoint);
+            
+            // Add cookies from current context
+            var httpContext = _httpContextAccessor.HttpContext;
+            if (httpContext != null)
+            {
+                var cookies = httpContext.Request.Cookies;
+                var cookieHeader = string.Join("; ", cookies.Select(c => $"{c.Key}={c.Value}"));
+                if (!string.IsNullOrEmpty(cookieHeader))
+                {
+                    request.Headers.Add("Cookie", cookieHeader);
+                    _logger.LogInformation("Added cookies to request: {Cookies}", cookieHeader);
+                }
+            }
+            
+            using var response = await _httpClient.SendAsync(request);
             var content = await response.Content.ReadAsStringAsync();
             
             _logger.LogInformation("Received response from {Endpoint}. Status: {StatusCode}, Content Length: {ContentLength}", 
-                endpoint, response.StatusCode, content?.Length ?? 0);
+                cleanEndpoint, response.StatusCode, content?.Length ?? 0);
 
             if (!response.IsSuccessStatusCode)
             {
@@ -68,7 +94,7 @@ public class HttpClientService : IHttpClientService
                 }
 
                 _logger.LogError("API Error: {ErrorMessage}", errorMessage);
-                _logger.LogError("Request URL: {Url}", fullUrl);
+                _logger.LogError("Request URL: {BaseUrl}{Endpoint}", _httpClient.BaseAddress, cleanEndpoint);
                 _logger.LogError("Response Headers: {Headers}", string.Join(", ", response.Headers.Select(h => $"{h.Key}: {string.Join(", ", h.Value)}")));
 
                 throw new HttpRequestException(errorMessage, null, response.StatusCode);
@@ -76,7 +102,7 @@ public class HttpClientService : IHttpClientService
             
             if (string.IsNullOrEmpty(content))
             {
-                _logger.LogWarning("Empty response content from {Endpoint}", endpoint);
+                _logger.LogWarning("Empty response content from {Endpoint}", cleanEndpoint);
                 return default;
             }
 

@@ -35,7 +35,8 @@ namespace EcommerceBackend.BusinessObject.Services.AuthService
                 {
                     new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
                     new Claim(ClaimTypes.Name, user.Email),
-                    new Claim(ClaimTypes.Role, user.RoleName)
+                    new Claim(ClaimTypes.Role, user.RoleName),
+                    new Claim("UserName", user.UserName)
 
                 }),
                 Expires = DateTime.UtcNow.AddHours(8),

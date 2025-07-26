@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace EcommerceBackend.DataAccess.Models
@@ -26,4 +26,4 @@ namespace EcommerceBackend.DataAccess.Models
         public virtual PaymentMethod? PaymentMethod { get; set; }
         public virtual ICollection<OrderDetail> OrderDetails { get; set; }
     }
-}
+} 

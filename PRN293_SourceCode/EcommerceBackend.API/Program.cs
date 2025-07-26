@@ -7,29 +7,37 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Authorization;
 using PdfSharp.Fonts;
 using EcommerceBackend.API.Configurations;
+using Microsoft.AspNetCore.Cors;
 using EcommerceBackend.API.Hubs;
 using EcommerceBackend.BusinessObject.Services;
 
+
+using EcommerceBackend.DataAccess.Repository.SaleRepository;
+
 using EcommerceBackend.DataAccess.Abstract.BlogAbstract;
 using EcommerceBackend.DataAccess.Repository.BlogRepository;
-using EcommerceBackend.DataAccess.Repository.SaleRepository.ProductRepo;
+
 
 using EcommerceBackend.BusinessObject.Services.UserService;
 using EcommerceBackend.DataAccess.Repository.UserRepository;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.Cookies;
+
 using EcommerceBackend.DataAccess.Repository;
 using EcommerceBackend.DataAccess.Models;
+
+using EcommerceBackend.BusinessObject.Services.SaleService;
 using EcommerceBackend.DataAccess.Abstract;
-using EcommerceBackend.BusinessObject.Services.OrderService;
-using EcommerceBackend.DataAccess.Repository.SaleRepository.CategoryRepo;
-using EcommerceBackend.BusinessObject.Services.SaleService.CategoryService;
-using EcommerceBackend.BusinessObject.Services.SaleService.ProductService;
-using EcommerceBackend.DataAccess.Repository.SaleRepository.OrderRepo;
-using EcommerceBackend.BusinessObject.Services.SaleService.OrderService;
 using EcommerceBackend.DataAccess.Repository;
-using EcommerceBackend.BusinessObject.Services.SaleService.UserService;
-using EcommerceBackend.DataAccess.Repository.SaleRepository.UserRepo;
+using EcommerceBackend.BusinessObject.Abstract;
+using EcommerceBackend.BusinessObject.Services.CartService;
+using EcommerceBackend.DataAccess.Repository.CartRepository;
+using EcommerceBackend.DataAccess.Abstract.AuthAbstract;
+using EcommerceBackend.DataAccess.Repository.AuthRepository;
+using EcommerceBackend.BusinessObject.Abstract.AuthAbstract;
+using EcommerceBackend.BusinessObject.Services.AuthService;
+using EcommerceBackend.BusinessObject.Services.OrderService;
+using EcommerceBackend.BusinessObject.Services.GhnService;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -50,20 +58,29 @@ builder.Services.AddDbContext<EcommerceDBContext>(options =>
 builder.Services.AddScoped<EcommerceBackend.DataAccess.Repository.IProductRepository, EcommerceBackend.DataAccess.Repository.ProductRepository>();
 builder.Services.AddScoped<IProductService, ProductService>();
 
-//builder.Services.AddScoped<IOrderRepository, OrderRepository>();
-//builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<IOrderService, OrderService>();
 
 
 
 //builder.Services.AddScoped<ISaleProductService, SaleProductService>();
 builder.Services.AddScoped<ISaleService, SaleService>(); 
-builder.Services.AddScoped<EcommerceBackend.DataAccess.Repository.SaleRepository.ProductRepo.IProductRepository, EcommerceBackend.DataAccess.Repository.SaleRepository.ProductRepo.ProductRepository>();
-builder.Services.AddScoped<ICategoryService, CategoryService>();
-builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
-builder.Services.AddScoped<ISaleOrderService, SaleOrderService>();
-builder.Services.AddScoped<ISaleOrderRepository, SaleOrderRepository>();  
-builder.Services.AddScoped<ISaleUserService, SaleUserService>();  
-builder.Services.AddScoped<ISaleUserRepository, SaleUserRepository>();  
+builder.Services.AddScoped<EcommerceBackend.DataAccess.Repository.SaleRepository.IProductRepository, EcommerceBackend.DataAccess.Repository.SaleRepository.ProductRepository>();
+builder.Services.AddScoped<EcommerceBackend.BusinessObject.Services.SaleService.ICategoryService, EcommerceBackend.BusinessObject.Services.SaleService.CategoryService>();
+builder.Services.AddScoped<EcommerceBackend.DataAccess.Repository.SaleRepository.ICategoryRepository, EcommerceBackend.DataAccess.Repository.SaleRepository.CategoryRepository>();
+
+// Register Cart Services
+builder.Services.AddScoped<ICartService, CartService>();
+builder.Services.AddScoped<ICartRepository, CartRepository>();
+
+// Register GHN Services
+builder.Services.AddHttpClient<IGhnService, GhnService>();
+builder.Services.AddScoped<IGhnService, GhnService>();
+
+// Register Auth Services
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IAuthRepository, AuthRepository>();
+
 // Config Authentication Jwt
 JwtConfig.ConfigureJwtAuthentication(builder.Services, builder.Configuration);
 JwtConfig.ConfigureSwagger(builder.Services);
@@ -96,16 +113,7 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 
-//builder.Services.AddCorsPolicy(builder.Configuration);
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAll", policy =>
-    {
-        policy.AllowAnyOrigin()
-              .AllowAnyHeader()
-              .AllowAnyMethod();
-    });
-});
+builder.Services.AddCorsPolicy(builder.Configuration);
 
 builder.Services.AddSignalR();
 
@@ -116,6 +124,14 @@ app.MapHub<SignalrHub>("/SignalrHub");
 app.UseSwagger();
 app.UseSwaggerUI();
 app.UseSession();
+
+// Add headers to allow iframe embedding
+app.Use(async (context, next) =>
+{
+    context.Response.Headers.Add("X-Frame-Options", "SAMEORIGIN");
+    context.Response.Headers.Add("Content-Security-Policy", "frame-ancestors 'self' https://localhost:44321 http://localhost:44321");
+    await next();
+});
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();

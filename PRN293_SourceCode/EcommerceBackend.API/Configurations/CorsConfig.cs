@@ -12,10 +12,29 @@
                 options.AddPolicy("AllowFrontendApp",
                     policy =>
                     {
-                        policy.WithOrigins(frontendAppUrl ?? "https://localhost:7107")
+                        policy.WithOrigins(
+                                frontendAppUrl ?? "https://localhost:7107",
+                                "https://localhost:7107",
+                                "http://localhost:5107",
+                                "https://localhost:44321",
+                                "http://localhost:44321",
+                                "https://localhost:7257",
+                                "http://localhost:7257",
+                                "https://localhost:5287",
+                                "http://localhost:5287"
+                              )
                               .AllowAnyHeader()
                               .AllowAnyMethod()
-                              .AllowCredentials();
+                              .AllowCredentials()
+                              .SetIsOriginAllowedToAllowWildcardSubdomains();
+                    });
+
+                options.AddPolicy("AllowAll",
+                    policy =>
+                    {
+                        policy.AllowAnyOrigin()
+                              .AllowAnyHeader()
+                              .AllowAnyMethod();
                     });
             });
         }

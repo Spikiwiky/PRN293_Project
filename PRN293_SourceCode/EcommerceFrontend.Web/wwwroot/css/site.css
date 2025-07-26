@@ -16,3 +16,289 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+/* Slick Slider Styles */
+.slick-slide {
+  outline: none !important;
+}
+
+.wrap-slick1 {
+  position: relative;
+  overflow: hidden;
+}
+
+.slick1 {
+  position: relative;
+}
+
+.item-slick1 {
+  position: relative;
+  height: 500px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.item-slick1 .h-full {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wrap-slick1-arrows {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.wrap-slick1-arrows .arrow-slick1 {
+  pointer-events: auto;
+}
+
+/* Slider content styles */
+.flex-col-l-m {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 0 50px;
+  color: white;
+  text-align: left;
+}
+
+.ltext-101 {
+  font-size: 18px;
+  font-weight: 400;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.ltext-201 {
+  font-size: 48px;
+  font-weight: 700;
+  margin-bottom: 30px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+@media (max-width: 768px) {
+  .flex-col-l-m {
+    padding: 0 30px;
+  }
+  
+  .ltext-101 {
+    font-size: 16px;
+  }
+  
+  .ltext-201 {
+    font-size: 32px;
+  }
+}
+
+@media (max-width: 576px) {
+  .flex-col-l-m {
+    padding: 0 20px;
+  }
+  
+  .ltext-101 {
+    font-size: 14px;
+  }
+  
+  .ltext-201 {
+    font-size: 24px;
+  }
+}
+
+.arrow-slick1 {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 50px;
+  height: 50px;
+  background-color: rgba(255, 255, 255, 0.8);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.arrow-slick1:hover {
+  background-color: rgba(255, 255, 255, 1);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.prev-slick1 {
+  left: 20px;
+}
+
+.next-slick1 {
+  right: 20px;
+}
+
+.arrow-slick1 i {
+  font-size: 18px;
+  color: #333;
+}
+
+/* Slick2 arrows */
+.arrow-slick2 {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  background-color: #fff;
+  border: 1px solid #e6e6e6;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.arrow-slick2:hover {
+  background-color: #717fe0;
+  border-color: #717fe0;
+}
+
+.arrow-slick2:hover i {
+  color: #fff;
+}
+
+.prev-slick2 {
+  left: -20px;
+}
+
+.next-slick2 {
+  right: -20px;
+}
+
+.arrow-slick2 i {
+  font-size: 16px;
+  color: #333;
+  transition: color 0.3s ease;
+}
+
+/* Slick3 arrows */
+.arrow-slick3 {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 50px;
+  height: 50px;
+  background-color: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.arrow-slick3:hover {
+  background-color: #717fe0;
+}
+
+.arrow-slick3:hover i {
+  color: #fff;
+}
+
+.prev-slick3 {
+  left: 20px;
+}
+
+.next-slick3 {
+  right: 20px;
+}
+
+.arrow-slick3 i {
+  font-size: 18px;
+  color: #333;
+  transition: color 0.3s ease;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .item-slick1 {
+    height: 300px;
+  }
+  
+  .arrow-slick1,
+  .arrow-slick3 {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .arrow-slick1 i,
+  .arrow-slick3 i {
+    font-size: 16px;
+  }
+  
+  .prev-slick1,
+  .prev-slick3 {
+    left: 10px;
+  }
+  
+  .next-slick1,
+  .next-slick3 {
+    right: 10px;
+  }
+  
+  .arrow-slick2 {
+    width: 35px;
+    height: 35px;
+  }
+  
+  .arrow-slick2 i {
+    font-size: 14px;
+  }
+  
+  .prev-slick2 {
+    left: -15px;
+  }
+  
+  .next-slick2 {
+    right: -15px;
+  }
+}
+
+@media (max-width: 576px) {
+  .item-slick1 {
+    height: 250px;
+  }
+  
+  .arrow-slick1,
+  .arrow-slick3 {
+    width: 35px;
+    height: 35px;
+  }
+  
+  .arrow-slick1 i,
+  .arrow-slick3 i {
+    font-size: 14px;
+  }
+  
+  .prev-slick1,
+  .prev-slick3 {
+    left: 5px;
+  }
+  
+  .next-slick1,
+  .next-slick3 {
+    right: 5px;
+  }
+}

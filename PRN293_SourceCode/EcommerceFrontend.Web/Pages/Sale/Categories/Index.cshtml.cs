@@ -28,7 +28,7 @@ namespace EcommerceFrontend.Web.Pages.Sale.Categories
         public async Task<IActionResult> OnPostDeleteAsync(int id)
         {
             var client = _httpClientFactory.CreateClient("MyAPI");
-            var url = $"{_apiSettings.BaseUrl}/api/SaleProduct/categories/{id}";
+            var url = $"{_apiSettings.BaseUrl}/api/sale/categories/{id}";
 
             var response = await client.DeleteAsync(url);
 
@@ -49,7 +49,7 @@ namespace EcommerceFrontend.Web.Pages.Sale.Categories
             try
             {
                 var client = _httpClientFactory.CreateClient("MyAPI");
-                var fullUrl = $"{_apiSettings.BaseUrl}/api/SaleProduct/categories";
+                var fullUrl = $"{_apiSettings.BaseUrl}/api/sale/categories";
                 var response = await client.GetAsync(fullUrl);
 
                 if (response.IsSuccessStatusCode)

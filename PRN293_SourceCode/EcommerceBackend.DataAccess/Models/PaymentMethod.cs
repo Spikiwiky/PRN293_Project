@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace EcommerceBackend.DataAccess.Models
@@ -15,4 +15,4 @@ namespace EcommerceBackend.DataAccess.Models
 
         public virtual ICollection<Order> Orders { get; set; }
     }
-}
+} 

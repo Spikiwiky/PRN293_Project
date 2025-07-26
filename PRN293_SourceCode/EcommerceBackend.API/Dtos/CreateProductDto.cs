@@ -52,26 +52,11 @@ public class ProductResponseDto
 
 public class ProductImageDto
 {
-    public int ProductImageId { get; set; }
     public string ImageUrl { get; set; }
 }
 
 public class ProductVariantDto
 {
-    public int VariantId { get; set; }
-    public string Attributes { get; set; }
-    public string Variants { get; set; }
-}
-
-public class UpdateProductImageDto
-{
-    public int ProductImageId { get; set; }
-    public string ImageUrl { get; set; }
-}
-
-public class UpdateProductVariantDto
-{
-    public int VariantId { get; set; }
-    public string Attributes { get; set; }
-    public string Variants { get; set; }
+    public string Attributes { get; set; }  
+    public string Variants { get; set; }   
 }

@@ -124,7 +124,6 @@ namespace EcommerceBackend.DataAccess.Models
                     .HasColumnName("Product_name");
 
                 entity.Property(e => e.VariantId)
-                    .HasMaxLength(50)
                     .HasColumnName("Variant_id");
 
                 entity.HasOne(d => d.Cart)
@@ -193,7 +192,6 @@ namespace EcommerceBackend.DataAccess.Models
                     .HasColumnName("Product_name");
 
                 entity.Property(e => e.VariantId)
-                    .HasMaxLength(50)
                     .HasColumnName("Variant_id");
 
                 entity.HasOne(d => d.Order)

@@ -4,42 +4,7 @@
     ViewData["Title"] = "Products";
 }
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <title>Product</title>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!--===============================================================================================-->
-    <link rel="icon" type="image/png" href="images/icons/favicon.png" />
-    <!--===============================================================================================-->
-    <link rel="stylesheet" type="text/css" href="vendor/bootstrap/css/bootstrap.min.css">
-    <!--===============================================================================================-->
-    <link rel="stylesheet" type="text/css" href="fonts/font-awesome-4.7.0/css/font-awesome.min.css">
-    <!--===============================================================================================-->
-    <link rel="stylesheet" type="text/css" href="fonts/iconic/css/material-design-iconic-font.min.css">
-    <!--===============================================================================================-->
-    <link rel="stylesheet" type="text/css" href="fonts/linearicons-v1.0.0/icon-font.min.css">
-    <!--===============================================================================================-->
-    <link rel="stylesheet" type="text/css" href="vendor/animate/animate.css">
-    <!--===============================================================================================-->
-    <link rel="stylesheet" type="text/css" href="vendor/css-hamburgers/hamburgers.min.css">
-    <!--===============================================================================================-->
-    <link rel="stylesheet" type="text/css" href="vendor/animsition/css/animsition.min.css">
-    <!--===============================================================================================-->
-    <link rel="stylesheet" type="text/css" href="vendor/select2/select2.min.css">
-    <!--===============================================================================================-->
-    <link rel="stylesheet" type="text/css" href="vendor/daterangepicker/daterangepicker.css">
-    <!--===============================================================================================-->
-    <link rel="stylesheet" type="text/css" href="vendor/slick/slick.css">
-    <!--===============================================================================================-->
-    <link rel="stylesheet" type="text/css" href="vendor/MagnificPopup/magnific-popup.css">
-    <!--===============================================================================================-->
-    <link rel="stylesheet" type="text/css" href="vendor/perfect-scrollbar/perfect-scrollbar.css">
-    <!--===============================================================================================-->
-    <link rel="stylesheet" type="text/css" href="css/util.css">
-    <link rel="stylesheet" type="text/css" href="css/main.css">
-    <!--===============================================================================================-->
+@section Styles {
     <style>
         /* Đảm bảo card sản phẩm có kích cỡ cố định */
         .product-card {
@@ -232,212 +197,9 @@
             }
         }
     </style>
-</head>
-<body class="animsition">
+}
 
-    <!-- Header -->
-    <header class="header-v4">
-        <!-- Header desktop -->
-        <div class="container-menu-desktop">
-            <!-- Topbar -->
-            <div class="top-bar">
-                <div class="content-topbar flex-sb-m h-full container">
-                    <div class="left-top-bar">
-                        Miễn phí vận chuyển cho đơn từ 1tr vnđ
-                    </div>
-
-                    <div class="right-top-bar flex-w h-full">
-                        <a href="#" class="flex-c-m trans-04 p-lr-25">
-                            Trợ giúp
-                        </a>
-
-                        <a href="#" class="flex-c-m trans-04 p-lr-25">
-                            Tài khoản của tôi
-                        </a>
-
-                        <a href="#" class="flex-c-m trans-04 p-lr-25">
-                            VN
-                        </a>
-
-                        <a href="#" class="flex-c-m trans-04 p-lr-25">
-                            VND
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="wrap-menu-desktop">
-                <nav class="limiter-menu-desktop container">
-
-                    <!-- Logo desktop -->
-                    <a href="#" class="logo">
-                        <img src="images/icons/logo-01.png" alt="IMG-LOGO">
-                    </a>
-
-                    <!-- Menu desktop -->
-                    <div class="menu-desktop">
-                        <ul class="main-menu">
-                            <li>
-                                <a href="index.html">Trang chủ</a>
-                                <ul class="sub-menu">
-                                    <li><a href="index.html">Trang chủ 1</a></li>
-                                    <li><a href="home-02.html">Trang chủ 2</a></li>
-                                    <li><a href="home-03.html">Trang chủ 3</a></li>
-                                </ul>
-                            </li>
-
-                            <li class="active-menu">
-                                <a href="product.html">Cửa hàng</a>
-                            </li>
-
-                            <li class="label1">
-                                <a href="shoping-cart.html">Thanh toán</a>
-                            </li>
-
-                            <li>
-                                <a href="blog.html">Bài viết</a>
-                            </li>
-
-                            <li>
-                                <a href="about.html">Về tôi</a>
-                            </li>
-
-                            <li>
-                                <a href="contact.html">Liên hệ</a>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <!-- Icon header -->
-                    <div class="wrap-icon-header flex-w flex-r-m">
-                        <div class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 js-show-modal-search">
-                            <i class="zmdi zmdi-search"></i>
-                        </div>
-
-                        <div class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 icon-header-noti js-show-cart" data-notify="2">
-                            <i class="zmdi zmdi-shopping-cart"></i>
-                        </div>
-
-                        <a href="#" class="dis-block icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 icon-header-noti" data-notify="0">
-                            <i class="zmdi zmdi-favorite-outline"></i>
-                        </a>
-                    </div>
-                </nav>
-            </div>
-        </div>
-
-        <!-- Header Mobile -->
-        <div class="wrap-header-mobile">
-            <!-- Logo moblie -->
-            <div class="logo-mobile">
-                <a href="index.html"><img src="images/icons/logo-01.png" alt="IMG-LOGO"></a>
-            </div>
-
-            <!-- Icon header -->
-            <div class="wrap-icon-header flex-w flex-r-m m-r-15">
-                <div class="icon-header-item cl2 hov-cl1 trans-04 p-r-11 js-show-modal-search">
-                    <i class="zmdi zmdi-search"></i>
-                </div>
-
-                <div class="icon-header-item cl2 hov-cl1 trans-04 p-r-11 p-l-10 icon-header-noti js-show-cart" data-notify="2">
-                    <i class="zmdi zmdi-shopping-cart"></i>
-                </div>
-
-                <a href="#" class="dis-block icon-header-item cl2 hov-cl1 trans-04 p-r-11 p-l-10 icon-header-noti" data-notify="0">
-                    <i class="zmdi zmdi-favorite-outline"></i>
-                </a>
-            </div>
-
-            <!-- Button show menu -->
-            <div class="btn-show-menu-mobile hamburger hamburger--squeeze">
-                <span class="hamburger-box">
-                    <span class="hamburger-inner"></span>
-                </span>
-            </div>
-        </div>
-
-
-        <!-- Menu Mobile -->
-        <div class="menu-mobile">
-            <ul class="topbar-mobile">
-                <li>
-                    <div class="left-top-bar">
-                        Miễn phí vận chuyển cho đơn từ 1tr vnđ
-                    </div>
-                </li>
-
-                <li>
-                    <div class="right-top-bar flex-w h-full">
-                        <a href="#" class="flex-c-m p-lr-10 trans-04">
-                            Trợ giúp
-                        </a>
-
-                        <a href="#" class="flex-c-m p-lr-10 trans-04">
-                            Tài khoản của tôi
-                        </a>
-
-                        <a href="#" class="flex-c-m p-lr-10 trans-04">
-                            VN
-                        </a>
-
-                        <a href="#" class="flex-c-m p-lr-10 trans-04">
-                            VND
-                        </a>
-                    </div>
-                </li>
-            </ul>
-
-            <ul class="main-menu-m">
-                <li>
-                    <a href="index.html">Trang chủ</a>
-                    <ul class="sub-menu-m">
-                        <li><a href="index.html">Trang chủ 1</a></li>
-                        <li><a href="home-02.html">Trang chủ 2</a></li>
-                        <li><a href="home-03.html">Trang chủ 3</a></li>
-                    </ul>
-                    <span class="arrow-main-menu-m">
-                        <i class="fa fa-angle-right" aria-hidden="true"></i>
-                    </span>
-                </li>
-
-                <li>
-                    <a href="product.html" class="label1 rs1">Cửa hàng</a>
-                </li>
-
-                <li>
-                    <a href="shoping-cart.html">Thanh toán</a>
-                </li>
-
-                <li>
-                    <a href="blog.html">Bài viết</a>
-                </li>
-
-                <li>
-                    <a href="about.html">Về chúng tôi</a>
-                </li>
-
-                <li>
-                    <a href="contact.html">Liên hệ</a>
-                </li>
-            </ul>
-        </div>
-
-        <!-- Modal Search -->
-        <div class="modal-search-header flex-c-m trans-04 js-hide-modal-search">
-            <div class="container-search-header">
-                <button class="flex-c-m btn-hide-modal-search trans-04 js-hide-modal-search">
-                    <img src="images/icons/icon-close2.png" alt="CLOSE">
-                </button>
-
-                <form class="wrap-search-header flex-w p-l-15">
-                    <button class="flex-c-m trans-04">
-                        <i class="zmdi zmdi-search"></i>
-                    </button>
-                    <input class="plh3" type="text" name="search" placeholder="Tìm kiếm...">
-                </form>
-            </div>
-        </div>
-    </header>
+<div class="container-fluid">
 
     <!-- Cart -->
     <div class="wrap-header-cart js-panel-cart">
@@ -672,6 +434,7 @@
                                                 var attributeNames = attributes?.Keys.ToList() ?? new List<string>();
                                                 var variantData = product.Variants.Select(v => new
                                                 {
+                                                    VariantId = v.VariantId,
                                                     Attributes = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, List<string>>>(v.Attributes),
                                                     Variants = v.Variants
                                                 }).ToList();
@@ -721,8 +484,8 @@
                                                                 }
 
                                                                 <div class="selected-price mt-4 p-3 bg-light rounded" id="selected-price-@product.ProductId" data-base-price="@product.BasePrice.ToString("N2")">
-                                                                    <h5 class="text-success mb-0">
-                                                                        <i class="fa fa-tag me-2"></i>Giá: $@product.BasePrice.ToString("N2")
+                                                                    <h5 class="text-warning mb-0">
+                                                                        <i class="fa fa-info-circle me-2"></i>Giá cơ bản: $@product.BasePrice.ToString("N2")
                                                                     </h5>
                                                                 </div>
 
@@ -758,6 +521,12 @@
                                         <div class="modal-footer bg-light">
                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                                                 <i class="fa fa-times me-2"></i>Đóng
+                                            </button>
+                                            <button type="button" class="btn btn-success add-to-cart-btn" 
+                                                    data-product-id="@product.ProductId" 
+                                                    data-product-name="@product.Name"
+                                                    disabled>
+                                                <i class="fa fa-shopping-cart me-2"></i>Thêm vào giỏ hàng
                                             </button>
                                             <a asp-page="./Details" asp-route-id="@product.ProductId" class="btn btn-primary">
                                                 <i class="fa fa-eye me-2"></i>Xem chi tiết
@@ -1218,6 +987,15 @@
 
     <!-- Variant selection script -->
     <script>
+            // Helper function to get cookie
+            function getCookie(name) {
+                const value = `; ${document.cookie}`;
+                const parts = value.split(`; ${name}=`);
+                if (parts.length === 2) return parts.pop().split(';').shift();
+                return null;
+            }
+
+            // Product variant handling
             document.addEventListener('DOMContentLoaded', function() {
                 // Khởi tạo trạng thái ban đầu cho từng modal sản phẩm
                 document.querySelectorAll('[id^="variantModal-"]').forEach(modal => {
@@ -1238,13 +1016,58 @@
                     });
                 });
                 
-                // Add modal show animation
+                // Add modal show animation and reset price display
                 document.querySelectorAll('[id^="variantModal-"]').forEach(modal => {
                     modal.addEventListener('show.bs.modal', function () {
                         this.querySelector('.modal-dialog').style.transform = 'scale(0.8)';
                         setTimeout(() => {
                             this.querySelector('.modal-dialog').style.transform = 'scale(1)';
                         }, 50);
+                        
+                        // Reset price display to base price with warning color
+                        const productId = this.id.replace('variantModal-', '');
+                        const priceElement = document.getElementById(`selected-price-${productId}`);
+                        const detailsElement = document.getElementById(`variant-details-${productId}`);
+                        const basePrice = priceElement.dataset.basePrice;
+                        
+                        if (priceElement) {
+                            priceElement.innerHTML = `<h5 class="text-warning mb-0"><i class="fa fa-info-circle me-2"></i>Giá cơ bản: $${basePrice}</h5>`;
+                        }
+                        
+                        if (detailsElement) {
+                            detailsElement.style.display = 'none';
+                        }
+                        
+                        // Reset all selects
+                        const allSelects = this.querySelectorAll('.variant-select');
+                        allSelects.forEach(select => {
+                            select.value = '';
+                            Array.from(select.options).forEach(option => {
+                                if (option.value !== '') option.disabled = false;
+                            });
+                        });
+                        
+                        // Hide all variant options except the first one
+                        const allOptions = this.querySelectorAll('.variant-option');
+                        allOptions.forEach((option, idx) => {
+                            if (idx === 0) {
+                                option.style.display = 'block';
+                                option.style.visibility = 'visible';
+                                option.style.opacity = '1';
+                            } else {
+                                option.style.display = 'none';
+                                option.style.visibility = 'hidden';
+                                option.style.opacity = '0';
+                            }
+                        });
+                        
+                        // Disable add to cart button
+                        const addToCartBtn = this.querySelector('.add-to-cart-btn');
+                        if (addToCartBtn) {
+                            addToCartBtn.disabled = true;
+                            addToCartBtn.classList.remove('btn-success');
+                            addToCartBtn.classList.add('btn-secondary');
+                        }
                     });
                 });
 
@@ -1344,11 +1167,20 @@
                         
                         console.log('Selected attributes:', selectedAttributes);
 
-                        // Update price display
+                        // Update price display and add to cart button
+                        const addToCartBtn = document.querySelector(`.add-to-cart-btn[data-product-id="${productId}"]`);
+                        
                         if (!allAttributesSelected) {
                             // Hiển thị base price khi chưa chọn hết thuộc tính
                             priceElement.innerHTML = `<h5 class="text-warning mb-0"><i class="fa fa-info-circle me-2"></i>Giá cơ bản: $${basePrice}</h5>`;
                             detailsElement.style.display = 'none';
+                            
+                            // Disable add to cart button
+                            if (addToCartBtn) {
+                                addToCartBtn.disabled = true;
+                                addToCartBtn.classList.remove('btn-success');
+                                addToCartBtn.classList.add('btn-secondary');
+                            }
                         } else {
                             // Hiển thị price của variant khi đã chọn hết thuộc tính
                             const matchingVariant = variantData.find(v => {
@@ -1379,12 +1211,177 @@
                                     } else {
                                         detailsElement.style.display = 'none';
                                     }
+                                    
+                                    // Enable add to cart button
+                                    if (addToCartBtn) {
+                                        addToCartBtn.disabled = false;
+                                        addToCartBtn.classList.remove('btn-secondary');
+                                        addToCartBtn.classList.add('btn-success');
+                                    }
                                 }
                             }
                         }
                     });
                 });
+                
+                // Add event listeners for add to cart buttons
+                document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const productId = this.dataset.productId;
+                        const productName = this.dataset.productName;
+                        
+                        // Get selected variant information
+                        const modal = document.getElementById(`variantModal-${productId}`);
+                        const allSelects = modal.querySelectorAll('.variant-select');
+                        const selectedAttributes = {};
+                        
+                        allSelects.forEach(select => {
+                            const attrName = select.dataset.attribute;
+                            const value = select.value;
+                            if (value && value !== '') {
+                                selectedAttributes[attrName] = value;
+                            }
+                        });
+                        
+                        // Get variant price
+                        const priceElement = document.getElementById(`selected-price-${productId}`);
+                        const priceText = priceElement.textContent;
+                        const priceMatch = priceText.match(/\$([\d,]+\.?\d*)/);
+                        const price = priceMatch ? priceMatch[1] : '0';
+                        
+                        // Find variant ID based on selected attributes
+                        let variantId = null;
+                        const variantDataElement = document.getElementById(`variant-data-${productId}`);
+                        if (variantDataElement) {
+                            const variantData = JSON.parse(variantDataElement.textContent);
+                            console.log('Variant data for product', productId, ':', variantData);
+                            console.log('Selected attributes:', selectedAttributes);
+                            
+                            // Find the matching variant
+                            for (let i = 0; i < variantData.length; i++) {
+                                const variantGroup = variantData[i];
+                                console.log('Processing variant group', i, ':', variantGroup);
+                                let variants;
+                                
+                                try {
+                                    // Check if variants is already an object or needs parsing
+                                    if (typeof variantGroup.variants === 'string') {
+                                        variants = JSON.parse(variantGroup.variants);
+                                    } else {
+                                        variants = variantGroup.variants;
+                                    }
+                                    console.log('Parsed variants:', variants);
+                                } catch (parseError) {
+                                    console.error('Error parsing variants:', parseError);
+                                    console.log('Raw variants data:', variantGroup.variants);
+                                    continue;
+                                }
+                                
+                                if (!Array.isArray(variants)) {
+                                    console.warn('Variants is not an array:', variants);
+                                    continue;
+                                }
+                                
+                                for (let j = 0; j < variants.length; j++) {
+                                    const variant = variants[j];
+                                    console.log('Checking variant', j, ':', variant);
+                                    let isMatch = true;
+                                    
+                                    // Check if all selected attributes match this variant
+                                    for (const [key, value] of Object.entries(selectedAttributes)) {
+                                        console.log(`Comparing ${key}: selected="${value}" vs variant="${variant[key]}"`);
+                                        if (variant[key] !== value) {
+                                            isMatch = false;
+                                            console.log(`Mismatch found: ${key} - selected: ${value}, variant: ${variant[key]}`);
+                                            break;
+                                        }
+                                    }
+                                    
+                                    if (isMatch) {
+                                        console.log('Found matching variant:', variant);
+                                        // Use VariantId from variantGroup instead of variant.id
+                                        if (variantGroup.variantId) {
+                                            variantId = parseInt(variantGroup.variantId);
+                                            console.log('Found matching variant ID:', variantId, 'for variant group:', variantGroup);
+                                        } else {
+                                            console.warn('Variant matched but variant group has no VariantId:', variantGroup);
+                                        }
+                                        break;
+                                    }
+                                }
+                                
+                                if (variantId !== null) break;
+                            }
+                        } else {
+                            console.warn('Variant data element not found for product', productId);
+                        }
+                        
+                        console.log('Final variant ID:', variantId);
+                        
+                        // Create cart item data
+                        const cartItem = {
+                            productId: parseInt(productId),
+                            variantId: variantId,
+                            variantAttributes: JSON.stringify(selectedAttributes),
+                            quantity: 1
+                        };
+                        
+                        console.log('Adding to cart:', cartItem);
+                        
+                        // Check if user is logged in
+                        const userId = getCookie('UserId');
+                        const endpoint = userId ? '/api/Cart/add' : '/api/Cart/add-guest';
+                        
+                        console.log('User ID:', userId, 'Using endpoint:', endpoint);
+                        
+                        // Send data to frontend API (which will proxy to backend)
+                        fetch(endpoint, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify(cartItem)
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error(`HTTP error! status: ${response.status}`);
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            console.log('Success:', data);
+                            
+                            // Show success message
+                            swal({
+                                title: "Thành công!",
+                                text: `${productName} đã được thêm vào giỏ hàng`,
+                                icon: "success",
+                                button: "OK",
+                            });
+                            
+                            // Close modal after adding to cart
+                            const modalInstance = bootstrap.Modal.getInstance(modal);
+                            if (modalInstance) {
+                                modalInstance.hide();
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            
+                            // Show error message
+                            swal({
+                                title: "Lỗi!",
+                                text: "Không thể thêm sản phẩm vào giỏ hàng. Vui lòng thử lại.",
+                                icon: "error",
+                                button: "OK",
+                            });
+                        });
+                    });
+                });
             });
         </script>
-</body>
-</html>
+    </div>
+}
+
+

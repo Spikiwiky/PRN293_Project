@@ -24,7 +24,7 @@ namespace EcommerceFrontend.Web.Pages.Sale.Categories
         public async Task<IActionResult> OnGetAsync(int id)
         {
             var client = _httpClientFactory.CreateClient();
-            var response = await client.GetAsync($"{_apiSettings.BaseUrl}/api/SaleProduct/categories/{id}");
+            var response = await client.GetAsync($"{_apiSettings.BaseUrl}/api/sale/categories/{id}");
             if (response.IsSuccessStatusCode)
             {
                 Category = await response.Content.ReadFromJsonAsync<CategoryModel>();
@@ -42,7 +42,7 @@ namespace EcommerceFrontend.Web.Pages.Sale.Categories
 
             var client = _httpClientFactory.CreateClient();
             var content = new StringContent(JsonSerializer.Serialize(Category), Encoding.UTF8, "application/json");
-            var response = await client.PutAsync($"{_apiSettings.BaseUrl}/api/SaleProduct/categories/{Category.ProductCategoryId}", content);
+            var response = await client.PutAsync($"{_apiSettings.BaseUrl}/api/sale/categories/{Category.ProductCategoryId}", content);
 
             if (response.IsSuccessStatusCode)
             {

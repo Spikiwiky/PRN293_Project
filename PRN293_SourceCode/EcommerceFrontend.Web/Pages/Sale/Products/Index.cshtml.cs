@@ -27,7 +27,7 @@ namespace EcommerceFrontend.Web.Pages.Sale.Products
         public async Task<IActionResult> OnPostDeleteAsync(int id)
         {
             var client = _httpClientFactory.CreateClient("MyAPI");
-            var response = await client.DeleteAsync($"{_apiSettings.BaseUrl}/api/SaleProduct/products/{id}");
+            var response = await client.DeleteAsync($"{_apiSettings.BaseUrl}/api/sale/products/{id}");
 
             if (response.IsSuccessStatusCode)
             {
@@ -46,7 +46,7 @@ namespace EcommerceFrontend.Web.Pages.Sale.Products
             try
             {
                 var client = _httpClientFactory.CreateClient("MyAPI");
-                var response = await client.GetAsync($"{_apiSettings.BaseUrl}/api/SaleProduct/products");
+                var response = await client.GetAsync($"{_apiSettings.BaseUrl}/api/sale/products");
                 if (response.IsSuccessStatusCode)
                 {
                     Products = await response.Content.ReadFromJsonAsync<List<ProductModel>>() ?? new List<ProductModel>();

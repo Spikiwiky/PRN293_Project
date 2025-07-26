@@ -1,0 +1,91 @@
+@page
+@model EcommerceFrontend.Web.Pages.SwaggerModel
+@{
+    ViewData["Title"] = "API Documentation";
+    Layout = "_Layout";
+}
+
+@section Styles {
+    <style>
+        .swagger-container {
+            height: 80vh;
+            width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .swagger-info {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .swagger-links {
+            margin-bottom: 20px;
+        }
+        .swagger-links .btn {
+            margin-right: 10px;
+        }
+    </style>
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="swagger-info">
+                <h4><i class="fa fa-book"></i> API Documentation</h4>
+                <p class="mb-2">Tài liệu API của hệ thống e-commerce. Sử dụng Swagger UI để test các endpoints.</p>
+                <div class="swagger-links">
+                    <a href="https://localhost:7107/swagger" target="_blank" class="btn btn-primary">
+                        <i class="fa fa-external-link"></i> Mở Swagger trong tab mới
+                    </a>
+                    <a href="https://localhost:7107/swagger/v1/swagger.json" target="_blank" class="btn btn-outline-secondary">
+                        <i class="fa fa-download"></i> Tải JSON Schema
+                    </a>
+                    <a href="/" class="btn btn-outline-info">
+                        <i class="fa fa-arrow-left"></i> Quay lại trang chủ
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fa fa-code"></i> Swagger UI
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <iframe src="https://localhost:7107/swagger" class="swagger-container"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Auto-resize iframe
+        window.addEventListener('load', function() {
+            const iframe = document.querySelector('.swagger-container');
+            if (iframe) {
+                // Set height based on viewport
+                const viewportHeight = window.innerHeight;
+                const offset = 300; // Account for header, navigation, etc.
+                iframe.style.height = (viewportHeight - offset) + 'px';
+            }
+        });
+        
+        // Handle iframe load errors
+        document.addEventListener('DOMContentLoaded', function() {
+            const iframe = document.querySelector('.swagger-container');
+            if (iframe) {
+                iframe.onerror = function() {
+                    alert('Không thể tải Swagger UI. Vui lòng đảm bảo backend API đang chạy.');
+                };
+            }
+        });
+    </script>
+} 

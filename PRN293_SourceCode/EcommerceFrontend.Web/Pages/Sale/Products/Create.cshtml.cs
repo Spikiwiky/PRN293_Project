@@ -98,10 +98,13 @@ namespace EcommerceFrontend.Web.Pages.Sale.Products
             };
 
             var json = JsonSerializer.Serialize(dto);
+            //Console.WriteLine("====== JSON SENT TO API ======");
+            //Console.WriteLine(json);
+            //Console.WriteLine("==============================");
 
             var client = _httpClientFactory.CreateClient();
             var content = new StringContent(json, Encoding.UTF8, "application/json");
-            var response = await client.PostAsync($"{_apiSettings.BaseUrl}/api/SaleProduct/products", content);
+            var response = await client.PostAsync($"{_apiSettings.BaseUrl}/api/sale/products", content);
 
             if (response.IsSuccessStatusCode)
                 return RedirectToPage("Index");

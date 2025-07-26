@@ -36,7 +36,7 @@ namespace EcommerceFrontend.Web.Pages.Sale.Products
         public async Task<IActionResult> OnGetAsync([FromQuery] int id)
         {
             var client = _httpClientFactory.CreateClient("MyAPI");
-            var response = await client.GetAsync($"{_apiSettings.BaseUrl}/api/SaleProduct/products/{id}");
+            var response = await client.GetAsync($"{_apiSettings.BaseUrl}/api/sale/products/{id}");
             if (!response.IsSuccessStatusCode)
                 return NotFound();
 
@@ -163,7 +163,7 @@ namespace EcommerceFrontend.Web.Pages.Sale.Products
             var jsonContent = JsonSerializer.Serialize(updateDto);
             var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
-            var response = await client.PutAsync($"{_apiSettings.BaseUrl}/api/SaleProduct/products/{Product.ProductId}", content);
+            var response = await client.PutAsync($"{_apiSettings.BaseUrl}/api/sale/products/{Product.ProductId}", content);
 
             if (response.IsSuccessStatusCode)
                 return RedirectToPage("/Sale/Products/Index");

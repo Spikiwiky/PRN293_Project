@@ -8,7 +8,6 @@ using Microsoft.Extensions.Options;
 using EcommerceFrontend.Web.Models.Sale;
 using EcommerceFrontend.Web.Services.AI;
 using EcommerceFrontend.Web.Service.AI;
-using EcommerceFrontend.Web.Services.Order;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,6 +15,18 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
+builder.Services.AddControllers();
+
+// Add CORS policy for frontend
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 
 // Register HTTP client services
 var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"];
@@ -26,7 +37,19 @@ if (string.IsNullOrEmpty(apiBaseUrl))
 builder.Services.AddHttpClient("MyAPI", client =>
 {
     client.BaseAddress = new Uri(apiBaseUrl);
-    Console.WriteLine($"Configured BaseAddress for MyAPI: {apiBaseUrl}");  
+    Console.WriteLine($"Configured BaseAddress for MyAPI: {apiBaseUrl}"); // Debug log
+});
+
+// Add BackendAPI HttpClient
+var backendApiUrl = builder.Configuration["BackendAPI:BaseUrl"];
+if (string.IsNullOrEmpty(backendApiUrl))
+{
+    throw new ArgumentNullException("BackendAPI:BaseUrl is not configured in appsettings.json");
+}
+builder.Services.AddHttpClient("BackendAPI", client =>
+{
+    client.BaseAddress = new Uri(backendApiUrl);
+    Console.WriteLine($"Configured BaseAddress for BackendAPI: {backendApiUrl}"); // Debug log
 });
 
 //Tri
@@ -42,8 +65,10 @@ builder.Services.Configure<ApiSettings>(builder.Configuration.GetSection("ApiSet
 builder.Services.AddScoped<IHttpClientService, HttpClientService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<EcommerceFrontend.Web.Services.Order.IOrderService, EcommerceFrontend.Web.Services.Order.OrderService>();
 
-//builder.Services.AddScoped<IOrderService, OrderService>();
+// Add HttpContextAccessor for accessing cookies in services
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddHttpClient<BlogService>();
 builder.Services.AddHttpClient<IAdminBlogService, AdminBlogService>(client =>
@@ -51,6 +76,7 @@ builder.Services.AddHttpClient<IAdminBlogService, AdminBlogService>(client =>
     client.BaseAddress = new Uri("https://localhost:7107/");
 });
 builder.Services.AddScoped<ISaleProductService, SaleProductService>();
+
 
 builder.Services.AddScoped<IAdminBlogService, AdminBlogService>();
 
@@ -62,7 +88,6 @@ builder.Services.AddScoped<IBlogService, BlogService>();
 // Register admin services
 builder.Services.AddScoped<IProductService, ProductService>();
 
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -71,12 +96,13 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Error");
     app.UseHsts();
 }
-
+app.UseCors("AllowAll");
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthorization();
 app.MapRazorPages();
+app.MapControllers();
 app.MapBlazorHub();
 
 app.Run();

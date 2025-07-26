@@ -1,109 +1,64 @@
-﻿<!DOCTYPE html>
+﻿```html
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Ecommerce Sale</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
-    <style>
-        /* Tùy chỉnh nhỏ để sidebar dính và có độ cao tối thiểu */
-        .sidebar {
-            position: sticky;
-            top: 0;
-            height: 100vh; /* Chiều cao đầy đủ của viewport */
-            overflow-y: auto; /* Cho phép cuộn nếu nội dung sidebar dài */
-        }
-
-        /* Điều chỉnh để nội dung chính có thể cuộn độc lập */
-        .main-content-area {
-            min-height: calc(100vh - 56px - 70px); /* 100vh - chiều cao navbar - chiều cao footer (ước tính) */
-            padding-bottom: 30px; /* Thêm padding dưới để footer không che mất nội dung */
-        }
-    </style>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>@ViewData["Title"] - Ecommerce Sale</title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">Ecommerce Sale Admin</a> <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" asp-page="/Admin/User/Index">Dashboard</a>
-                    </li>
-                    <li class="nav-item">
-                        <button class="btn btn-outline-light ms-2" onclick="logout()">Đăng xuất</button>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+	<!-- Navbar -->
+	<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+		<div class="container-fluid">
+			<a class="navbar-brand" href="#">Ecommerce Sale</a>
+			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+				<span class="navbar-toggler-icon"></span>
+			</button>
+			<div class="collapse navbar-collapse" id="navbarNav">
+				<ul class="navbar-nav">
+					<li class="nav-item">
+						<a class="nav-link" asp-page="/Admin/User/Index">Dashboard</a>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</nav>
 
-    <div style="height: 56px;"></div>
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-md-3 col-lg-2 bg-light p-3 border-end sidebar">
-                <h5 class="text-center mb-4 mt-3 text-primary">Quản lý</h5> <div class="list-group list-group-flush">
-                    <a asp-page="/Admin/User/Create" class="list-group-item list-group-item-action py-2"> <i class="bi bi-person-plus me-2"></i> Thêm mới User </a>
-                    <a asp-page="/Admin/User/Index" class="list-group-item list-group-item-action py-2 active"> <i class="bi bi-people me-2"></i> Danh sách User </a>
-                    <a asp-page="/Admin/Products/Index" class="list-group-item list-group-item-action py-2">
-                        <i class="bi bi-box-seam me-2"></i> Quản lý Sản phẩm
-                    </a>
-                    <a asp-page="/Admin/Orders/Index" class="list-group-item list-group-item-action py-2">
-                        <i class="bi bi-receipt me-2"></i> Quản lý Đơn hàng
-                    </a>
-                    <a asp-page="/Admin/Categories/Index" class="list-group-item list-group-item-action py-2">
-                        <i class="bi bi-tags me-2"></i> Quản lý Danh mục
-                    </a>
-                </div>
-                <hr class="my-4"> <h5 class="text-center mb-4 text-primary">Báo cáo & Thống kê</h5>
-                <div class="list-group list-group-flush">
-                    <a asp-page="/Admin/Reports/Sales" class="list-group-item list-group-item-action py-2">
-                        <i class="bi bi-graph-up me-2"></i> Báo cáo Doanh thu
-                    </a>
-                    <a asp-page="/Admin/Reports/Customers" class="list-group-item list-group-item-action py-2">
-                        <i class="bi bi-people-fill me-2"></i> Thống kê Khách hàng
-                    </a>
-                </div>
-            </div>
+	<!-- Main Content -->
+	<div class="container-fluid mt-4">
+		<div class="row">
+			<!-- Sidebar (Dashboard) -->
+			<div class="col-md-3 col-lg-2 bg-light p-3 vh-100" style="overflow-y: auto; position: sticky; top: 0;">
+				<h5 class="text-center mb-3">Quản lý sản phẩm</h5>
+				<div class="list-group">
+					<a asp-page="/Admin/User/Create" class="list-group-item list-group-item-action">
+						<i class="bi bi-plus-circle me-2"></i> Thêm mới User
+					</a>
+					<a asp-page="/Admin/User/Index" class="list-group-item list-group-item-action">
+						<i class="bi bi-list-ul me-2"></i> Danh sách User
+					</a>
+				</div>
+			</div>
 
-            <div class="col-md-9 col-lg-10 p-4 main-content-area">
-                <main role="main">
-                    @RenderBody()
-                </main>
-            </div>
-        </div>
-    </div>
+			<!-- Main Content -->
+			<div class="col-md-9 col-lg-10 p-4">
+				<main role="main">
+					@RenderBody()
+				</main>
+			</div>
+		</div>
+	</div>
 
-    <footer class="bg-dark text-white text-center py-3 mt-4">
-        <p class="mb-0">&copy; 2025 Ecommerce Sale. All rights reserved.</p>
-    </footer>
+	<!-- Footer -->
+	<footer class="bg-dark text-white text-center py-3 mt-4">
+		<p>© 2025 Ecommerce Sale. All rights reserved.</p>
+	</footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Hàm logout - giống như các trang khác của bạn
-        function logout() {
-            localStorage.clear();
-            window.location.href = "/login.html"; // Giả sử login.html nằm ở root
-        }
-
-        // Optional: Highlight active sidebar link
-        document.addEventListener('DOMContentLoaded', function() {
-            const currentPath = window.location.pathname;
-            document.querySelectorAll('.list-group-item-action').forEach(link => {
-                // Ensure the link is an ASP.NET Core Tag Helper 'a' tag with 'asp-page'
-                if (link.getAttribute('asp-page') && link.getAttribute('asp-page') === currentPath) {
-                    link.classList.add('active');
-                }
-                // Fallback for direct HTML links if asp-page isn't available or for non-ASP.NET Core projects
-                else if (link.href && link.href === window.location.href) {
-                     link.classList.add('active');
-                }
-            });
-        });
-    </script>
-    @await RenderSectionAsync("Scripts", required: false)
+	<!-- Scripts -->
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+	@await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
+```
