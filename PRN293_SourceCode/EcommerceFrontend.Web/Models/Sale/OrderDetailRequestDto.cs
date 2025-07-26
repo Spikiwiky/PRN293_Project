@@ -4,8 +4,13 @@ namespace EcommerceFrontend.Web.Models.DTOs
 {
     public class OrderDetailRequestDto
     {
+        [Required]
         public int? ProductId { get; set; }
+
+        [Required]
+        [Range(1, int.MaxValue, ErrorMessage = "Quantity must be greater than 0.")]
         public int Quantity { get; set; }
+
         public string VariantId { get; set; }
     }
 
@@ -16,6 +21,7 @@ namespace EcommerceFrontend.Web.Models.DTOs
         public string VariantId { get; set; }
         public decimal? Price { get; set; }
         public string ProductName { get; set; }
+        public string VariantAttributes { get; set; }
     }
 
     public class OrderResponseDto
@@ -27,16 +33,25 @@ namespace EcommerceFrontend.Web.Models.DTOs
         public int? PaymentMethodId { get; set; }
         public string? OrderNote { get; set; }
         public int? OrderStatusId { get; set; }
-        public List<OrderDetailResponseDto> OrderDetails { get; set; }
+        public string? ShippingAddress { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
+
+        public List<OrderDetailResponseDto> OrderDetails { get; set; } = new();
     }
 
     public class CreateOrderDto
     {
+        [Required]
         public int CustomerId { get; set; }
+
         public int? PaymentMethodId { get; set; }
         public int? OrderStatusId { get; set; }
-        public string OrderNote { get; set; }
-        public List<OrderDetailRequestDto> OrderDetails { get; set; } = new List<OrderDetailRequestDto>();
+        public string? OrderNote { get; set; }
+        public string? ShippingAddress { get; set; }
+
+        [MinLength(1, ErrorMessage = "Order must have at least one product.")]
+        public List<OrderDetailRequestDto> OrderDetails { get; set; } = new();
     }
 
     public class UpdateOrderDto
@@ -44,17 +59,16 @@ namespace EcommerceFrontend.Web.Models.DTOs
         public int? CustomerId { get; set; }
         public int? PaymentMethodId { get; set; }
         public int? OrderStatusId { get; set; }
-        public List<OrderDetailRequestDto> OrderDetails { get; set; } = new List<OrderDetailRequestDto>();
+        public string? OrderNote { get; set; }
+        public string? ShippingAddress { get; set; }
+
+        [MinLength(1, ErrorMessage = "Order must have at least one product.")]
+        public List<OrderDetailRequestDto> OrderDetails { get; set; } = new();
     }
-    public class OrderDetailDto
+    public class ProductVariantDto
     {
-        [Required]
-        public int? ProductId { get; set; }
-
-        [Required]
-        [Range(1, int.MaxValue, ErrorMessage = "Quantity must be greater than 0.")]
-        public int? Quantity { get; set; }
-
-        public string VariantId { get; set; }
+        public int VariantId { get; set; }
+        public string Attributes { get; set; }
+        public string Variants { get; set; }
     }
 }

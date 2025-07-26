@@ -1,9 +1,7 @@
-﻿using System;
+﻿using EcommerceBackend.DataAccess.Models;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using EcommerceBackend.DataAccess.Models;
+
 namespace EcommerceBackend.DataAccess.Repository.SaleRepository.ProductRepo
 {
     public interface IProductRepository
@@ -17,5 +15,8 @@ namespace EcommerceBackend.DataAccess.Repository.SaleRepository.ProductRepo
         void UpdateProductImages(Product product, List<ProductImage> images);
         void UpdateProductVariants(Product product, List<ProductVariant> variants);
         Task<ProductVariant> GetProductVariantAsync(int productId, string variantId);
+
+        // **Mới thêm**
+        Task<IEnumerable<ProductVariant>> GetProductVariantsByProductIdAsync(int productId);
     }
 }

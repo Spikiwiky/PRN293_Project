@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using EcommerceBackend.DataAccess.Models;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 
 namespace EcommerceBackend.BusinessObject.dtos.SaleDto;
@@ -14,6 +15,7 @@ public class CreateProductDto
 
     public int? Status { get; set; }
     public bool IsDelete { get; set; } = false;
+
 
     public List<ProductImageDto> ProductImages { get; set; }
     public List<ProductVariantDto> Variants { get; set; }
@@ -52,11 +54,18 @@ public class ProductResponseDto
 
 public class ProductImageDto
 {
-    public string ImageUrl { get; set; }
+    public int ProductImageId { get; set; }
+    public int? ProductId { get; set; }
+    public string ImageUrl { get; set; } = null!;
+
+    public virtual Product? Product { get; set; }
 }
 
 public class ProductVariantDto
 {
+    public int VariantId { get; set; }
     public string Attributes { get; set; }  
     public string Variants { get; set; }   
 }
+
+

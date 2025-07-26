@@ -1,9 +1,8 @@
 ﻿using EcommerceFrontend.Web.Models.Sale;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using System.Net.Http.Json;
 using System.Text.Json;
-using System.Text;
-using EcommerceBackend.BusinessObject.dtos.SaleDto;
 
 namespace EcommerceFrontend.Web.Pages.Sale.Products
 {
@@ -13,7 +12,11 @@ namespace EcommerceFrontend.Web.Pages.Sale.Products
         private readonly ApiSettings _apiSettings;
 
         [BindProperty]
-        public CreateProductInputModel Product { get; set; }
+        public CreateProductDto Product { get; set; } = new CreateProductDto
+        {
+            ProductImages = new List<ProductImageDto> { new ProductImageDto() },
+            Variants = new List<ProductVariantDto> { new ProductVariantDto() }
+        };
 
         public CreateModel(IHttpClientFactory httpClientFactory, IConfiguration configuration)
         {
@@ -21,58 +24,22 @@ namespace EcommerceFrontend.Web.Pages.Sale.Products
             _apiSettings = configuration.GetSection("ApiSettings").Get<ApiSettings>();
         }
 
-        public IActionResult OnGet()
-        {
-            if (Product == null)
-            {
-                Product = new CreateProductInputModel
-                {
-                    Variants = new List<ProductVariantInputModel>
-            {
-                new ProductVariantInputModel()
-            },
-                    AvailableSizes = new List<string>(),
-                    AvailableColors = new List<string>()
-                };
-            }
-            return Page();
-        }
-
+        public IActionResult OnGet() => Page();
 
         public async Task<IActionResult> OnPostAsync()
         {
             if (!ModelState.IsValid)
                 return Page();
 
-            var availableAttributesObj = new Dictionary<string, List<string>>
+            // Group attributes từ tất cả variant
+            var attributes = new Dictionary<string, List<string>>
     {
-        {
-            "size",
-            Product.AvailableSizes
-                .SelectMany(s => s.Split(new[] { ',', '.' }, StringSplitOptions.RemoveEmptyEntries))
-                .Select(s => s.Trim())
-                .Where(s => !string.IsNullOrEmpty(s))
-                .ToList()
-        },
-        {
-            "color",
-            Product.AvailableColors
-                .SelectMany(s => s.Split(new[] { ',', '.' }, StringSplitOptions.RemoveEmptyEntries))
-                .Select(c => c.Trim())
-                .Where(c => !string.IsNullOrEmpty(c))
-                .ToList()
-        }
+        { "size", Product.Variants.Select(v => v.Size).Distinct().ToList() },
+        { "color", Product.Variants.Select(v => v.Color).Distinct().ToList() },
+        { "material", Product.Variants.Select(v => v.Material).Distinct().ToList() },
+        { "supplier", Product.Variants.Select(v => v.Supplier).Distinct().ToList() },
+        { "xuất xứ", Product.Variants.Select(v => v.XuatXu).Distinct().ToList() }
     };
-            var availableAttributesJson = JsonSerializer.Serialize(availableAttributesObj);
-             
-            var variantsList = Product.Variants.Select(v => new Dictionary<string, object>
-    {
-        { "size", v.Size },
-        { "color", v.Color },
-        { "price", v.Price },
-        { "stock", v.Stock }
-    }).ToList();
-            var variantsJson = JsonSerializer.Serialize(variantsList);
 
             var dto = new CreateProductDto
             {
@@ -81,30 +48,28 @@ namespace EcommerceFrontend.Web.Pages.Sale.Products
                 ProductCategoryId = Product.ProductCategoryId,
                 Brand = Product.Brand,
                 BasePrice = Product.BasePrice,
-                AvailableAttributes = availableAttributesJson,
+                AvailableAttributes = JsonSerializer.Serialize(attributes),
                 Status = Product.Status,
                 IsDelete = Product.IsDelete,
                 ProductImages = string.IsNullOrEmpty(Product.ImageUrl)
                     ? new List<ProductImageDto>()
                     : new List<ProductImageDto> { new ProductImageDto { ImageUrl = Product.ImageUrl } },
-                Variants = new List<ProductVariantDto>
-    {
-        new ProductVariantDto
-        {
-            Attributes = availableAttributesJson, 
-            Variants = JsonSerializer.Serialize(variantsList)
-        }
-    }
+                Variants = Product.Variants.Select(v => new ProductVariantDto
+                {
+                    Attributes = JsonSerializer.Serialize(new
+                    {
+                        size = v.Size,
+                        color = v.Color,
+                        material = v.Material,
+                        supplier = v.Supplier,
+                        xuấtxứ = v.XuatXu
+                    }),
+                    Variants = JsonSerializer.Serialize(v)
+                }).ToList()
             };
 
-            var json = JsonSerializer.Serialize(dto);
-            //Console.WriteLine("====== JSON SENT TO API ======");
-            //Console.WriteLine(json);
-            //Console.WriteLine("==============================");
-
             var client = _httpClientFactory.CreateClient();
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
-            var response = await client.PostAsync($"{_apiSettings.BaseUrl}/api/sale/products", content);
+            var response = await client.PostAsJsonAsync($"{_apiSettings.BaseUrl}/api/SaleProduct/products", dto);
 
             if (response.IsSuccessStatusCode)
                 return RedirectToPage("Index");
@@ -113,5 +78,6 @@ namespace EcommerceFrontend.Web.Pages.Sale.Products
             ModelState.AddModelError(string.Empty, $"Error creating product: {error}");
             return Page();
         }
+
     }
 }

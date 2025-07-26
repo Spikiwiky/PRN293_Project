@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace EcommerceBackend.DataAccess.Repository.SaleRepository.ProductRepo
@@ -11,6 +10,7 @@ namespace EcommerceBackend.DataAccess.Repository.SaleRepository.ProductRepo
     public class ProductRepository : IProductRepository
     {
         readonly EcommerceDBContext _context;
+
         public ProductRepository(EcommerceDBContext context)
         {
             _context = context;
@@ -18,12 +18,11 @@ namespace EcommerceBackend.DataAccess.Repository.SaleRepository.ProductRepo
 
         public async Task<Product> GetProductByIdAsync(int id)
         {
-            var product = await _context.Products
+            return await _context.Products
                 .Include(p => p.ProductCategory)
                 .Include(p => p.ProductImages)
                 .Include(p => p.Variants)
                 .FirstOrDefaultAsync(p => p.ProductId == id && !p.IsDelete && p.Status == 1);
-            return product;
         }
 
         public async Task<IEnumerable<Product>> GetAllProductsAsync()
@@ -34,6 +33,7 @@ namespace EcommerceBackend.DataAccess.Repository.SaleRepository.ProductRepo
                 .Include(p => p.Variants)
                 .ToListAsync();
         }
+
         public async Task AddProductAsync(Product product)
         {
             _context.Products.Add(product);
@@ -56,10 +56,12 @@ namespace EcommerceBackend.DataAccess.Repository.SaleRepository.ProductRepo
                 await _context.SaveChangesAsync();
             }
         }
+
         public Task SaveChangesAsync()
         {
             return _context.SaveChangesAsync();
         }
+
         public void UpdateProductImages(Product product, List<ProductImage> images)
         {
             _context.ProductImages.RemoveRange(product.ProductImages);
@@ -84,6 +86,14 @@ namespace EcommerceBackend.DataAccess.Repository.SaleRepository.ProductRepo
         {
             return await _context.ProductVariants
                 .FirstOrDefaultAsync(v => v.ProductId == productId && v.VariantId.ToString() == variantId);
+        }
+
+        // **Hàm mới thêm**
+        public async Task<IEnumerable<ProductVariant>> GetProductVariantsByProductIdAsync(int productId)
+        {
+            return await _context.ProductVariants
+                .Where(v => v.ProductId == productId)
+                .ToListAsync();
         }
     }
 }

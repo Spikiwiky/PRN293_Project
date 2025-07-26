@@ -4,51 +4,92 @@
     ViewData["Title"] = "Chỉnh sửa đơn hàng";
 }
 
-<h2>Chỉnh sửa đơn hàng</h2>
-
-@if (!string.IsNullOrEmpty(Model.ErrorMessage))
-{
-    <div class="alert alert-danger">@Model.ErrorMessage</div>
-}
-
-<form method="post">
-    <div class="form-group">
-        <label>Customer ID</label>
-        <input asp-for="OrderDto.CustomerId" class="form-control" readonly />
-    </div>
-
-    <div class="form-group">
-        <label>Payment Method ID</label>
-        <input asp-for="OrderDto.PaymentMethodId" class="form-control" />
-    </div>
-
-    <h4>Order Details</h4>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Product ID</th>
-                <th>Variant ID</th>
-                <th>Quantity</th>
-            </tr>
-        </thead>
-        <tbody>
-            @for (int i = 0; i < Model.OrderDto.OrderDetails.Count; i++)
+<div class="container my-4">
+    <div class="card rounded-0 shadow-sm">
+        <div class="card-header bg-dark text-white rounded-0">
+            <h2 class="mb-0">Chỉnh sửa đơn hàng</h2>
+        </div>
+        <div class="card-body">
+            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
             {
-                <tr>
-                    <td>
-                        <input asp-for="OrderDto.OrderDetails[@i].ProductId" class="form-control" />
-                    </td>
-                    <td>
-                        <input asp-for="OrderDto.OrderDetails[@i].VariantId" class="form-control" />
-                    </td>
-                    <td>
-                        <input asp-for="OrderDto.OrderDetails[@i].Quantity" class="form-control" />
-                    </td>
-                </tr>
+                <div class="alert alert-danger alert-dismissible fade show rounded-0" role="alert">
+                    @Model.ErrorMessage
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
             }
-        </tbody>
-    </table>
 
-    <button type="submit" class="btn btn-success">Lưu thay đổi</button>
-    <a asp-page="/Sale/Sale_Order/Index" class="btn btn-secondary">Hủy</a>
-</form>
+            <form method="post">
+                <div class="mb-3">
+                    <label for="OrderDto_CustomerId" class="form-label">Customer ID</label>
+                    <input asp-for="OrderDto.CustomerId" class="form-control rounded-0" readonly />
+                </div>
+
+                <div class="form-group">
+                    <label>Payment Method</label>
+                    <select asp-for="OrderDto.PaymentMethodId" class="form-control" asp-items="Model.PaymentMethods" disabled>
+                        <option value="">-- Chọn phương thức thanh toán --</option>
+                    </select>
+                    <input type="hidden" asp-for="OrderDto.PaymentMethodId" /> <!-- vẫn gửi giá trị về server -->
+                </div>
+
+
+                <div class="mb-3">
+                    <label for="OrderDto_OrderStatusId" class="form-label">Order Status</label>
+                    <select asp-for="OrderDto.OrderStatusId" class="form-select rounded-0" asp-items="Model.OrderStatuses">
+                        <option value="">-- Chọn trạng thái --</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="OrderDto_OrderNote" class="form-label">Order Note</label>
+                    <textarea asp-for="OrderDto.OrderNote" class="form-control rounded-0"></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label for="OrderDto_ShippingAddress" class="form-label">Shipping Address</label>
+                    <textarea asp-for="OrderDto.ShippingAddress" class="form-control rounded-0"></textarea>
+                </div>
+
+                <h4 class="mt-4 mb-3">Order Details</h4>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped rounded-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="border-top-0">Product ID</th>
+                                <th class="border-top-0">Variant</th>
+                                <th class="border-top-0">Quantity</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (int i = 0; i < Model.OrderDto.OrderDetails.Count; i++)
+                            {
+                                <tr>
+                                    <td>
+                                        <input asp-for="OrderDto.OrderDetails[@i].ProductId" class="form-control rounded-0" />
+                                    </td>
+                                    <td>
+                                        <select asp-for="OrderDto.OrderDetails[@i].VariantId" class="form-select rounded-0" asp-items="Model.VariantOptions">
+                                            <option value="">-- Chọn Variant --</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <input asp-for="OrderDto.OrderDetails[@i].Quantity" class="form-control rounded-0" />
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-flex gap-2 mt-4">
+                    <button type="submit" class="btn btn-success rounded-0">Lưu thay đổi</button>
+                    <a asp-page="/Sale/Sale_Order/Index" class="btn btn-secondary rounded-0">Hủy</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+}

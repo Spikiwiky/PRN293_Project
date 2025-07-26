@@ -50,6 +50,8 @@ builder.Services.AddScoped<ISaleUserRepository, SaleUserRepository>();
 builder.Services.AddScoped<ISaleBlogRepository, SaleBlogRepository>();
 builder.Services.AddScoped<ISaleBlogService, SaleBlogService>();
 builder.Services.AddScoped<ICartService, CartService>();
+builder.Services.AddScoped<CartService>();
+
 // Config Authentication Jwt
 JwtConfig.ConfigureJwtAuthentication(builder.Services, builder.Configuration);
 JwtConfig.ConfigureSwagger(builder.Services);

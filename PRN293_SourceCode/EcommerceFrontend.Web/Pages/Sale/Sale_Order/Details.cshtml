@@ -10,11 +10,22 @@
 {
     <div class="alert alert-danger">@Model.ErrorMessage</div>
 }
-
-@if (Model.OrderDetails != null && Model.OrderDetails.Any())
+else
 {
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Thông tin chung</h5>
+            <p><strong>Customer ID:</strong> @Model.CustomerId</p>
+            <p><strong>Payment Method:</strong> @Model.PaymentMethodName</p>
+            <p><strong>Status:</strong> @Model.OrderStatusName</p>
+            <p><strong>Order Note:</strong> @Model.OrderNote</p>
+            <p><strong>Shipping Address:</strong> @Model.ShippingAddress</p>
+        </div>
+    </div>
+
     <div class="card">
         <div class="card-body">
+            <h5 class="card-title">Chi tiết sản phẩm</h5>
             <table class="table">
                 <thead>
                     <tr>
@@ -30,7 +41,7 @@
                     {
                         <tr>
                             <td>@detail.ProductId</td>
-                            <td>@(string.IsNullOrEmpty(detail.VariantId) ? "N/A" : detail.VariantId)</td>
+                            <td>@(detail.VariantId?.ToString() ?? "N/A")</td>
                             <td>@detail.Quantity</td>
                             <td>@detail.Price?.ToString("N2")</td>
                             <td>@detail.ProductName</td>
@@ -40,11 +51,8 @@
             </table>
         </div>
     </div>
+
     <a asp-page="/Sale/Sale_Order/Index" class="btn btn-secondary mt-3">Quay lại</a>
-}
-else
-{
-    <p>Không có chi tiết đơn hàng nào.</p>
 }
 
 @section Scripts {
