@@ -1,0 +1,86 @@
+﻿@page
+@model EcommerceFrontend.Web.Pages.Sale.Sale_Order.CreateModel
+@{
+}
+
+<h2>Tạo đơn hàng mới</h2>
+
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <div class="alert alert-danger">@Model.ErrorMessage</div>
+}
+
+<form method="post" class="mt-4">
+    <div class="form-group">
+        <label asp-for="OrderDto.CustomerId">Customer ID</label>
+        <input asp-for="OrderDto.CustomerId" class="form-control" required>
+        <span asp-validation-for="OrderDto.CustomerId" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="OrderDto.PaymentMethodId">Payment Method ID</label>
+        <input asp-for="OrderDto.PaymentMethodId" class="form-control" required>
+        <span asp-validation-for="OrderDto.PaymentMethodId" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="OrderDto.OrderNote">Order Note</label>
+        <input asp-for="OrderDto.OrderNote" class="form-control">
+    </div>
+
+    <!-- Danh sách chi tiết đơn hàng -->
+    @for (int i = 0; i < Model.OrderDto.OrderDetails.Count; i++)
+    {
+        <div class="form-group order-detail-row">
+            <h5>Order Detail @(i + 1)</h5>
+            <label asp-for="OrderDto.OrderDetails[i].ProductId">Product ID</label>
+            <input asp-for="OrderDto.OrderDetails[i].ProductId" class="form-control" required>
+            <span asp-validation-for="OrderDto.OrderDetails[i].ProductId" class="text-danger"></span>
+            <label asp-for="OrderDto.OrderDetails[i].Quantity">Quantity</label>
+            <input asp-for="OrderDto.OrderDetails[i].Quantity" class="form-control" required>
+            <span asp-validation-for="OrderDto.OrderDetails[i].Quantity" class="text-danger"></span>
+            <label asp-for="OrderDto.OrderDetails[i].VariantId">Variant ID</label>
+            <input asp-for="OrderDto.OrderDetails[i].VariantId" class="form-control">
+            <button type="button" class="btn btn-danger btn-sm remove-detail" style="margin-top: 5px;">Xóa</button>
+        </div>
+    }
+
+    <button type="button" class="btn btn-secondary mb-2" onclick="addOrderDetail()">Thêm chi tiết</button>
+    <button type="submit" class="btn btn-primary">Tạo đơn hàng</button>
+    <a asp-page="/Sale/Sale_Order/Index" class="btn btn-secondary ml-2">Quay lại</a>
+</form>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.3/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"></script>
+    <script>
+        let detailCount = @Model.OrderDto.OrderDetails.Count;
+
+        function addOrderDetail() {
+            detailCount++;
+            const detailsDiv = $('.order-detail-row').last().parent();
+            const newDetail = `
+                <div class="form-group order-detail-row">
+                    <h5>Order Detail ${detailCount}</h5>
+                    <label asp-for="OrderDto.OrderDetails[0].ProductId">Product ID</label>
+                    <input asp-for="OrderDto.OrderDetails[${detailCount-1}].ProductId" class="form-control" required>
+                    <span asp-validation-for="OrderDto.OrderDetails[${detailCount-1}].ProductId" class="text-danger"></span>
+                    <label asp-for="OrderDto.OrderDetails[0].Quantity">Quantity</label>
+                    <input asp-for="OrderDto.OrderDetails[${detailCount-1}].Quantity" class="form-control" required>
+                    <span asp-validation-for="OrderDto.OrderDetails[${detailCount-1}].Quantity" class="text-danger"></span>
+                    <label asp-for="OrderDto.OrderDetails[0].VariantId">Variant ID</label>
+                    <input asp-for="OrderDto.OrderDetails[${detailCount-1}].VariantId" class="form-control">
+                    <button type="button" class="btn btn-danger btn-sm remove-detail" style="margin-top: 5px;">Xóa</button>
+                </div>
+            `;
+            detailsDiv.append(newDetail);
+        }
+
+        $(document).on('click', '.remove-detail', function() {
+            if (detailCount > 1) {
+                $(this).parent().remove();
+                detailCount--;
+            }
+        });
+    </script>
+}

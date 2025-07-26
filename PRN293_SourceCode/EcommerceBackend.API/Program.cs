@@ -39,7 +39,18 @@ using EcommerceBackend.BusinessObject.Services.AuthService;
 using EcommerceBackend.BusinessObject.Services.OrderService;
 using EcommerceBackend.BusinessObject.Services.GhnService;
 
-
+using EcommerceBackend.DataAccess.Repository.SaleRepository.SaleCategory;
+using EcommerceBackend.BusinessObject.Services.SaleService.CategoryService;
+using EcommerceBackend.BusinessObject.Services.SaleService.ProductService;
+using EcommerceBackend.DataAccess.Repository.SaleRepository.OrderRepo;
+using EcommerceBackend.BusinessObject.Services.SaleService.OrderService;
+using EcommerceBackend.BusinessObject.Services.SaleService.UserService;
+using EcommerceBackend.DataAccess.Repository.SaleRepository.UserRepo;
+using EcommerceBackend.BusinessObject.Services.SaleService.CategoryService.CategoryService;
+using EcommerceBackend.DataAccess.Repository.SaleRepository.BlogRepo;
+using EcommerceBackend.BusinessObject.Services.SaleService.BlogService;
+using EcommerceBackend.BusinessObject.Abstract;
+using EcommerceBackend.BusinessObject.Services.CartService;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -65,14 +76,39 @@ builder.Services.AddScoped<IOrderService, OrderService>();
 
 //builder.Services.AddScoped<ISaleProductService, SaleProductService>();
 builder.Services.AddScoped<ISaleService, SaleService>(); 
-builder.Services.AddScoped<EcommerceBackend.DataAccess.Repository.SaleRepository.IProductRepository, EcommerceBackend.DataAccess.Repository.SaleRepository.ProductRepository>();
-builder.Services.AddScoped<EcommerceBackend.BusinessObject.Services.SaleService.ICategoryService, EcommerceBackend.BusinessObject.Services.SaleService.CategoryService>();
-builder.Services.AddScoped<EcommerceBackend.DataAccess.Repository.SaleRepository.ICategoryRepository, EcommerceBackend.DataAccess.Repository.SaleRepository.CategoryRepository>();
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 
 // Register Cart Services
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<ICartRepository, CartRepository>();
+// Add services to the container.
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+builder.Services.AddScoped<IBlogRepository, BlogRepository>();
+builder.Services.AddScoped<BlogService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserService, UserService>();
 
+
+//thanhvv
+builder.Services.AddDbContext<EcommerceDBContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddScoped<EcommerceBackend.DataAccess.Repository.IProductRepository, EcommerceBackend.DataAccess.Repository.ProductRepository>();
+builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<ISaleService, SaleService>();
+builder.Services.AddScoped<EcommerceBackend.DataAccess.Repository.SaleRepository.ProductRepo.IProductRepository, EcommerceBackend.DataAccess.Repository.SaleRepository.ProductRepo.ProductRepository>();
+builder.Services.AddScoped<ISaleCategoryService, SaleCategoryService>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<ISaleOrderService, SaleOrderService>();
+builder.Services.AddScoped<ISaleOrderRepository, SaleOrderRepository>();
+builder.Services.AddScoped<ISaleUserService, SaleUserService>();
+builder.Services.AddScoped<ISaleUserRepository, SaleUserRepository>();
+builder.Services.AddScoped<ISaleBlogRepository, SaleBlogRepository>();
+builder.Services.AddScoped<ISaleBlogService, SaleBlogService>();
+builder.Services.AddScoped<ICartService, CartService>();
+builder.Services.AddScoped<CartService>();
 // Register GHN Services
 builder.Services.AddHttpClient<IGhnService, GhnService>();
 builder.Services.AddScoped<IGhnService, GhnService>();

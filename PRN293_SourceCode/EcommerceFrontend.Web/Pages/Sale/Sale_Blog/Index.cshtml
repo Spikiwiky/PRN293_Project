@@ -1,0 +1,86 @@
+﻿@page
+@model EcommerceFrontend.Web.Pages.Sale.Sale_Blog.IndexModel
+
+@{
+    ViewData["Title"] = "Quản lý Blog";
+}
+
+<h1>Quản lý Blog</h1>
+
+<form method="get" class="form-inline mb-3">
+    <input type="text" name="search" value="@Model.Search" placeholder="Tìm tiêu đề..." class="form-control mr-2" />
+    <button type="submit" class="btn btn-primary mr-2">Tìm kiếm</button>
+    <a asp-page="Create" class="btn btn-success">Thêm mới Blog</a>
+</form>
+
+<table class="table table-bordered table-striped">
+    <thead class="thead-dark">
+        <tr>
+            <th>Tiêu đề</th>
+            <th>Ngày đăng</th>
+            <th>Lượt xem</th>
+            <th>Trạng thái</th>
+            <th style="width: 200px;">Thao tác</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.Blogs.Any())
+        {
+            @foreach (var blog in Model.Blogs)
+            {
+                <tr>
+                    <td>@blog.BlogTittle</td>
+                    <td>@blog.PublishedDate?.ToString("dd/MM/yyyy")</td>
+                    <td>@blog.ViewCount</td>
+                    <td>@(blog.IsPublished ? "Đã xuất bản" : "Nháp")</td>
+                    <td>
+                        <a asp-page="Edit" asp-route-id="@blog.BlogId" class="btn btn-sm btn-warning">Sửa</a>
+                        <a asp-page="Details" asp-route-id="@blog.BlogId" class="btn btn-sm btn-info">Chi tiết</a>
+                        <form method="post" asp-page-handler="Delete" asp-route-id="@blog.BlogId" style="display:inline"
+                              onsubmit="return confirm('Bạn có chắc muốn xóa blog này không?');">
+                            <button type="submit" class="btn btn-sm btn-danger">Xóa</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="5" class="text-center">Không có dữ liệu</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (Model.TotalPages > 1)
+{
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            <li class="page-item @(Model.PageNumber == 1 ? "disabled" : "")">
+                <a class="page-link"
+                   asp-page="Index"
+                   asp-route-search="@Model.Search"
+                   asp-route-pageNumber="@(Model.PageNumber - 1)"
+                   asp-route-pageSize="@Model.PageSize">Previous</a>
+            </li>
+            @for (int i = 1; i <= Model.TotalPages; i++)
+            {
+                <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+                    <a class="page-link"
+                       asp-page="Index"
+                       asp-route-search="@Model.Search"
+                       asp-route-pageNumber="@i"
+                       asp-route-pageSize="@Model.PageSize">@i</a>
+                </li>
+            }
+            <li class="page-item @(Model.PageNumber == Model.TotalPages ? "disabled" : "")">
+                <a class="page-link"
+                   asp-page="Index"
+                   asp-route-search="@Model.Search"
+                   asp-route-pageNumber="@(Model.PageNumber + 1)"
+                   asp-route-pageSize="@Model.PageSize">Next</a>
+            </li>
+        </ul>
+    </nav>
+}

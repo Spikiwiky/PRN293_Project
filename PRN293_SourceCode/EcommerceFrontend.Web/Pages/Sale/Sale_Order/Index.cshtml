@@ -1,0 +1,65 @@
+﻿@page
+@model EcommerceFrontend.Web.Pages.Sale.Sale_Order.IndexModel
+@{
+    ViewData["Title"] = "Quản lý đơn hàng";
+}
+
+<div class="container my-4">
+    <div class="card rounded-0 shadow-sm">
+        <div class="card-header bg-dark text-white rounded-0">
+            <h2 class="mb-0">Quản lý đơn hàng</h2>
+        </div>
+        <div class="card-body">
+            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+            {
+                <div class="alert alert-danger alert-dismissible fade show rounded-0" role="alert">
+                    @Model.ErrorMessage
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            <a href="/Sale/Sale_Order/Create" class="btn btn-primary rounded-0 mb-3">Tạo đơn hàng mới</a>
+
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped table-hover rounded-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="border-top-0">Order ID</th>
+                            <th class="border-top-0">Customer ID</th>
+                            <th class="border-top-0">Total Quantity</th>
+                            <th class="border-top-0">Amount Due</th>
+                            <th class="border-top-0">Status</th>
+                            <th class="border-top-0">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var order in Model.Orders)
+                        {
+                            <tr>
+                                <td>@order.OrderId</td>
+                                <td>@order.CustomerId</td>
+                                <td>@order.TotalQuantity</td>
+                                <td>@order.AmountDue</td>
+                                <td>@EcommerceFrontend.Web.Pages.Sale.Sale_Order.IndexModel.GetStatusName(order.OrderStatusId)</td>
+                                <td>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <a asp-page-handler="Details" asp-route-id="@order.OrderId" class="btn btn-info btn-sm rounded-0">Chi tiết</a>
+                                        <a asp-page="/Sale/Sale_Order/Edit" asp-route-id="@order.OrderId" class="btn btn-warning btn-sm rounded-0">Sửa</a>
+                                        <form method="post" asp-page-handler="Delete" asp-route-id="@order.OrderId" style="display:inline;"
+                                              onsubmit="return confirm('Bạn có chắc chắn muốn xóa đơn hàng này?');">
+                                            <button type="submit" class="btn btn-danger btn-sm rounded-0">Xóa</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+}

@@ -1,6 +1,5 @@
 using EcommerceBackend.BusinessObject.Services.SaleService;
 using EcommerceFrontend.Web.Models;
-using EcommerceFrontend.Web.Models.DTOs;
 using EcommerceFrontend.Web.Models.Sale;
 using EcommerceFrontend.Web.Services;
 using EcommerceFrontend.Web.Services.Blog;

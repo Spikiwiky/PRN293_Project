@@ -1,0 +1,39 @@
+﻿@page "{id:int}"
+@model EcommerceFrontend.Web.Pages.Sale.Sale_Blog.DetailsModel
+@{
+    ViewData["Title"] = "Chi tiết Blog";
+}
+
+<h2>@Model.Blog.BlogTittle</h2>
+<img src="@Model.Blog.BlogImage" alt="@Model.Blog.BlogTittle" style="max-width: 300px;" />
+<p><strong>Ngày đăng:</strong> @Model.Blog.PublishedDate?.ToString("dd/MM/yyyy")</p>
+<p><strong>Lượt xem:</strong> @Model.Blog.ViewCount</p>
+<p>@Model.Blog.BlogContent</p>
+
+<hr />
+<h3>Bình luận</h3>
+<ul>
+    @foreach (var c in Model.Blog.Comments)
+    {
+        <li>
+            <strong>@c.CommenterName</strong> (@c.CreatedDate.ToString("dd/MM/yyyy")):
+            <p>@c.CommentContent</p>
+        </li>
+    }
+</ul>
+
+
+<hr />
+<h4>Thêm bình luận mới</h4>
+<form method="post" asp-page-handler="AddComment">
+    <input type="hidden" name="id" value="@Model.Blog.BlogId" />
+    <div>
+        <label>Tên</label>
+        <input asp-for="NewComment.CommenterName" class="form-control" />
+    </div>
+    <div>
+        <label>Nội dung</label>
+        <textarea asp-for="NewComment.CommentContent" class="form-control"></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">Gửi bình luận</button>
+</form>

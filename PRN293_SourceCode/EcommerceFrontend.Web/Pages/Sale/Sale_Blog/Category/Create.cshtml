@@ -1,0 +1,11 @@
+﻿@page
+@model EcommerceFrontend.Web.Pages.Sale.Sale_Blog.Category.CreateModel
+<h1>Thêm danh mục Blog</h1>
+<form method="post">
+    <div>
+        <label>Tên danh mục</label>
+        <input asp-for="Category.BlogCategoryTitle" class="form-control" />
+    </div>
+    <button type="submit" class="btn btn-primary">Lưu</button>
+    <a asp-page="Index" class="btn btn-secondary">Hủy</a>
+</form>

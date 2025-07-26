@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EcommerceBackend.BusinessObject.Services.SaleService
+namespace EcommerceBackend.BusinessObject.Services.SaleService.CategoryService.CategoryService
 {
-    public interface ICategoryService
+    public interface ISaleCategoryService
     {
         Task CreateCategoryAsync(ProductCategory category);
         Task UpdateCategoryAsync(ProductCategory category);
