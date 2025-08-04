@@ -45,7 +45,7 @@
     {
         public int BlogCategoryId { get; set; }
         public string? BlogCategoryTitle { get; set; }
-        public bool IsDelete { get; set; }
+        public bool? IsDelete { get; set; }
     }
     public class PagedResultDto<T>
     {

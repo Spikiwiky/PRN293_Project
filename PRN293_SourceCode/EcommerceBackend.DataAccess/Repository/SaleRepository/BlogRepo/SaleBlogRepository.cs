@@ -20,6 +20,7 @@ namespace EcommerceBackend.DataAccess.Repository.SaleRepository.BlogRepo
         public async Task<IEnumerable<Blog>> GetAllBlogsAsync()
         {
             return await _context.Blogs
+                .Where(b => b.IsPublished == true)   // loại bỏ IsDelete = true
                 .Include(b => b.BlogCategory)
                 .Include(b => b.Comments)
                 .ToListAsync();
@@ -28,10 +29,12 @@ namespace EcommerceBackend.DataAccess.Repository.SaleRepository.BlogRepo
         public async Task<Blog?> GetBlogByIdAsync(int id)
         {
             return await _context.Blogs
+                .Where(b => b.BlogId == id && b.IsPublished == true)  
                 .Include(b => b.BlogCategory)
                 .Include(b => b.Comments)
-                .FirstOrDefaultAsync(b => b.BlogId == id);
+                .FirstOrDefaultAsync();
         }
+
 
         public async Task AddBlogAsync(Blog blog)
         {
@@ -56,13 +59,17 @@ namespace EcommerceBackend.DataAccess.Repository.SaleRepository.BlogRepo
 
         public async Task<IEnumerable<BlogCategory>> GetAllCategoriesAsync()
         {
-            return await _context.BlogCategories.ToListAsync();
+            return await _context.BlogCategories
+                .Where(c => c.IsDelete == false) 
+                .ToListAsync();
         }
 
         public async Task<BlogCategory?> GetCategoryByIdAsync(int id)
         {
-            return await _context.BlogCategories.FirstOrDefaultAsync(c => c.BlogCategoryId == id);
+            return await _context.BlogCategories
+                .FirstOrDefaultAsync(c => c.BlogCategoryId == id && (c.IsDelete == false));
         }
+
 
         public async Task<IEnumerable<BlogComment>> GetCommentsByBlogIdAsync(int blogId)
         {

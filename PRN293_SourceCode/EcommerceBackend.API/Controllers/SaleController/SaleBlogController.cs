@@ -108,19 +108,22 @@ namespace EcommerceBackend.API.Controllers.SaleController
 
 
         [HttpPut("{id}")]
-        [Consumes("multipart/form-data")]
-        public async Task<IActionResult> UpdateBlog(int id, [FromForm] BlogUpdateFormDto dto)
+        public async Task<IActionResult> UpdateBlog(int id, [FromBody] BlogUpdateFormDto dto)
         {
             var existing = await _service.GetBlogByIdAsync(id);
-            if (existing == null) return NotFound();
+            if (existing == null)
+                return NotFound();
 
-            if (dto.RemoveImage && dto.ImageFile == null)
+            // Xử lý xóa ảnh
+            if (dto.RemoveImage)
             {
                 if (!string.IsNullOrEmpty(existing.BlogImage))
                 {
+                    // Nếu ảnh hiện tại là file nội bộ và cần xóa vật lý
                     if (existing.BlogImage.StartsWith("/images/blogs/"))
                     {
-                        var oldImagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", existing.BlogImage.TrimStart('/'));
+                        var oldImagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot",
+                            existing.BlogImage.TrimStart('/'));
                         if (System.IO.File.Exists(oldImagePath))
                         {
                             System.IO.File.Delete(oldImagePath);
@@ -129,20 +132,13 @@ namespace EcommerceBackend.API.Controllers.SaleController
                 }
                 existing.BlogImage = null;
             }
-            else if (dto.ImageFile != null && dto.ImageFile.Length > 0)
+            else if (!string.IsNullOrWhiteSpace(dto.BlogImageUrl))
             {
-                var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "blogs");
-                if (!Directory.Exists(folderPath))
-                    Directory.CreateDirectory(folderPath);
-
-                var fileName = $"{Guid.NewGuid()}{Path.GetExtension(dto.ImageFile.FileName)}";
-                var filePath = Path.Combine(folderPath, fileName);
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await dto.ImageFile.CopyToAsync(stream);
-                }
-                existing.BlogImage = $"/images/blogs/{fileName}";
+                // Lưu URL ảnh mới
+                existing.BlogImage = dto.BlogImageUrl;
             }
+
+            // Cập nhật các field khác
             existing.BlogCategoryId = dto.BlogCategoryId;
             existing.BlogTittle = dto.BlogTittle;
             existing.Tags = dto.Tags;
@@ -153,6 +149,7 @@ namespace EcommerceBackend.API.Controllers.SaleController
             await _service.UpdateBlogAsync(existing);
             return NoContent();
         }
+
 
 
         // DELETE: api/saleblog/{id}

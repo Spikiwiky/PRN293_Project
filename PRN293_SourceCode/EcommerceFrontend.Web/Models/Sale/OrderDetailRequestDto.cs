@@ -31,14 +31,29 @@ namespace EcommerceFrontend.Web.Models.DTOs
         public int? TotalQuantity { get; set; }
         public decimal? AmountDue { get; set; }
         public int? PaymentMethodId { get; set; }
-        public string? OrderNote { get; set; }
+        public string? OrderNote { get; set; }   // thêm
+        public string? ShippingAddress { get; set; }  // thêm
         public int? OrderStatusId { get; set; }
-        public string? ShippingAddress { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
-
-        public List<OrderDetailResponseDto> OrderDetails { get; set; } = new();
+        public List<OrderDetailResponseDto> OrderDetails { get; set; }
     }
+
+    //public class OrderResponseDto
+    //{
+    //    public int OrderId { get; set; }
+    //    public int? CustomerId { get; set; }
+    //    public int? TotalQuantity { get; set; }
+    //    public decimal? AmountDue { get; set; }
+    //    public int? PaymentMethodId { get; set; }
+    //    public string? OrderNote { get; set; }
+    //    public int? OrderStatusId { get; set; }
+    //    public string? ShippingAddress { get; set; }
+    //    public DateTime CreatedAt { get; set; }
+    //    public DateTime UpdatedAt { get; set; }
+
+    //    public List<OrderDetailResponseDto> OrderDetails { get; set; } = new();
+    //}
 
     public class CreateOrderDto
     {

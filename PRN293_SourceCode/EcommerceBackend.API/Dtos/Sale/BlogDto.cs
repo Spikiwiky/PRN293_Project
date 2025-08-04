@@ -90,13 +90,13 @@
     public class BlogUpdateFormDto
     {
         public int? BlogCategoryId { get; set; }
-        public string BlogTittle { get; set; } = "";
-        public string? Tags { get; set; }
-        public string? BlogContent { get; set; }
-        public string? BlogSummary { get; set; }
+        public string BlogTittle { get; set; }
+        public string Tags { get; set; }
+        public string BlogContent { get; set; }
+        public string BlogSummary { get; set; }
         public bool IsPublished { get; set; }
-        public IFormFile? ImageFile { get; set; }
-        public bool RemoveImage { get; set; }
+        public bool RemoveImage { get; set; }   
+        public string BlogImageUrl { get; set; }  
     }
 
     public class BlogCreateDto

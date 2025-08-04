@@ -3,7 +3,7 @@
 
 <h1>Chỉnh sửa Blog</h1>
 
-<form method="post" enctype="multipart/form-data">
+<form method="post">
     <input type="hidden" asp-for="Blog.BlogId" />
 
     <div class="form-group">
@@ -38,19 +38,16 @@
         }
     </div>
 
-    <!-- Hidden để giữ giá trị ảnh hiện tại -->
-    <input type="hidden" asp-for="Blog.BlogImage" id="Blog_BlogImage" />
-
+    <!-- Checkbox để xóa ảnh -->
     <div class="form-group form-check mb-3">
-        <input type="checkbox" class="form-check-input" id="removeImage"
-               onchange="if(this.checked){document.getElementById('Blog_BlogImage').value='';}">
-        <label class="form-check-label" for="removeImage">Xóa ảnh hiện tại</label>
+        <input type="checkbox" asp-for="RemoveImage" class="form-check-input" />
+        <label class="form-check-label" asp-for="RemoveImage">Xóa ảnh hiện tại</label>
     </div>
 
+    <!-- Trường nhập URL ảnh mới -->
     <div class="form-group">
-        <label>Thay ảnh mới</label>
-        <input asp-for="UploadImage" type="file" class="form-control" />
-        <span asp-validation-for="UploadImage" class="text-danger"></span>
+        <label>URL Ảnh mới</label>
+        <input asp-for="BlogImageUrl" class="form-control" placeholder="https://example.com/image.jpg" />
     </div>
 
     <div class="form-group">

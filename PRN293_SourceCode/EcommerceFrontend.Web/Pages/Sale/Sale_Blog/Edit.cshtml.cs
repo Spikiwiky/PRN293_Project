@@ -2,7 +2,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
+using System.Net.Http;
 using System.Net.Http.Json;
+using System.Text.Json;
 
 namespace EcommerceFrontend.Web.Pages.Sale.Sale_Blog
 {
@@ -15,7 +17,10 @@ namespace EcommerceFrontend.Web.Pages.Sale.Sale_Blog
         public BlogUpdateDto Blog { get; set; } = new();
 
         [BindProperty]
-        public IFormFile? UploadImage { get; set; }
+        public bool RemoveImage { get; set; }
+
+        [BindProperty]
+        public string? BlogImageUrl { get; set; }
 
         public EditModel(IHttpClientFactory httpClientFactory, IOptions<ApiSettings> apiSettings)
         {
@@ -37,27 +42,23 @@ namespace EcommerceFrontend.Web.Pages.Sale.Sale_Blog
                 return Page();
 
             var client = _httpClientFactory.CreateClient("MyAPI");
-            using var content = new MultipartFormDataContent();
 
-            content.Add(new StringContent(Blog.BlogCategoryId?.ToString() ?? ""), "BlogCategoryId");
-            content.Add(new StringContent(Blog.BlogTittle ?? ""), "BlogTittle");
-            content.Add(new StringContent(Blog.Tags ?? ""), "Tags");
-            content.Add(new StringContent(Blog.BlogContent ?? ""), "BlogContent");
-            content.Add(new StringContent(Blog.BlogSummary ?? ""), "BlogSummary");
-            content.Add(new StringContent(Blog.IsPublished.ToString()), "IsPublished");
-
-            // Gửi RemoveImage = true nếu người dùng xóa link ảnh (Blog.BlogImage == null hoặc "")
-            bool removeImage = string.IsNullOrWhiteSpace(Blog.BlogImage) && (UploadImage == null || UploadImage.Length == 0);
-            content.Add(new StringContent(removeImage.ToString()), "RemoveImage");
-
-            if (UploadImage != null && UploadImage.Length > 0)
+            var payload = new
             {
-                var fileContent = new StreamContent(UploadImage.OpenReadStream());
-                fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(UploadImage.ContentType);
-                content.Add(fileContent, "ImageFile", UploadImage.FileName);
-            }
+                BlogCategoryId = Blog.BlogCategoryId,
+                BlogTittle = Blog.BlogTittle,
+                Tags = Blog.Tags,
+                BlogContent = Blog.BlogContent,
+                BlogSummary = Blog.BlogSummary,
+                IsPublished = Blog.IsPublished,
+                RemoveImage = RemoveImage,
+                BlogImageUrl = BlogImageUrl
+            };
 
-            var response = await client.PutAsync($"{_apiSettings.BaseUrl}/api/saleblog/{id}", content);
+            var response = await client.PutAsJsonAsync($"{_apiSettings.BaseUrl}/api/saleblog/{id}", payload, new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            });
 
             if (response.IsSuccessStatusCode)
                 return RedirectToPage("Index");
@@ -65,7 +66,5 @@ namespace EcommerceFrontend.Web.Pages.Sale.Sale_Blog
             ModelState.AddModelError("", "Không thể cập nhật blog");
             return Page();
         }
-
-
     }
 }

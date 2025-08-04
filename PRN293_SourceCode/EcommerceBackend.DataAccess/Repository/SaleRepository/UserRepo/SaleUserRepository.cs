@@ -19,11 +19,16 @@ namespace EcommerceBackend.DataAccess.Repository.SaleRepository.UserRepo
 
         public IEnumerable<User> GetAll()
         {
-            return _context.Users.ToList();
+            return _context.Users
+                           .Where(u => u.IsDelete == false) 
+                           .ToList();
         }
 
         public User? GetById(int id) =>
-            _context.Users.FirstOrDefault(u => u.UserId == id);
+            _context.Users
+                    .FirstOrDefault(u => u.UserId == id && u.IsDelete == false);
+
+
 
         public void Add(User user)
         {

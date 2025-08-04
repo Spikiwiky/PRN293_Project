@@ -18,13 +18,17 @@ namespace EcommerceBackend.DataAccess.Repository.SaleRepository.SaleCategory
         }
         public async Task<IEnumerable<ProductCategory>> GetAllCategoriesAsync()
         {
-            return await _context.ProductCategories.ToListAsync();
+            return await _context.ProductCategories
+                                 .Where(c => c.IsDelete == false)
+                                 .ToListAsync();
         }
 
         public async Task<ProductCategory> GetCategoryByIdAsync(int id)
         {
-            return await _context.ProductCategories.FindAsync(id);
+            return await _context.ProductCategories
+                                 .FirstOrDefaultAsync(c => c.ProductCategoryId == id && c.IsDelete == false);
         }
+
 
         public async Task AddCategoryAsync(ProductCategory category)
         {
@@ -43,10 +47,12 @@ namespace EcommerceBackend.DataAccess.Repository.SaleRepository.SaleCategory
             var category = await _context.ProductCategories.FindAsync(id);
             if (category != null)
             {
-                _context.ProductCategories.Remove(category);
+                category.IsDelete = true;  
+                _context.ProductCategories.Update(category);
                 await _context.SaveChangesAsync();
             }
         }
+
 
         public Task SaveChangesAsync()
         {

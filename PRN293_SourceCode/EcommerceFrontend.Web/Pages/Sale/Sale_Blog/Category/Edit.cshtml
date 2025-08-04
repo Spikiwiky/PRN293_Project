@@ -16,7 +16,8 @@
         </div>
 
         <div class="form-check mb-3">
-            <input asp-for="Category.IsDelete" class="form-check-input" type="checkbox" id="IsDeleteCheck" />
+            <input type="checkbox" name="Category.IsDelete"
+            @(Model.Category.IsDelete == true ? "checked" : "") />
             <label class="form-check-label" for="IsDeleteCheck">Đã xóa (ẩn khỏi hiển thị)</label>
         </div>
 
